@@ -1,0 +1,24 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.slider img {
+  width: 1000px;  
+  height: auto;
+}
+
+.slider button {
+  font-size: 24px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
