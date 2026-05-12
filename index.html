@@ -8,360 +8,129 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400;600&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --black: #111111;
-      --off-black: #1C1C1C;
-      --gray-dark: #3A3A3A;
-      --gray-mid: #767676;
-      --gray-light: #C4C4C4;
-      --gray-border: #DCDCDC;
-      --gray-bg: #F5F5F5;
-      --white: #FFFFFF;
-      --math-dot: #111111;
-      --eng-dot: #111111;
+      --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
+      --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5; --white: #FFFFFF;
     }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); min-height: 100vh; font-size: 15px; -webkit-font-smoothing: antialiased; }
+    .page { display: none; min-height: 100vh; }
+    .page.active { display: flex; flex-direction: column; animation: fadeSlide 0.25s ease; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    html, body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--white);
-      color: var(--black);
-      min-height: 100vh;
-      font-size: 15px;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .page { display: none; min-height: 100vh; animation: fadeSlide 0.3s ease; }
-    .page.active { display: flex; flex-direction: column; }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ───────────────────────────────────────────
-       SHARED HEADER
-    ─────────────────────────────────────────── */
-    .site-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2.5rem;
-      height: 56px;
-      border-bottom: 1px solid var(--gray-border);
-      background: var(--white);
-      position: sticky; top: 0; z-index: 100;
-    }
-
-    .logo {
-      font-family: 'DM Mono', monospace;
-      font-size: 14px; font-weight: 500;
-      letter-spacing: 0.06em;
-      color: var(--black);
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    .header-right {
-      display: flex; align-items: center; gap: 1.5rem;
-    }
-
-    .breadcrumb {
-      font-size: 13px; color: var(--gray-mid);
-      display: flex; align-items: center; gap: 8px;
-    }
+    /* HEADER */
+    .site-header { display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 56px; border-bottom: 1px solid var(--gray-border); background: var(--white); position: sticky; top: 0; z-index: 100; }
+    .logo { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 1.5rem; }
+    .breadcrumb { font-size: 13px; color: var(--gray-mid); display: flex; align-items: center; gap: 8px; }
     .breadcrumb .sep { color: var(--gray-light); }
+    .breadcrumb .crumb { cursor: pointer; transition: color 0.15s; }
+    .breadcrumb .crumb:hover { color: var(--black); }
     .breadcrumb .current { color: var(--black); font-weight: 500; }
-
-    .back-btn {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 13px; color: var(--gray-mid);
-      background: none; border: 1px solid var(--gray-border);
-      border-radius: 6px; padding: 6px 14px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: color 0.15s, border-color 0.15s, background 0.15s;
-    }
+    .back-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-mid); background: none; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.15s, border-color 0.15s, background 0.15s; }
     .back-btn:hover { color: var(--black); border-color: var(--black); background: var(--gray-bg); }
 
-    /* ───────────────────────────────────────────
-       HOME PAGE
-    ─────────────────────────────────────────── */
-
-    .home-hero {
-      padding: 5rem 2.5rem 4rem;
-      max-width: 860px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .hero-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--gray-mid);
-      margin-bottom: 1.5rem;
-    }
-
-    .hero-title {
-      font-family: 'Source Serif 4', serif;
-      font-size: clamp(38px, 5vw, 58px);
-      font-weight: 300;
-      line-height: 1.12;
-      color: var(--black);
-      margin-bottom: 1.25rem;
-      letter-spacing: -0.01em;
-    }
-
-    .hero-sub {
-      font-size: 15px; color: var(--gray-mid);
-      max-width: 420px; line-height: 1.7;
-      font-weight: 300;
-    }
-
-    .divider {
-      border: none; border-top: 1px solid var(--gray-border);
-      margin: 0 2.5rem;
-    }
-
-    .subject-row {
-      max-width: 860px; margin: 0 auto; width: 100%;
-      padding: 3rem 2.5rem;
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .subject-card {
-      border: 1px solid var(--gray-border);
-      border-radius: 4px;
-      padding: 2rem 1.75rem;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s, transform 0.2s;
-      background: var(--white);
-    }
-    .subject-card:hover {
-      border-color: var(--black);
-      background: var(--gray-bg);
-      transform: translateY(-2px);
-    }
-
-    .card-top {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-
-    .card-tag {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--gray-mid);
-      border: 1px solid var(--gray-border);
-      border-radius: 2px; padding: 3px 9px;
-    }
-
-    .card-arrow {
-      font-size: 18px; color: var(--gray-light);
-      transition: color 0.2s, transform 0.2s;
-    }
+    /* HOME */
+    .home-hero { padding: 5rem 2.5rem 4rem; max-width: 860px; margin: 0 auto; width: 100%; }
+    .hero-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .hero-title { font-family: 'Source Serif 4', serif; font-size: clamp(38px, 5vw, 58px); font-weight: 300; line-height: 1.12; color: var(--black); margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+    .hero-sub { font-size: 15px; color: var(--gray-mid); max-width: 420px; line-height: 1.7; font-weight: 300; }
+    .divider { border: none; border-top: 1px solid var(--gray-border); margin: 0 2.5rem; }
+    .subject-row { max-width: 860px; margin: 0 auto; width: 100%; padding: 3rem 2.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .subject-card { border: 1px solid var(--gray-border); border-radius: 4px; padding: 2rem 1.75rem; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.2s; background: var(--white); }
+    .subject-card:hover { border-color: var(--black); background: var(--gray-bg); transform: translateY(-2px); }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
+    .card-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); border: 1px solid var(--gray-border); border-radius: 2px; padding: 3px 9px; }
+    .card-arrow { font-size: 18px; color: var(--gray-light); transition: color 0.2s, transform 0.2s; }
     .subject-card:hover .card-arrow { color: var(--black); transform: translate(2px, -2px); }
-
-    .card-title {
-      font-family: 'Source Serif 4', serif;
-      font-size: 28px; font-weight: 400;
-      color: var(--black); margin-bottom: 0.6rem;
-    }
-
-    .card-desc {
-      font-size: 13px; color: var(--gray-mid);
-      line-height: 1.65; margin-bottom: 1.5rem;
-      font-weight: 300;
-    }
-
-    .card-tests {
-      border-top: 1px solid var(--gray-border);
-      padding-top: 1rem;
-    }
-    .card-tests-label {
-      font-size: 11px; color: var(--gray-mid);
-      text-transform: uppercase; letter-spacing: 0.08em;
-      margin-bottom: 0.6rem;
-      font-family: 'DM Mono', monospace;
-    }
+    .card-title { font-family: 'Source Serif 4', serif; font-size: 28px; font-weight: 400; color: var(--black); margin-bottom: 0.6rem; }
+    .card-desc { font-size: 13px; color: var(--gray-mid); line-height: 1.65; margin-bottom: 1.5rem; font-weight: 300; }
+    .card-tests { border-top: 1px solid var(--gray-border); padding-top: 1rem; }
+    .card-tests-label { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem; font-family: 'DM Mono', monospace; }
     .card-test-list { display: flex; flex-direction: column; gap: 4px; }
-    .card-test-item {
-      font-size: 12px; color: var(--gray-dark);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .card-test-item::before {
-      content: ''; display: block;
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--gray-light); flex-shrink: 0;
-    }
+    .card-test-item { font-size: 12px; color: var(--gray-dark); display: flex; align-items: center; gap: 8px; }
+    .card-test-item::before { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--gray-light); flex-shrink: 0; }
+    .home-stats { max-width: 860px; margin: 0 auto; width: 100%; padding: 2rem 2.5rem 4rem; display: flex; gap: 2.5rem; }
+    .stat-num { font-family: 'Source Serif 4', serif; font-size: 28px; font-weight: 300; color: var(--black); }
+    .stat-lbl { font-size: 12px; color: var(--gray-mid); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; }
 
-    .home-stats {
-      max-width: 860px; margin: 0 auto; width: 100%;
-      padding: 2rem 2.5rem 4rem;
-      display: flex; gap: 2.5rem;
-    }
-    .stat-item { }
-    .stat-num {
-      font-family: 'Source Serif 4', serif;
-      font-size: 28px; font-weight: 300;
-      color: var(--black);
-    }
-    .stat-lbl {
-      font-size: 12px; color: var(--gray-mid);
-      font-family: 'DM Mono', monospace;
-      text-transform: uppercase; letter-spacing: 0.06em;
-    }
-
-    /* ───────────────────────────────────────────
-       SUBJECT PAGE
-    ─────────────────────────────────────────── */
-
-    .subject-hero {
-      padding: 3rem 2.5rem 2.5rem;
-      max-width: 860px; margin: 0 auto; width: 100%;
-      border-bottom: 1px solid var(--gray-border);
-    }
-
-    .subject-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--gray-mid);
-      margin-bottom: 0.75rem;
-    }
-
-    .subject-title {
-      font-family: 'Source Serif 4', serif;
-      font-size: 42px; font-weight: 300;
-      color: var(--black); margin-bottom: 0.5rem;
-    }
-
+    /* SUBJECT PAGE */
+    .subject-hero { padding: 3rem 2.5rem 2.5rem; max-width: 860px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--gray-border); }
+    .subject-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 0.75rem; }
+    .subject-title { font-family: 'Source Serif 4', serif; font-size: 42px; font-weight: 300; color: var(--black); margin-bottom: 0.5rem; }
     .subject-meta { font-size: 13px; color: var(--gray-mid); font-weight: 300; }
-
-    .tests-section {
-      max-width: 860px; margin: 0 auto; width: 100%;
-      padding: 2.5rem 2.5rem;
-      flex: 1;
-    }
-
-    .tests-section-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--gray-mid);
-      margin-bottom: 1.25rem;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .tests-section-label::after {
-      content: ''; flex: 1; height: 1px; background: var(--gray-border);
-    }
-
-    .tests-list { display: flex; flex-direction: column; gap: 0; }
-
-    .test-row {
-      display: flex; align-items: center;
-      padding: 1.1rem 0;
-      border-bottom: 1px solid var(--gray-border);
-      cursor: pointer;
-      transition: background 0.15s;
-      border-radius: 2px;
-    }
+    .tests-section { max-width: 860px; margin: 0 auto; width: 100%; padding: 2.5rem; flex: 1; }
+    .tests-section-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 12px; }
+    .tests-section-label::after { content: ''; flex: 1; height: 1px; background: var(--gray-border); }
+    .tests-list { display: flex; flex-direction: column; }
+    .test-row { display: flex; align-items: center; padding: 1.1rem 0; border-bottom: 1px solid var(--gray-border); cursor: pointer; transition: background 0.15s, padding 0.15s; border-radius: 2px; }
     .test-row:first-child { border-top: 1px solid var(--gray-border); }
     .test-row:hover { background: var(--gray-bg); padding-left: 12px; padding-right: 12px; margin: 0 -12px; }
-
-    .test-index {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; color: var(--gray-light);
-      width: 36px; flex-shrink: 0;
-    }
-
+    .test-row.disabled { cursor: default; }
+    .test-row.disabled:hover { background: none; padding-left: 0; padding-right: 0; margin: 0; }
+    .test-index { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-light); width: 36px; flex-shrink: 0; }
     .test-info { flex: 1; }
-
-    .test-name {
-      font-size: 15px; font-weight: 500;
-      color: var(--black); margin-bottom: 2px;
-    }
-
-    .test-detail {
-      font-size: 12px; color: var(--gray-mid); font-weight: 300;
-    }
-
-    .test-right {
-      display: flex; align-items: center; gap: 1.5rem;
-    }
-
-    .test-badge {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px; letter-spacing: 0.08em;
-      text-transform: uppercase; padding: 3px 9px;
-      border-radius: 2px; border: 1px solid;
-    }
-    .badge-available {
-      border-color: var(--black);
-      color: var(--black);
-      background: var(--white);
-    }
-    .badge-soon {
-      border-color: var(--gray-border);
-      color: var(--gray-mid);
-    }
-
-    .test-arrow {
-      color: var(--gray-light); font-size: 16px;
-      transition: color 0.15s, transform 0.15s;
-    }
+    .test-name { font-size: 15px; font-weight: 500; color: var(--black); margin-bottom: 2px; }
+    .test-name.muted { color: var(--gray-mid); }
+    .test-detail { font-size: 12px; color: var(--gray-mid); font-weight: 300; }
+    .test-right { display: flex; align-items: center; gap: 1.5rem; }
+    .test-badge { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; border: 1px solid; }
+    .badge-available { border-color: var(--black); color: var(--black); background: var(--white); }
+    .badge-soon { border-color: var(--gray-border); color: var(--gray-mid); }
+    .test-arrow { color: var(--gray-light); font-size: 16px; transition: color 0.15s, transform 0.15s; }
     .test-row:hover .test-arrow { color: var(--black); transform: translateX(3px); }
 
-    /* ───────────────────────────────────────────
-       FOOTER
-    ─────────────────────────────────────────── */
-    .site-footer {
-      border-top: 1px solid var(--gray-border);
-      padding: 1.25rem 2.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .footer-copy {
-      font-size: 12px; color: var(--gray-light);
-      font-family: 'DM Mono', monospace;
-    }
+    /* MODULE SELECTION */
+    .module-select-hero { padding: 3rem 2.5rem 2.5rem; max-width: 860px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--gray-border); }
+    .module-select-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 0.5rem; }
+    .module-select-title { font-family: 'Source Serif 4', serif; font-size: 36px; font-weight: 300; color: var(--black); margin-bottom: 0.4rem; }
+    .module-select-sub { font-size: 13px; color: var(--gray-mid); font-weight: 300; }
+    .module-grid-section { max-width: 860px; margin: 0 auto; width: 100%; padding: 2.5rem; flex: 1; }
+    .module-group-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem; display: flex; align-items: center; gap: 12px; }
+    .module-group-label::after { content: ''; flex: 1; height: 1px; background: var(--gray-border); }
+    .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+    .module-card { border: 1px solid var(--gray-border); border-radius: 4px; padding: 1.5rem; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s; background: var(--white); display: flex; flex-direction: column; gap: 0.75rem; }
+    .module-card:hover { border-color: var(--black); background: var(--gray-bg); transform: translateY(-2px); }
+    .module-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .module-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); border: 1px solid var(--gray-border); border-radius: 2px; padding: 2px 8px; }
+    .module-card-arrow { color: var(--gray-light); font-size: 16px; transition: color 0.2s, transform 0.2s; }
+    .module-card:hover .module-card-arrow { color: var(--black); transform: translate(2px, -2px); }
+    .module-card-name { font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 400; color: var(--black); }
+    .module-card-detail { font-size: 12px; color: var(--gray-mid); font-weight: 300; line-height: 1.5; }
+
+    /* FOOTER */
+    .site-footer { border-top: 1px solid var(--gray-border); padding: 1.25rem 2.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .footer-copy { font-size: 12px; color: var(--gray-light); font-family: 'DM Mono', monospace; }
     .footer-note { font-size: 12px; color: var(--gray-mid); }
 
-    /* ───────────────────────────────────────────
-       RESPONSIVE
-    ─────────────────────────────────────────── */
     @media (max-width: 600px) {
-      .subject-row { grid-template-columns: 1fr; }
+      .subject-row, .module-grid { grid-template-columns: 1fr; }
       .site-header { padding: 0 1.25rem; }
-      .home-hero, .subject-hero, .tests-section, .home-stats { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .home-hero, .subject-hero, .tests-section, .home-stats, .module-select-hero, .module-grid-section { padding-left: 1.25rem; padding-right: 1.25rem; }
       .divider { margin: 0 1.25rem; }
       .hero-title { font-size: 34px; }
+      .breadcrumb { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     HOME PAGE
-══════════════════════════════════════════ -->
+<!-- HOME -->
 <div id="home" class="page active">
-
   <header class="site-header">
     <div class="logo" onclick="showPage('home')">SAT Practice</div>
     <div class="header-right">
       <span style="font-size:12px;color:var(--gray-mid);font-family:'DM Mono',monospace;">Digital SAT · 2025–2026</span>
     </div>
   </header>
-
   <div class="home-hero">
     <div class="hero-label">College Board · Official Practice</div>
     <h1 class="hero-title">Practice tests,<br>section by section.</h1>
     <p class="hero-sub">Work through real SAT practice tests organized by subject. Select Math or English to begin.</p>
   </div>
-
   <hr class="divider" />
-
   <div class="subject-row">
-
     <div class="subject-card" onclick="showPage('math')">
-      <div class="card-top">
-        <div class="card-tag">Section 1 &amp; 2</div>
-        <div class="card-arrow">↗</div>
-      </div>
+      <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Math</div>
       <div class="card-desc">Algebra, advanced math, geometry, trigonometry, and data analysis.</div>
       <div class="card-tests">
@@ -374,12 +143,8 @@
         </div>
       </div>
     </div>
-
     <div class="subject-card" onclick="showPage('english')">
-      <div class="card-top">
-        <div class="card-tag">Section 1 &amp; 2</div>
-        <div class="card-arrow">↗</div>
-      </div>
+      <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
       <div class="card-title">English</div>
       <div class="card-desc">Reading comprehension, grammar, standard English conventions, and rhetoric.</div>
       <div class="card-tests">
@@ -392,271 +157,209 @@
         </div>
       </div>
     </div>
-
   </div>
-
   <hr class="divider" />
-
   <div class="home-stats">
-    <div class="stat-item">
-      <div class="stat-num">6</div>
-      <div class="stat-lbl">Practice Tests</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">2</div>
-      <div class="stat-lbl">Subjects</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">98</div>
-      <div class="stat-lbl">Questions / Test</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">800</div>
-      <div class="stat-lbl">Max Score / Section</div>
-    </div>
+    <div class="stat-item"><div class="stat-num">6</div><div class="stat-lbl">Practice Tests</div></div>
+    <div class="stat-item"><div class="stat-num">2</div><div class="stat-lbl">Subjects</div></div>
+    <div class="stat-item"><div class="stat-num">98</div><div class="stat-lbl">Questions / Test</div></div>
+    <div class="stat-item"><div class="stat-num">800</div><div class="stat-lbl">Max Score / Section</div></div>
   </div>
-
   <footer class="site-footer">
     <div class="footer-copy">SAT Practice · 2025–2026</div>
     <div class="footer-note">Not affiliated with College Board</div>
   </footer>
-
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     MATH PAGE
-══════════════════════════════════════════ -->
+<!-- MATH -->
 <div id="math" class="page">
-
   <header class="site-header">
     <div class="logo" onclick="showPage('home')">SAT Practice</div>
     <div class="header-right">
       <div class="breadcrumb">
-        <span onclick="showPage('home')" style="cursor:pointer;">Home</span>
-        <span class="sep">/</span>
-        <span class="current">Math</span>
+        <span class="crumb" onclick="showPage('home')">Home</span>
+        <span class="sep">/</span><span class="current">Math</span>
       </div>
       <button class="back-btn" onclick="showPage('home')">← Back</button>
     </div>
   </header>
-
   <div class="subject-hero">
     <div class="subject-label">SAT · Mathematics</div>
     <div class="subject-title">Math</div>
     <div class="subject-meta">Modules 1 &amp; 2 · Algebra, Advanced Math, Geometry, Data Analysis · 44 questions per module</div>
   </div>
-
   <div class="tests-section">
-
     <div class="tests-section-label">Available practice tests</div>
-
     <div class="tests-list">
-
-      <div class="test-row" onclick="openTest('math', 'dec2025')">
+      <div class="test-row" onclick="showModules('math','dec2025','December 2025')">
         <div class="test-index">01</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — December 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 44 + 44 questions · 70 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — December 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 44 questions each · 70 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" onclick="openTest('math', 'nov2025')">
+      <div class="test-row" onclick="showModules('math','nov2025','November 2025')">
         <div class="test-index">02</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — November 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 44 + 44 questions · 70 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — November 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 44 questions each · 70 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" onclick="openTest('math', 'oct2025')">
+      <div class="test-row" onclick="showModules('math','oct2025','October 2025')">
         <div class="test-index">03</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — October 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 44 + 44 questions · 70 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — October 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 44 questions each · 70 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" onclick="openTest('math', 'aug2025')">
+      <div class="test-row" onclick="showModules('math','aug2025','August 2025')">
         <div class="test-index">04</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — August 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 44 + 44 questions · 70 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — August 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 44 questions each · 70 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" style="cursor:default;" onclick="">
-        <div class="test-index">05</div>
-        <div class="test-info">
-          <div class="test-name" style="color:var(--gray-mid);">Practice Test — May 2025</div>
-          <div class="test-detail">Coming soon</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-soon">Soon</div>
-        </div>
-      </div>
-
-      <div class="test-row" style="cursor:default;" onclick="">
-        <div class="test-index">06</div>
-        <div class="test-info">
-          <div class="test-name" style="color:var(--gray-mid);">Practice Test — March 2025</div>
-          <div class="test-detail">Coming soon</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-soon">Soon</div>
-        </div>
-      </div>
-
+      <div class="test-row disabled"><div class="test-index">05</div><div class="test-info"><div class="test-name muted">Practice Test — May 2025</div><div class="test-detail">Coming soon</div></div><div class="test-right"><div class="test-badge badge-soon">Soon</div></div></div>
+      <div class="test-row disabled"><div class="test-index">06</div><div class="test-info"><div class="test-name muted">Practice Test — March 2025</div><div class="test-detail">Coming soon</div></div><div class="test-right"><div class="test-badge badge-soon">Soon</div></div></div>
     </div>
   </div>
-
-  <footer class="site-footer">
-    <div class="footer-copy">SAT Practice · 2025–2026</div>
-    <div class="footer-note">Not affiliated with College Board</div>
-  </footer>
-
+  <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     ENGLISH PAGE
-══════════════════════════════════════════ -->
+<!-- ENGLISH -->
 <div id="english" class="page">
-
   <header class="site-header">
     <div class="logo" onclick="showPage('home')">SAT Practice</div>
     <div class="header-right">
       <div class="breadcrumb">
-        <span onclick="showPage('home')" style="cursor:pointer;">Home</span>
-        <span class="sep">/</span>
-        <span class="current">English</span>
+        <span class="crumb" onclick="showPage('home')">Home</span>
+        <span class="sep">/</span><span class="current">English</span>
       </div>
       <button class="back-btn" onclick="showPage('home')">← Back</button>
     </div>
   </header>
-
   <div class="subject-hero">
     <div class="subject-label">SAT · Reading and Writing</div>
     <div class="subject-title">English</div>
     <div class="subject-meta">Modules 1 &amp; 2 · Information &amp; Ideas, Craft &amp; Structure, Expression of Ideas, Standard English · 27 questions per module</div>
   </div>
-
   <div class="tests-section">
-
     <div class="tests-section-label">Available practice tests</div>
-
     <div class="tests-list">
-
-      <div class="test-row" onclick="openTest('english', 'dec2025')">
+      <div class="test-row" onclick="showModules('english','dec2025','December 2025')">
         <div class="test-index">01</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — December 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 27 + 27 questions · 32 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — December 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" onclick="openTest('english', 'nov2025')">
+      <div class="test-row" onclick="showModules('english','nov2025','November 2025')">
         <div class="test-index">02</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — November 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 27 + 27 questions · 32 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — November 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" onclick="openTest('english', 'oct2025')">
+      <div class="test-row" onclick="showModules('english','oct2025','October 2025')">
         <div class="test-index">03</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — October 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 27 + 27 questions · 32 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — October 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" onclick="openTest('english', 'aug2025')">
+      <div class="test-row" onclick="showModules('english','aug2025','August 2025')">
         <div class="test-index">04</div>
-        <div class="test-info">
-          <div class="test-name">Practice Test — August 2025</div>
-          <div class="test-detail">Module 1 + Module 2 · 27 + 27 questions · 32 min per module</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-available">Available</div>
-          <div class="test-arrow">→</div>
-        </div>
+        <div class="test-info"><div class="test-name">Practice Test — August 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
+        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
       </div>
-
-      <div class="test-row" style="cursor:default;">
-        <div class="test-index">05</div>
-        <div class="test-info">
-          <div class="test-name" style="color:var(--gray-mid);">Practice Test — May 2025</div>
-          <div class="test-detail">Coming soon</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-soon">Soon</div>
-        </div>
-      </div>
-
-      <div class="test-row" style="cursor:default;">
-        <div class="test-index">06</div>
-        <div class="test-info">
-          <div class="test-name" style="color:var(--gray-mid);">Practice Test — March 2025</div>
-          <div class="test-detail">Coming soon</div>
-        </div>
-        <div class="test-right">
-          <div class="test-badge badge-soon">Soon</div>
-        </div>
-      </div>
-
+      <div class="test-row disabled"><div class="test-index">05</div><div class="test-info"><div class="test-name muted">Practice Test — May 2025</div><div class="test-detail">Coming soon</div></div><div class="test-right"><div class="test-badge badge-soon">Soon</div></div></div>
+      <div class="test-row disabled"><div class="test-index">06</div><div class="test-info"><div class="test-name muted">Practice Test — March 2025</div><div class="test-detail">Coming soon</div></div><div class="test-right"><div class="test-badge badge-soon">Soon</div></div></div>
     </div>
   </div>
-
-  <footer class="site-footer">
-    <div class="footer-copy">SAT Practice · 2025–2026</div>
-    <div class="footer-note">Not affiliated with College Board</div>
-  </footer>
-
+  <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
+<!-- MODULE SELECTION -->
+<div id="modules" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="showPage('home')">SAT Practice</div>
+    <div class="header-right">
+      <div class="breadcrumb">
+        <span class="crumb" onclick="showPage('home')">Home</span>
+        <span class="sep">/</span>
+        <span class="crumb" id="bc-subject" onclick="goBackToSubject()">English</span>
+        <span class="sep">/</span>
+        <span class="current" id="bc-test">December 2025</span>
+      </div>
+      <button class="back-btn" onclick="goBackToSubject()">← Back</button>
+    </div>
+  </header>
+  <div class="module-select-hero">
+    <div class="module-select-label" id="mod-label">SAT · Reading and Writing</div>
+    <div class="module-select-title" id="mod-title">December 2025</div>
+    <div class="module-select-sub">Select a module to begin. Each module is independently timed.</div>
+  </div>
+  <div class="module-grid-section">
+    <div class="module-group-label">Module 1</div>
+    <div class="module-grid">
+      <div class="module-card" onclick="launchTest('1A')">
+        <div class="module-card-top"><div class="module-tag">Module 1A</div><div class="module-card-arrow">↗</div></div>
+        <div class="module-card-name">Module 1A</div>
+        <div class="module-card-detail" id="det-1a">27 questions · 32 minutes</div>
+      </div>
+      <div class="module-card" onclick="launchTest('1B')">
+        <div class="module-card-top"><div class="module-tag">Module 1B</div><div class="module-card-arrow">↗</div></div>
+        <div class="module-card-name">Module 1B</div>
+        <div class="module-card-detail" id="det-1b">27 questions · 32 minutes</div>
+      </div>
+    </div>
+    <div class="module-group-label">Module 2</div>
+    <div class="module-grid">
+      <div class="module-card" onclick="launchTest('2A')">
+        <div class="module-card-top"><div class="module-tag">Module 2A</div><div class="module-card-arrow">↗</div></div>
+        <div class="module-card-name">Module 2A</div>
+        <div class="module-card-detail" id="det-2a">27 questions · 32 minutes</div>
+      </div>
+      <div class="module-card" onclick="launchTest('2B')">
+        <div class="module-card-top"><div class="module-tag">Module 2B</div><div class="module-card-arrow">↗</div></div>
+        <div class="module-card-name">Module 2B</div>
+        <div class="module-card-detail" id="det-2b">27 questions · 32 minutes</div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
 
 <script>
+  let currentSubject = 'english';
+  let currentTest = 'dec2025';
+  let currentTestLabel = 'December 2025';
+
+  const subjectConfig = {
+    english: { label: 'SAT · Reading and Writing', title: 'English', qCount: 27, minutes: 32 },
+    math:    { label: 'SAT · Mathematics',          title: 'Math',    qCount: 44, minutes: 70 }
+  };
+
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     window.scrollTo(0, 0);
   }
 
-  function openTest(subject, testId) {
-    // TODO: navigate to the actual test page
-    // e.g.: showPage('test'); loadTest(subject, testId);
-    alert('Opening: ' + subject + ' · ' + testId + '\n\nTest UI coming next!');
+  function goBackToSubject() { showPage(currentSubject); }
+
+  function showModules(subject, testId, testLabel) {
+    currentSubject = subject;
+    currentTest = testId;
+    currentTestLabel = testLabel;
+    const cfg = subjectConfig[subject];
+    const detail = `${cfg.qCount} questions · ${cfg.minutes} minutes`;
+
+    document.getElementById('bc-subject').textContent = cfg.title;
+    document.getElementById('bc-test').textContent = testLabel;
+    document.getElementById('mod-label').textContent = cfg.label;
+    document.getElementById('mod-title').textContent = testLabel;
+    ['det-1a','det-1b','det-2a','det-2b'].forEach(id => {
+      document.getElementById(id).textContent = detail;
+    });
+    showPage('modules');
+  }
+
+  function launchTest(moduleId) {
+    const params = new URLSearchParams({
+      subject: currentSubject,
+      test: currentTest,
+      label: currentTestLabel,
+      module: moduleId
+    });
+    window.location.href = 'test.html?' + params.toString();
   }
 </script>
-
 </body>
 </html>
