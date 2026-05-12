@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Practice — Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400;500&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
+      --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
+      --white: #FFFFFF; --answer-hover: #F0F0F0; --answer-selected: #111111;
+      --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
+    }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 52px;
+      border-bottom: 1px solid var(--gray-border);
+      background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 1rem; }
+    .top-bar-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; }
+    .top-bar-sep { color: var(--gray-border); font-size: 18px; font-weight: 200; }
+    .top-bar-module { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.05em; }
+    .top-bar-center { display: flex; align-items: center; gap: 0.5rem; }
+    .timer {
+      font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500;
+      color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center;
+    }
+    .timer.warning { color: #c0392b; }
+    .timer-toggle {
+      font-size: 11px; color: var(--gray-mid); cursor: pointer;
+      border: 1px solid var(--gray-border); border-radius: 4px;
+      padding: 3px 8px; font-family: 'DM Mono', monospace;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .timer-toggle:hover { color: var(--black); border-color: var(--black); }
+    .top-bar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-exit {
+      font-size: 13px; color: var(--gray-mid); background: none;
+      border: 1px solid var(--gray-border); border-radius: 6px;
+      padding: 6px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-exit:hover { color: var(--black); border-color: var(--black); }
+
+    /* ── MAIN LAYOUT ── */
+    .test-body {
+      position: fixed; top: 52px; bottom: 56px; left: 0; right: 0;
+      display: flex; overflow: hidden;
+    }
+
+    /* ── PASSAGE PANE ── */
+    .passage-pane {
+      flex: 1; overflow-y: auto; padding: 2.5rem 2rem 2.5rem 2.5rem;
+      border-right: 1px solid var(--gray-border);
+    }
+    .passage-context {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1.25rem;
+    }
+    .passage-text {
+      font-family: 'Source Serif 4', serif; font-size: 15px; line-height: 1.85;
+      color: var(--black); font-weight: 300;
+    }
+    .passage-text p + p { margin-top: 1rem; }
+
+    /* ── QUESTION PANE ── */
+    .question-pane {
+      width: 420px; flex-shrink: 0; overflow-y: auto;
+      padding: 2.5rem 2.5rem 2.5rem 2rem;
+      display: flex; flex-direction: column;
+    }
+    .q-number {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem;
+    }
+    .q-text {
+      font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 400;
+      line-height: 1.65; color: var(--black); margin-bottom: 2rem;
+    }
+    .answers { display: flex; flex-direction: column; gap: 0.6rem; }
+    .answer-option {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      padding: 0.85rem 1rem; border: 1px solid var(--gray-border);
+      border-radius: 4px; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: var(--white);
+    }
+    .answer-option:hover { border-color: var(--black); background: var(--answer-hover); }
+    .answer-option.selected { border-color: var(--black); background: var(--answer-selected); }
+    .answer-option.selected .answer-letter,
+    .answer-option.selected .answer-text { color: var(--white); }
+    .answer-option.correct { border-color: var(--correct); background: #edf7f1; }
+    .answer-option.correct .answer-letter,
+    .answer-option.correct .answer-text { color: var(--correct); }
+    .answer-option.incorrect { border-color: var(--incorrect); background: #fdf0ee; }
+    .answer-option.incorrect .answer-letter,
+    .answer-option.incorrect .answer-text { color: var(--incorrect); }
+    .answer-letter {
+      font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500;
+      color: var(--gray-mid); min-width: 18px; padding-top: 1px;
+      transition: color 0.15s;
+    }
+    .answer-text { font-size: 14px; color: var(--black); line-height: 1.5; transition: color 0.15s; }
+    .flag-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; cursor: pointer; width: fit-content; }
+    .flag-row input[type="checkbox"] { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
+    .flag-label { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
+      border-top: 1px solid var(--gray-border); background: var(--white);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; gap: 1rem;
+    }
+    .q-nav { display: flex; align-items: center; gap: 6px; flex: 1; overflow-x: auto; padding: 4px 0; }
+    .q-dot {
+      width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--gray-border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid);
+      cursor: pointer; flex-shrink: 0; transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .q-dot:hover { border-color: var(--black); color: var(--black); }
+    .q-dot.active { border-color: var(--black); background: var(--black); color: var(--white); }
+    .q-dot.answered { border-color: var(--black); color: var(--black); }
+    .q-dot.flagged { border-color: #c0392b; color: #c0392b; }
+    .q-dot.flagged.answered { background: #fff5f5; }
+    .nav-buttons { display: flex; gap: 0.6rem; flex-shrink: 0; }
+    .btn-nav {
+      font-size: 13px; font-family: 'DM Sans', sans-serif;
+      border: 1px solid var(--gray-border); background: var(--white);
+      border-radius: 6px; padding: 7px 18px; cursor: pointer;
+      color: var(--gray-mid); transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .btn-nav:hover { color: var(--black); border-color: var(--black); }
+    .btn-nav.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-nav.primary:hover { background: var(--gray-dark); border-color: var(--gray-dark); }
+
+    /* ── REVIEW / SCORE OVERLAY ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
+    .overlay.active { display: flex; }
+    .overlay-box {
+      background: var(--white); border-radius: 6px; width: 100%; max-width: 520px;
+      max-height: 80vh; overflow-y: auto; padding: 2.5rem; animation: fadeSlide 0.2s ease;
+    }
+    @keyframes fadeSlide { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .overlay-title { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 300; color: var(--black); margin-bottom: 0.5rem; }
+    .overlay-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-big { font-family: 'Source Serif 4', serif; font-size: 56px; font-weight: 300; color: var(--black); line-height: 1; }
+    .score-label { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
+    .score-stat .num { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--black); }
+    .score-stat .lbl { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+    .review-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+    .review-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; }
+    .review-item:hover { color: var(--gray-mid); }
+    .review-num { font-family: 'DM Mono', monospace; width: 28px; color: var(--gray-mid); }
+    .review-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-correct { background: var(--correct); }
+    .status-incorrect { background: var(--incorrect); }
+    .status-unanswered { background: var(--gray-light); }
+    .overlay-btn-row { display: flex; gap: 0.75rem; }
+    .overlay-btn { flex: 1; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s; }
+    .overlay-btn:hover { color: var(--black); border-color: var(--black); }
+    .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .overlay-btn.primary:hover { background: var(--gray-dark); }
+
+    @media (max-width: 720px) {
+      .passage-pane { display: none; }
+      .question-pane { width: 100%; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <div class="top-bar-logo">SAT Practice</div>
+    <div class="top-bar-sep">|</div>
+    <div class="top-bar-module" id="bar-module">English · December 2025 · Module 1A</div>
+  </div>
+  <div class="top-bar-center">
+    <div class="timer" id="timer">32:00</div>
+    <div class="timer-toggle" id="timer-toggle" onclick="toggleTimer()">Hide</div>
+  </div>
+  <div class="top-bar-right">
+    <button class="btn-exit" onclick="confirmExit()">Exit</button>
+    <button class="btn-nav primary" onclick="openReview()" style="font-size:13px;">Review & Submit</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="test-body">
+  <div class="passage-pane" id="passage-pane">
+    <!-- Passage injected by JS -->
+  </div>
+  <div class="question-pane" id="question-pane">
+    <!-- Question injected by JS -->
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="q-nav" id="q-nav"></div>
+  <div class="nav-buttons">
+    <button class="btn-nav" onclick="prevQuestion()">← Back</button>
+    <button class="btn-nav primary" id="btn-next" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- REVIEW OVERLAY -->
+<div class="overlay" id="review-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Review Answers</div>
+    <div class="overlay-sub" id="review-sub">Check your answers before submitting.</div>
+    <div class="review-list" id="review-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="closeOverlay('review-overlay')">Continue Test</button>
+      <button class="overlay-btn primary" onclick="submitTest()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE OVERLAY -->
+<div class="overlay" id="score-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Module Complete</div>
+    <div class="overlay-sub" id="score-sub">December 2025 · Module 1A</div>
+    <div class="score-big" id="score-num">—</div>
+    <div class="score-label" id="score-pct">— correct</div>
+    <div class="score-breakdown">
+      <div class="score-stat"><div class="num" id="sc-correct">—</div><div class="lbl">Correct</div></div>
+      <div class="score-stat"><div class="num" id="sc-incorrect">—</div><div class="lbl">Incorrect</div></div>
+      <div class="score-stat"><div class="num" id="sc-unanswered">—</div><div class="lbl">Unanswered</div></div>
+    </div>
+    <div class="review-list" id="score-review-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Tests</button>
+      <button class="overlay-btn primary" onclick="closeOverlay('score-overlay')">Review Answers</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  QUESTION DATA
+//  TO ADD YOUR OWN QUESTIONS: edit the QUESTIONS array below.
+//  Each question has:
+//    passage  – text shown in the left pane (use \n\n for paragraph breaks)
+//    context  – small label above the passage e.g. "Passage 1 of 27"
+//    question – the question stem
+//    choices  – array of 4 strings (A B C D)
+//    answer   – index of correct answer (0=A, 1=B, 2=C, 3=D)
+// ══════════════════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    context: 'The following passage is adapted from a 2023 article on urban ecology.',
+    passage: `Urban green spaces — parks, street trees, and community gardens — are increasingly recognized as vital components of healthy cities. Researchers have found that access to greenery correlates strongly with reduced stress levels and improved mental health outcomes among residents.\n\nDespite these benefits, urban planners often face competing priorities: limited land, high property costs, and the demand for housing and commercial development. Some cities have responded by integrating green infrastructure into building design itself, through rooftop gardens and vertical plant installations.`,
+    question: 'Which choice best states the main purpose of the passage?',
+    choices: [
+      'To argue that urban green spaces should be prioritized over housing development',
+      'To describe both the benefits of urban green spaces and the challenges cities face in providing them',
+      'To explain why rooftop gardens are more effective than traditional parks',
+      'To present evidence that mental health outcomes are primarily determined by access to nature'
+    ],
+    answer: 1
+  },
+  {
+    context: 'The following passage is adapted from a 2024 essay on language change.',
+    passage: `Languages are never static. Over centuries, words shift in meaning, pronunciation evolves, and grammatical structures simplify or grow more complex. Linguists refer to this as language change — a neutral term that carries no judgment about whether such changes are improvements or deteriorations.\n\nPrescriptivists, who believe language should conform to established rules, often resist change, viewing new usages as errors. Descriptivists, by contrast, study language as it is actually used, treating change as a natural and inevitable phenomenon.`,
+    question: 'As used in the passage, the word "neutral" most nearly means',
+    choices: [
+      'ineffective',
+      'impartial',
+      'scientific',
+      'outdated'
+    ],
+    answer: 1
+  },
+  {
+    context: 'The following passage is adapted from a 2022 article on climate adaptation.',
+    passage: `Coastal communities worldwide are grappling with the effects of rising sea levels. Some municipalities have chosen to invest heavily in seawalls and flood barriers — what engineers call "hard" infrastructure. Others have turned to "soft" solutions: restoring mangrove forests and salt marshes that naturally absorb wave energy and filter water.\n\nStudies suggest that soft infrastructure is often more cost-effective over long time horizons and provides additional ecological benefits. However, it requires sustained maintenance and cannot always protect against extreme storm surges.`,
+    question: 'The passage suggests that "soft" infrastructure solutions are preferable to "hard" solutions primarily because they',
+    choices: [
+      'are more visually appealing to coastal residents',
+      'can withstand more severe storm conditions',
+      'tend to offer greater long-term value and ecological benefits',
+      'require less initial planning or maintenance'
+    ],
+    answer: 2
+  },
+  {
+    context: 'The following passage is adapted from a 2023 profile of mathematician Emmy Noether.',
+    passage: `Emmy Noether is widely regarded as one of the most important mathematicians of the twentieth century. Her 1915 theorem, now known as Noether\'s Theorem, established a profound connection between symmetry in physical systems and conservation laws — a result that underpins much of modern theoretical physics.\n\nDespite her contributions, Noether faced substantial institutional resistance. For years she was barred from formal academic positions at German universities due to her gender. She lectured under a male colleague\'s name before eventually being granted her own position.`,
+    question: 'Which choice best describes what the second paragraph adds to the passage?',
+    choices: [
+      'It provides a detailed explanation of Noether\'s mathematical methods',
+      'It contrasts Noether\'s personal life with her professional ambitions',
+      'It contextualizes her achievements within the obstacles she had to overcome',
+      'It argues that gender discrimination in academia has been fully resolved'
+    ],
+    answer: 2
+  },
+  {
+    context: 'The following sentences are from a student draft on behavioral economics.',
+    passage: `Behavioral economists study how psychological factors influence financial decision-making. One well-documented phenomenon is the "status quo bias" — people\'s tendency to prefer the current state of affairs over alternatives, even when change would benefit them.\n\nThis bias has significant implications for policy design. Researchers have found that when employees are automatically enrolled in retirement savings plans and must actively opt out, participation rates are dramatically higher than when enrollment requires an active choice to opt in.`,
+    question: 'Which choice most logically completes the argument about the policy implication described in the final sentence?',
+    choices: [
+      'Therefore, retirement plans should be made optional to respect individual autonomy.',
+      'This suggests that default settings can harness status quo bias to promote beneficial outcomes.',
+      'Employees clearly do not care about saving for retirement.',
+      'Active choice is always superior to automatic enrollment in policy design.'
+    ],
+    answer: 1
+  },
+  {
+    context: 'The following passage is adapted from a 2021 article on the history of cartography.',
+    passage: `Early maps were not merely navigational tools — they were political statements. Medieval European mapmakers placed Jerusalem at the center of the world, reflecting theological priorities rather than geographic accuracy. Colonial-era maps frequently enlarged territories held by the mapmaker\'s nation while shrinking or omitting others.\n\nModern cartographers have grappled with similar challenges. The Mercator projection, developed in 1569 and still widely used, significantly distorts the sizes of landmasses near the poles, making Greenland appear comparable in size to Africa, when Africa is actually fourteen times larger.`,
+    question: 'The main claim of the passage is that',
+    choices: [
+      'modern maps are significantly more accurate than medieval ones',
+      'map-making has always been influenced by the values and perspectives of those who create them',
+      'the Mercator projection should be replaced with a more accurate alternative',
+      'cartography is primarily a political rather than scientific discipline'
+    ],
+    answer: 1
+  },
+  {
+    context: 'The following passage is adapted from a 2024 article on artificial intelligence in medicine.',
+    passage: `Artificial intelligence systems trained on medical imaging data have demonstrated impressive diagnostic accuracy in controlled studies. In some tests, AI models have matched or exceeded the performance of experienced radiologists in detecting early-stage tumors.\n\nHowever, critics caution against overinterpreting these results. Many studies are conducted under idealized conditions that may not reflect the variability of real clinical environments. Additionally, questions about liability, transparency, and patient consent remain unresolved.`,
+    question: 'The critics mentioned in the second paragraph would most likely agree that',
+    choices: [
+      'AI systems should be banned from use in medical diagnosis',
+      'radiologists are always more reliable than AI in detecting tumors',
+      'promising AI results in controlled settings may not translate directly to clinical practice',
+      'liability concerns are the most significant barrier to AI adoption in medicine'
+    ],
+    answer: 2
+  }
+];
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+const params   = new URLSearchParams(window.location.search);
+const subject  = params.get('subject') || 'english';
+const testId   = params.get('test')    || 'dec2025';
+const label    = params.get('label')   || 'December 2025';
+const moduleId = params.get('module')  || '1A';
+
+const totalQ      = QUESTIONS.length;
+const totalSecs   = subject === 'math' ? 70 * 60 : 32 * 60;
+let currentQ      = 0;
+let answers       = new Array(totalQ).fill(null);   // null or choice index
+let flagged       = new Array(totalQ).fill(false);
+let timerSecs     = totalSecs;
+let timerHidden   = false;
+let timerInterval = null;
+let submitted     = false;
+
+// ── Init ──────────────────────────────────────────────────────
+document.getElementById('bar-module').textContent =
+  `${subject === 'math' ? 'Math' : 'English'} · ${label} · Module ${moduleId}`;
+document.getElementById('score-sub').textContent =
+  `${label} · Module ${moduleId}`;
+
+buildNav();
+renderQuestion(0);
+startTimer();
+
+// ── Timer ─────────────────────────────────────────────────────
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (submitted) return;
+    timerSecs--;
+    updateTimerDisplay();
+    if (timerSecs <= 0) { clearInterval(timerInterval); submitTest(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer');
+  if (timerHidden) { el.textContent = 'Hidden'; el.classList.remove('warning'); return; }
+  const m = Math.floor(timerSecs / 60).toString().padStart(2, '0');
+  const s = (timerSecs % 60).toString().padStart(2, '0');
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle('warning', timerSecs <= 300);
+}
+
+function toggleTimer() {
+  timerHidden = !timerHidden;
+  document.getElementById('timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  updateTimerDisplay();
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('q-nav');
+  nav.innerHTML = '';
+  for (let i = 0; i < totalQ; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.id = `dot-${i}`;
+    dot.onclick = () => goToQuestion(i);
+    nav.appendChild(dot);
+  }
+  updateNav();
+}
+
+function updateNav() {
+  for (let i = 0; i < totalQ; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.className = 'q-dot';
+    if (i === currentQ) dot.classList.add('active');
+    if (answers[i] !== null) dot.classList.add('answered');
+    if (flagged[i]) dot.classList.add('flagged');
+  }
+}
+
+function goToQuestion(i) {
+  currentQ = i;
+  renderQuestion(i);
+  updateNav();
+}
+
+function prevQuestion() {
+  if (currentQ > 0) goToQuestion(currentQ - 1);
+}
+
+function nextQuestion() {
+  if (currentQ < totalQ - 1) goToQuestion(currentQ + 1);
+  else openReview();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderQuestion(i) {
+  const q = QUESTIONS[i];
+
+  // Passage
+  const pp = document.getElementById('passage-pane');
+  const paras = q.passage.split('\n\n').map(p => `<p>${p}</p>`).join('');
+  pp.innerHTML = `
+    <div class="passage-context">${q.context}</div>
+    <div class="passage-text">${paras}</div>`;
+
+  // Question
+  const qp = document.getElementById('question-pane');
+  const letters = ['A','B','C','D'];
+  const choicesHTML = q.choices.map((c, ci) => {
+    let cls = 'answer-option';
+    if (submitted) {
+      if (ci === q.answer) cls += ' correct';
+      else if (ci === answers[i] && ci !== q.answer) cls += ' incorrect';
+    } else {
+      if (answers[i] === ci) cls += ' selected';
+    }
+    return `<div class="${cls}" onclick="selectAnswer(${i},${ci})">
+      <div class="answer-letter">${letters[ci]}</div>
+      <div class="answer-text">${c}</div>
+    </div>`;
+  }).join('');
+
+  qp.innerHTML = `
+    <div class="q-number">Question ${i + 1} of ${totalQ}</div>
+    <div class="q-text">${q.question}</div>
+    <div class="answers">${choicesHTML}</div>
+    <label class="flag-row">
+      <input type="checkbox" id="flag-cb" ${flagged[i] ? 'checked' : ''} onchange="toggleFlag(${i})">
+      <span class="flag-label">Flag for review</span>
+    </label>`;
+
+  // Next button label
+  document.getElementById('btn-next').textContent =
+    i === totalQ - 1 ? 'Review →' : 'Next →';
+}
+
+function selectAnswer(qi, ci) {
+  if (submitted) return;
+  answers[qi] = ci;
+  updateNav();
+  renderQuestion(qi);
+}
+
+function toggleFlag(qi) {
+  flagged[qi] = document.getElementById('flag-cb').checked;
+  updateNav();
+}
+
+// ── Review Overlay ────────────────────────────────────────────
+function openReview() {
+  const list = document.getElementById('review-list');
+  const unanswered = answers.filter(a => a === null).length;
+  const flagCount  = flagged.filter(Boolean).length;
+
+  document.getElementById('review-sub').textContent =
+    `${unanswered} unanswered · ${flagCount} flagged`;
+
+  list.innerHTML = QUESTIONS.map((q, i) => {
+    const status = answers[i] === null
+      ? '<span style="color:var(--gray-mid)">Not answered</span>'
+      : `<span style="color:var(--black)">Answer ${['A','B','C','D'][answers[i]]}</span>`;
+    const flagMark = flagged[i] ? ' <span style="color:#c0392b;font-size:11px;">★ Flagged</span>' : '';
+    return `<div class="review-item" onclick="closeOverlay('review-overlay');goToQuestion(${i})">
+      <div class="review-num">${i+1}</div>
+      <div style="flex:1;font-size:13px;color:var(--black);">${q.question.substring(0,60)}…</div>
+      <div>${status}${flagMark}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('review-overlay').classList.add('active');
+}
+
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// ── Submit ────────────────────────────────────────────────────
+function submitTest() {
+  submitted = true;
+  clearInterval(timerInterval);
+
+  const correct   = QUESTIONS.filter((q, i) => answers[i] === q.answer).length;
+  const incorrect = QUESTIONS.filter((q, i) => answers[i] !== null && answers[i] !== q.answer).length;
+  const unanswered = answers.filter(a => a === null).length;
+  const pct = Math.round((correct / totalQ) * 100);
+
+  document.getElementById('score-num').textContent = `${correct}/${totalQ}`;
+  document.getElementById('score-pct').textContent = `${pct}% correct`;
+  document.getElementById('sc-correct').textContent   = correct;
+  document.getElementById('sc-incorrect').textContent = incorrect;
+  document.getElementById('sc-unanswered').textContent = unanswered;
+
+  const scoreList = document.getElementById('score-review-list');
+  scoreList.innerHTML = QUESTIONS.map((q, i) => {
+    let statusClass = 'status-unanswered';
+    let statusLabel = 'Unanswered';
+    if (answers[i] !== null) {
+      statusClass = answers[i] === q.answer ? 'status-correct' : 'status-incorrect';
+      statusLabel = answers[i] === q.answer ? 'Correct' : 'Incorrect';
+    }
+    return `<div class="review-item" onclick="closeOverlay('score-overlay');goToQuestion(${i})">
+      <div class="review-num">${i+1}</div>
+      <div class="review-status ${statusClass}"></div>
+      <div style="flex:1;font-size:13px;color:var(--black);">${q.question.substring(0,55)}…</div>
+      <div style="font-size:12px;color:var(--gray-mid);">${statusLabel}</div>
+    </div>`;
+  }).join('');
+
+  closeOverlay('review-overlay');
+  document.getElementById('score-overlay').classList.add('active');
+
+  // Re-render current question to show correct/incorrect highlighting
+  renderQuestion(currentQ);
+}
+
+// ── Exit ──────────────────────────────────────────────────────
+function confirmExit() {
+  if (confirm('Exit this module? Your progress will not be saved.')) {
+    window.location.href = 'index.html';
+  }
+}
+</script>
+</body>
+</html>
