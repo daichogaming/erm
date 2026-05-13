@@ -125,7 +125,7 @@
   <div class="home-hero">
     <div class="hero-label">College Board · Official Practice</div>
     <h1 class="hero-title">Practice tests,<br>section by section.</h1>
-    <p class="hero-sub">Work through real SAT practice tests organized by subject. Select Math or English to begin.</p>
+    <p class="hero-sub">Work through real SAT practice questions organized by subject. Select Math or English to begin.</p>
   </div>
   <hr class="divider" />
   <div class="subject-row">
@@ -150,19 +150,19 @@
       <div class="card-tests">
         <div class="card-tests-label">Practice tests</div>
         <div class="card-test-list">
-          <div class="card-test-item">December 2025</div>
-          <div class="card-test-item">November 2025</div>
-          <div class="card-test-item">October 2025</div>
-          <div class="card-test-item">+ more</div>
+          <div class="card-test-item">Practice Tests 1–4</div>
+          <div class="card-test-item">Practice Tests 5–8</div>
+          <div class="card-test-item">Practice Tests 9–13</div>
+          <div class="card-test-item">1,404 official questions</div>
         </div>
       </div>
     </div>
   </div>
   <hr class="divider" />
   <div class="home-stats">
-    <div class="stat-item"><div class="stat-num">6</div><div class="stat-lbl">Practice Tests</div></div>
+    <div class="stat-item"><div class="stat-num">17</div><div class="stat-lbl">Practice Tests</div></div>
     <div class="stat-item"><div class="stat-num">2</div><div class="stat-lbl">Subjects</div></div>
-    <div class="stat-item"><div class="stat-num">98</div><div class="stat-lbl">Questions / Test</div></div>
+    <div class="stat-item"><div class="stat-num">27</div><div class="stat-lbl">Questions / Module</div></div>
     <div class="stat-item"><div class="stat-num">800</div><div class="stat-lbl">Max Score / Section</div></div>
   </div>
   <footer class="site-footer">
@@ -237,29 +237,8 @@
   </div>
   <div class="tests-section">
     <div class="tests-section-label">Available practice tests</div>
-    <div class="tests-list">
-      <div class="test-row" onclick="showModules('english','dec2025','December 2025')">
-        <div class="test-index">01</div>
-        <div class="test-info"><div class="test-name">Practice Test — December 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
-        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
-      </div>
-      <div class="test-row" onclick="showModules('english','nov2025','November 2025')">
-        <div class="test-index">02</div>
-        <div class="test-info"><div class="test-name">Practice Test — November 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
-        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
-      </div>
-      <div class="test-row" onclick="showModules('english','oct2025','October 2025')">
-        <div class="test-index">03</div>
-        <div class="test-info"><div class="test-name">Practice Test — October 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
-        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
-      </div>
-      <div class="test-row" onclick="showModules('english','aug2025','August 2025')">
-        <div class="test-index">04</div>
-        <div class="test-info"><div class="test-name">Practice Test — August 2025</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module</div></div>
-        <div class="test-right"><div class="test-badge badge-available">Available</div><div class="test-arrow">→</div></div>
-      </div>
-      <div class="test-row disabled"><div class="test-index">05</div><div class="test-info"><div class="test-name muted">Practice Test — May 2025</div><div class="test-detail">Coming soon</div></div><div class="test-right"><div class="test-badge badge-soon">Soon</div></div></div>
-      <div class="test-row disabled"><div class="test-index">06</div><div class="test-info"><div class="test-name muted">Practice Test — March 2025</div><div class="test-detail">Coming soon</div></div><div class="test-right"><div class="test-badge badge-soon">Soon</div></div></div>
+    <div class="tests-list" id="english-tests-list">
+      <!-- Populated by JS -->
     </div>
   </div>
   <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
@@ -275,14 +254,14 @@
         <span class="sep">/</span>
         <span class="crumb" id="bc-subject" onclick="goBackToSubject()">English</span>
         <span class="sep">/</span>
-        <span class="current" id="bc-test">December 2025</span>
+        <span class="current" id="bc-test">Practice Test 1</span>
       </div>
       <button class="back-btn" onclick="goBackToSubject()">← Back</button>
     </div>
   </header>
   <div class="module-select-hero">
     <div class="module-select-label" id="mod-label">SAT · Reading and Writing</div>
-    <div class="module-select-title" id="mod-title">December 2025</div>
+    <div class="module-select-title" id="mod-title">Practice Test 1</div>
     <div class="module-select-sub">Select a module to begin. Each module is independently timed.</div>
   </div>
   <div class="module-grid-section">
@@ -318,14 +297,48 @@
 
 <script>
   let currentSubject = 'english';
-  let currentTest = 'dec2025';
-  let currentTestLabel = 'December 2025';
+  let currentTest = 'test01';
+  let currentTestLabel = 'Practice Test 1';
 
   const subjectConfig = {
     english: { label: 'SAT · Reading and Writing', title: 'English', qCount: 27, minutes: 32 },
     math:    { label: 'SAT · Mathematics',          title: 'Math',    qCount: 44, minutes: 70 }
   };
 
+  // ── English test list ─────────────────────────────────────
+  const ENGLISH_TESTS = [
+    { id: 'test01', name: 'Practice Test 1' },
+    { id: 'test02', name: 'Practice Test 2' },
+    { id: 'test03', name: 'Practice Test 3' },
+    { id: 'test04', name: 'Practice Test 4' },
+    { id: 'test05', name: 'Practice Test 5' },
+    { id: 'test06', name: 'Practice Test 6' },
+    { id: 'test07', name: 'Practice Test 7' },
+    { id: 'test08', name: 'Practice Test 8' },
+    { id: 'test09', name: 'Practice Test 9' },
+    { id: 'test10', name: 'Practice Test 10' },
+    { id: 'test11', name: 'Practice Test 11' },
+    { id: 'test12', name: 'Practice Test 12' },
+    { id: 'test13', name: 'Practice Test 13' },
+  ];
+
+  (function buildEnglishList() {
+    const list = document.getElementById('english-tests-list');
+    list.innerHTML = ENGLISH_TESTS.map((t, idx) => `
+      <div class="test-row" onclick="showModules('english','${t.id}','${t.name}')">
+        <div class="test-index">${String(idx+1).padStart(2,'0')}</div>
+        <div class="test-info">
+          <div class="test-name">${t.name}</div>
+          <div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min per module · All 4 skill domains</div>
+        </div>
+        <div class="test-right">
+          <div class="test-badge badge-available">Available</div>
+          <div class="test-arrow">→</div>
+        </div>
+      </div>`).join('');
+  })();
+
+  // ── Navigation ────────────────────────────────────────────
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -358,7 +371,8 @@
       label: currentTestLabel,
       module: moduleId
     });
-    window.location.href = 'test.html?' + params.toString();
+    const targetPage = currentSubject === 'math' ? 'math.html' : 'test.html';
+    window.location.href = targetPage + '?' + params.toString();
   }
 </script>
 </body>

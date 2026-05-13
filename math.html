@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Practice — Math</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400;500&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
+      --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
+      --white: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
+    }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem; height: 52px;
+      border-bottom: 1px solid var(--gray-border);
+      background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+    .top-bar-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; white-space: nowrap; }
+    .top-bar-sep { color: var(--gray-border); font-size: 18px; }
+    .top-bar-module { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+    .top-bar-center { display: flex; align-items: center; gap: 0.5rem; }
+    .timer { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center; }
+    .timer.warning { color: var(--incorrect); }
+    .timer-toggle { font-size: 11px; color: var(--gray-mid); cursor: pointer; border: 1px solid var(--gray-border); border-radius: 4px; padding: 3px 8px; font-family: 'DM Mono', monospace; transition: color 0.15s, border-color 0.15s; }
+    .timer-toggle:hover { color: var(--black); border-color: var(--black); }
+    .top-bar-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+
+    /* ── TOOL BUTTONS ── */
+    .tool-btn {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; font-family: 'DM Sans', sans-serif;
+      border: 1px solid var(--gray-border); background: var(--white);
+      border-radius: 6px; padding: 6px 12px; cursor: pointer;
+      color: var(--gray-dark); transition: border-color 0.15s, background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .tool-btn:hover { border-color: var(--black); color: var(--black); }
+    .tool-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+    .tool-btn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+    .btn-exit { font-size: 13px; color: var(--gray-mid); background: none; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.15s, border-color 0.15s; }
+    .btn-exit:hover { color: var(--black); border-color: var(--black); }
+    .btn-submit { font-size: 13px; font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); border: 1px solid var(--black); border-radius: 6px; padding: 6px 14px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .btn-submit:hover { background: var(--gray-dark); }
+
+    /* ── MAIN LAYOUT ── */
+    .test-body { position: fixed; top: 52px; bottom: 56px; left: 0; right: 0; display: flex; overflow: hidden; }
+
+    /* ── QUESTION PANE (left) ── */
+    .question-pane { flex: 1; overflow-y: auto; padding: 2.25rem 2rem 2.25rem 2.5rem; border-right: 1px solid var(--gray-border); min-width: 0; }
+    .q-number { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem; }
+    .q-text { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 400; line-height: 1.7; color: var(--black); margin-bottom: 0.75rem; }
+    .q-note { font-size: 13px; color: var(--gray-mid); font-weight: 300; line-height: 1.55; margin-bottom: 1.75rem; font-style: italic; }
+    .q-image { max-width: 100%; margin-bottom: 1.5rem; border: 1px solid var(--gray-border); border-radius: 4px; }
+
+    /* Multiple choice answers */
+    .answers { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+    .answer-option { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.85rem 1rem; border: 1px solid var(--gray-border); border-radius: 4px; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--white); }
+    .answer-option:hover { border-color: var(--black); background: var(--gray-bg); }
+    .answer-option.selected { border-color: var(--black); background: var(--black); }
+    .answer-option.selected .answer-letter,
+    .answer-option.selected .answer-text { color: var(--white); }
+    .answer-option.correct { border-color: var(--correct); background: #edf7f1; }
+    .answer-option.correct .answer-letter,
+    .answer-option.correct .answer-text { color: var(--correct); }
+    .answer-option.incorrect { border-color: var(--incorrect); background: #fdf0ee; }
+    .answer-option.incorrect .answer-letter,
+    .answer-option.incorrect .answer-text { color: var(--incorrect); }
+    .answer-letter { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--gray-mid); min-width: 18px; padding-top: 1px; transition: color 0.15s; }
+    .answer-text { font-size: 14px; color: var(--black); line-height: 1.5; transition: color 0.15s; }
+
+    /* Grid-in (free response) */
+    .gridin-wrap { margin-bottom: 1.5rem; }
+    .gridin-label { font-size: 12px; color: var(--gray-mid); margin-bottom: 0.5rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+    .gridin-input { width: 160px; height: 48px; border: 2px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 22px; text-align: center; color: var(--black); outline: none; transition: border-color 0.15s; }
+    .gridin-input:focus { border-color: var(--black); }
+    .gridin-input.correct-input { border-color: var(--correct); color: var(--correct); }
+    .gridin-input.incorrect-input { border-color: var(--incorrect); color: var(--incorrect); }
+    .gridin-hint { font-size: 11px; color: var(--gray-mid); margin-top: 0.4rem; font-weight: 300; }
+
+    .flag-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; width: fit-content; }
+    .flag-row input[type="checkbox"] { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
+    .flag-label { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
+
+    /* ── TOOL PANE (right) ── */
+    .tool-pane { width: 440px; flex-shrink: 0; border-left: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.25s ease; }
+    .tool-pane.collapsed { width: 0; border-left: none; }
+    .tool-tabs { display: flex; border-bottom: 1px solid var(--gray-border); background: var(--gray-bg); flex-shrink: 0; }
+    .tool-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+    .tool-tab.active { color: var(--black); border-bottom-color: var(--black); background: var(--white); }
+    .tool-tab:hover:not(.active) { color: var(--black); }
+    .tool-content { flex: 1; overflow: hidden; display: none; }
+    .tool-content.active { display: flex; flex-direction: column; }
+
+    /* Basic Calculator */
+    .calc-wrap { padding: 1.25rem; display: flex; flex-direction: column; height: 100%; }
+    .calc-display { background: var(--black); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; min-height: 80px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 4px; }
+    .calc-expr { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); word-break: break-all; text-align: right; min-height: 18px; }
+    .calc-result { font-family: 'DM Mono', monospace; font-size: 28px; color: var(--white); word-break: break-all; text-align: right; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .calc-btn {
+      padding: 14px 0; border: 1px solid var(--gray-border); border-radius: 6px;
+      font-family: 'DM Mono', monospace; font-size: 15px; cursor: pointer;
+      background: var(--white); color: var(--black);
+      transition: background 0.1s, border-color 0.1s;
+      user-select: none;
+    }
+    .calc-btn:hover { background: var(--gray-bg); border-color: var(--black); }
+    .calc-btn:active { background: var(--gray-border); }
+    .calc-btn.op { background: var(--gray-bg); color: var(--black); }
+    .calc-btn.eq { background: var(--black); color: var(--white); border-color: var(--black); }
+    .calc-btn.eq:hover { background: var(--gray-dark); }
+    .calc-btn.fn { font-size: 12px; color: var(--gray-mid); }
+    .calc-btn.fn:hover { color: var(--black); }
+    .calc-btn.clear { color: var(--incorrect); }
+
+    /* Desmos */
+    .desmos-wrap { flex: 1; overflow: hidden; }
+    #desmos-container { width: 100%; height: 100%; }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; border-top: 1px solid var(--gray-border); background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
+    .q-nav { display: flex; align-items: center; gap: 5px; flex: 1; overflow-x: auto; padding: 4px 0; }
+    .q-dot { width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid); cursor: pointer; flex-shrink: 0; transition: border-color 0.15s, background 0.15s, color 0.15s; }
+    .q-dot:hover { border-color: var(--black); color: var(--black); }
+    .q-dot.active { border-color: var(--black); background: var(--black); color: var(--white); }
+    .q-dot.answered { border-color: var(--black); color: var(--black); }
+    .q-dot.flagged { border-color: var(--incorrect); color: var(--incorrect); }
+    .nav-buttons { display: flex; gap: 0.6rem; flex-shrink: 0; }
+    .btn-nav { font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 7px 18px; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s, background 0.15s; }
+    .btn-nav:hover { color: var(--black); border-color: var(--black); }
+    .btn-nav.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-nav.primary:hover { background: var(--gray-dark); border-color: var(--gray-dark); }
+
+    /* ── OVERLAYS ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 400; align-items: center; justify-content: center; }
+    .overlay.active { display: flex; }
+    .overlay-box { background: var(--white); border-radius: 6px; width: 100%; max-width: 520px; max-height: 82vh; overflow-y: auto; padding: 2.5rem; animation: fadeUp 0.2s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .overlay-title { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 300; color: var(--black); margin-bottom: 0.4rem; }
+    .overlay-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-big { font-family: 'Source Serif 4', serif; font-size: 52px; font-weight: 300; color: var(--black); line-height: 1; }
+    .score-label { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
+    .score-stat .num { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--black); }
+    .score-stat .lbl { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+    .review-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
+    .review-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; transition: background 0.1s; }
+    .review-item:hover { background: var(--gray-bg); }
+    .review-num { font-family: 'DM Mono', monospace; width: 28px; color: var(--gray-mid); font-size: 11px; flex-shrink: 0; }
+    .review-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-correct { background: var(--correct); }
+    .status-incorrect { background: var(--incorrect); }
+    .status-unanswered { background: var(--gray-light); }
+    .overlay-btn-row { display: flex; gap: 0.75rem; }
+    .overlay-btn { flex: 1; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s; }
+    .overlay-btn:hover { color: var(--black); border-color: var(--black); }
+    .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .overlay-btn.primary:hover { background: var(--gray-dark); }
+
+    /* Reference sheet overlay */
+    .ref-overlay-box { max-width: 640px; }
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .ref-item { border: 1px solid var(--gray-border); border-radius: 4px; padding: 1rem; }
+    .ref-item-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 0.5rem; }
+    .ref-formula { font-family: 'Source Serif 4', serif; font-size: 15px; color: var(--black); line-height: 1.6; }
+
+    @media (max-width: 768px) {
+      .tool-pane { display: none; }
+      .top-bar-module { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <div class="top-bar-logo">SAT Practice</div>
+    <div class="top-bar-sep">|</div>
+    <div class="top-bar-module" id="bar-module">Math · December 2025 · Module 1A</div>
+  </div>
+  <div class="top-bar-center">
+    <div class="timer" id="timer">35:00</div>
+    <div class="timer-toggle" id="timer-toggle" onclick="toggleTimer()">Hide</div>
+  </div>
+  <div class="top-bar-right">
+    <!-- Reference -->
+    <button class="tool-btn" onclick="openOverlay('ref-overlay')" title="Formula Reference Sheet">
+      <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/></svg>
+      Reference
+    </button>
+    <!-- Basic calc toggle -->
+    <button class="tool-btn" id="btn-calc" onclick="toggleTool('basic')" title="Basic Calculator">
+      <svg viewBox="0 0 16 16"><path d="M3 1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm0 1v12h10V2H3zm1 1h8v3H4V3zm0 4h2v2H4V7zm3 0h2v2H7V7zm3 0h2v2h-2V7zM4 10h2v2H4v-2zm3 0h2v2H7v-2zm3 0h2v2h-2v-2z"/></svg>
+      Calculator
+    </button>
+    <!-- Desmos toggle -->
+    <button class="tool-btn" id="btn-desmos" onclick="toggleTool('desmos')" title="Desmos Graphing Calculator">
+      <svg viewBox="0 0 16 16"><path d="M1 8h14M8 1v14M3 4l2 2-2 2M13 4l-2 2 2 2" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+      Desmos
+    </button>
+    <button class="btn-exit" onclick="confirmExit()">Exit</button>
+    <button class="btn-submit" onclick="openReview()">Review & Submit</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="test-body">
+
+  <!-- Question Pane -->
+  <div class="question-pane" id="question-pane"></div>
+
+  <!-- Tool Pane -->
+  <div class="tool-pane collapsed" id="tool-pane">
+    <div class="tool-tabs">
+      <div class="tool-tab active" id="tab-basic" onclick="switchTab('basic')">Calculator</div>
+      <div class="tool-tab" id="tab-desmos" onclick="switchTab('desmos')">Desmos</div>
+    </div>
+
+    <!-- Basic Calculator -->
+    <div class="tool-content active" id="content-basic">
+      <div class="calc-wrap">
+        <div class="calc-display">
+          <div class="calc-expr" id="calc-expr"></div>
+          <div class="calc-result" id="calc-result">0</div>
+        </div>
+        <div class="calc-grid">
+          <!-- Row 1 -->
+          <button class="calc-btn fn" onclick="calcFn('sin(')">sin</button>
+          <button class="calc-btn fn" onclick="calcFn('cos(')">cos</button>
+          <button class="calc-btn fn" onclick="calcFn('tan(')">tan</button>
+          <button class="calc-btn fn" onclick="calcFn('sqrt(')">√</button>
+          <!-- Row 2 -->
+          <button class="calc-btn fn" onclick="calcFn('log(')">log</button>
+          <button class="calc-btn fn" onclick="calcFn('ln(')">ln</button>
+          <button class="calc-btn fn" onclick="calcFn('Math.PI')">π</button>
+          <button class="calc-btn fn" onclick="calcFn('^')">xʸ</button>
+          <!-- Row 3 -->
+          <button class="calc-btn clear" onclick="calcClear()">AC</button>
+          <button class="calc-btn op" onclick="calcFn('(')">(</button>
+          <button class="calc-btn op" onclick="calcFn(')')">)</button>
+          <button class="calc-btn op" onclick="calcFn('/')">÷</button>
+          <!-- Row 4 -->
+          <button class="calc-btn" onclick="calcNum('7')">7</button>
+          <button class="calc-btn" onclick="calcNum('8')">8</button>
+          <button class="calc-btn" onclick="calcNum('9')">9</button>
+          <button class="calc-btn op" onclick="calcFn('*')">×</button>
+          <!-- Row 5 -->
+          <button class="calc-btn" onclick="calcNum('4')">4</button>
+          <button class="calc-btn" onclick="calcNum('5')">5</button>
+          <button class="calc-btn" onclick="calcNum('6')">6</button>
+          <button class="calc-btn op" onclick="calcFn('-')">−</button>
+          <!-- Row 6 -->
+          <button class="calc-btn" onclick="calcNum('1')">1</button>
+          <button class="calc-btn" onclick="calcNum('2')">2</button>
+          <button class="calc-btn" onclick="calcNum('3')">3</button>
+          <button class="calc-btn op" onclick="calcFn('+')">+</button>
+          <!-- Row 7 -->
+          <button class="calc-btn" onclick="calcNum('0')" style="grid-column:span 1;">0</button>
+          <button class="calc-btn" onclick="calcNum('.')">.</button>
+          <button class="calc-btn op" onclick="calcBackspace()">⌫</button>
+          <button class="calc-btn eq" onclick="calcEval()">=</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desmos -->
+    <div class="tool-content" id="content-desmos">
+      <div class="desmos-wrap">
+        <div id="desmos-container"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="q-nav" id="q-nav"></div>
+  <div class="nav-buttons">
+    <button class="btn-nav" onclick="prevQuestion()">← Back</button>
+    <button class="btn-nav primary" id="btn-next" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- REVIEW OVERLAY -->
+<div class="overlay" id="review-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Review Answers</div>
+    <div class="overlay-sub" id="review-sub">Check before submitting.</div>
+    <div class="review-list" id="review-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="closeOverlay('review-overlay')">Continue Test</button>
+      <button class="overlay-btn primary" onclick="submitTest()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE OVERLAY -->
+<div class="overlay" id="score-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Module Complete</div>
+    <div class="overlay-sub" id="score-sub">December 2025 · Module 1A</div>
+    <div class="score-big" id="score-num">—</div>
+    <div class="score-label" id="score-pct">— correct</div>
+    <div class="score-breakdown">
+      <div class="score-stat"><div class="num" id="sc-correct">—</div><div class="lbl">Correct</div></div>
+      <div class="score-stat"><div class="num" id="sc-incorrect">—</div><div class="lbl">Incorrect</div></div>
+      <div class="score-stat"><div class="num" id="sc-unanswered">—</div><div class="lbl">Unanswered</div></div>
+    </div>
+    <div class="review-list" id="score-review-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Tests</button>
+      <button class="overlay-btn primary" onclick="closeOverlay('score-overlay')">Review Answers</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFERENCE SHEET OVERLAY -->
+<div class="overlay" id="ref-overlay">
+  <div class="overlay-box ref-overlay-box">
+    <div class="overlay-title">Formula Reference</div>
+    <div class="overlay-sub">These formulas are provided on the SAT Math section.</div>
+    <div class="ref-grid">
+      <div class="ref-item"><div class="ref-item-title">Circle</div><div class="ref-formula">A = πr²<br>C = 2πr</div></div>
+      <div class="ref-item"><div class="ref-item-title">Rectangle</div><div class="ref-formula">A = lw</div></div>
+      <div class="ref-item"><div class="ref-item-title">Triangle</div><div class="ref-formula">A = ½bh</div></div>
+      <div class="ref-item"><div class="ref-item-title">Pythagorean Theorem</div><div class="ref-formula">a² + b² = c²</div></div>
+      <div class="ref-item"><div class="ref-item-title">Special Right Triangles</div><div class="ref-formula">30–60–90: 1, √3, 2<br>45–45–90: 1, 1, √2</div></div>
+      <div class="ref-item"><div class="ref-item-title">Rectangular Solid</div><div class="ref-formula">V = lwh</div></div>
+      <div class="ref-item"><div class="ref-item-title">Cylinder</div><div class="ref-formula">V = πr²h</div></div>
+      <div class="ref-item"><div class="ref-item-title">Sphere</div><div class="ref-formula">V = (4/3)πr³</div></div>
+      <div class="ref-item"><div class="ref-item-title">Cone</div><div class="ref-formula">V = (1/3)πr²h</div></div>
+      <div class="ref-item"><div class="ref-item-title">Pyramid</div><div class="ref-formula">V = (1/3)lwh</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--gray-mid);margin-bottom:1.5rem;">The number of degrees in a circle is 360. The number of radians in a circle is 2π. The sum of measures of angles in a triangle is 180°.</div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn primary" onclick="closeOverlay('ref-overlay')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Desmos API -->
+<script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  QUESTION DATA  — replace with real questions
+//  type: 'mc'    → multiple choice (choices + answer index)
+//  type: 'grid'  → student-produced response (correctAnswer string)
+// ══════════════════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    type: 'mc',
+    question: 'If 3x + 7 = 22, what is the value of x?',
+    note: '',
+    choices: ['3', '4', '5', '6'],
+    answer: 2   // C: 5
+  },
+  {
+    type: 'mc',
+    question: 'A line passes through the points (0, 4) and (2, 10). What is the slope of the line?',
+    note: '',
+    choices: ['2', '3', '4', '5'],
+    answer: 1   // B: 3
+  },
+  {
+    type: 'mc',
+    question: 'Which of the following is equivalent to (x + 3)² − 9?',
+    note: '',
+    choices: ['x² + 6x', 'x² + 9', 'x² + 6x + 9', 'x² − 6x'],
+    answer: 0   // A: x² + 6x
+  },
+  {
+    type: 'grid',
+    question: 'A rectangle has a length of 12 and a width of 7. What is its area?',
+    note: 'Enter your answer in the box. Do not enter units.',
+    correctAnswer: '84'
+  },
+  {
+    type: 'mc',
+    question: 'The function f is defined by f(x) = 2x² − 3x + 1. What is f(3)?',
+    note: '',
+    choices: ['8', '10', '12', '14'],
+    answer: 1   // B: 10
+  },
+  {
+    type: 'mc',
+    question: 'In the xy-plane, the graph of y = x² − 4 intersects the x-axis at two points. What is the positive x-intercept?',
+    note: '',
+    choices: ['1', '2', '3', '4'],
+    answer: 1   // B: 2
+  },
+  {
+    type: 'grid',
+    question: 'If 5y − 3 = 2y + 12, what is the value of y?',
+    note: 'Enter your answer in the box.',
+    correctAnswer: '5'
+  },
+  {
+    type: 'mc',
+    question: 'A right triangle has legs of length 5 and 12. What is the length of the hypotenuse?',
+    note: '',
+    choices: ['10', '13', '15', '17'],
+    answer: 1   // B: 13
+  }
+];
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+const params    = new URLSearchParams(window.location.search);
+const subject = 'math';
+const testLabel = params.get('label')  || 'December 2025';
+const moduleId  = params.get('module') || '1A';
+
+const totalQ      = QUESTIONS.length;
+const totalSecs   = 35 * 60; // 35 minutes
+let currentQ      = 0;
+let answers       = new Array(totalQ).fill(null);
+let gridAnswers   = new Array(totalQ).fill('');
+let flagged       = new Array(totalQ).fill(false);
+let timerSecs     = totalSecs;
+let timerHidden   = false;
+let timerInterval = null;
+let submitted     = false;
+let activeTool    = null; // 'basic' | 'desmos' | null
+let desmosCalc    = null;
+
+// ── Init ──────────────────────────────────────────────────────
+document.getElementById('bar-module').textContent = `Math · ${testLabel} · Module ${moduleId}`;
+document.getElementById('score-sub').textContent  = `${testLabel} · Module ${moduleId}`;
+
+buildNav();
+renderQuestion(0);
+startTimer();
+
+// ── Timer ─────────────────────────────────────────────────────
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (submitted) return;
+    timerSecs--;
+    updateTimerDisplay();
+    if (timerSecs <= 0) { clearInterval(timerInterval); submitTest(); }
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const el = document.getElementById('timer');
+  if (timerHidden) { el.textContent = 'Hidden'; el.classList.remove('warning'); return; }
+  const m = Math.floor(timerSecs / 60).toString().padStart(2,'0');
+  const s = (timerSecs % 60).toString().padStart(2,'0');
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle('warning', timerSecs <= 300);
+}
+function toggleTimer() {
+  timerHidden = !timerHidden;
+  document.getElementById('timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  updateTimerDisplay();
+}
+
+// ── Tool Pane ─────────────────────────────────────────────────
+function toggleTool(tool) {
+  const pane = document.getElementById('tool-pane');
+  if (activeTool === tool) {
+    // close
+    activeTool = null;
+    pane.classList.add('collapsed');
+    document.getElementById('btn-calc').classList.remove('active');
+    document.getElementById('btn-desmos').classList.remove('active');
+  } else {
+    activeTool = tool;
+    pane.classList.remove('collapsed');
+    document.getElementById('btn-calc').classList.toggle('active', tool === 'basic');
+    document.getElementById('btn-desmos').classList.toggle('active', tool === 'desmos');
+    switchTab(tool);
+    if (tool === 'desmos') initDesmos();
+  }
+}
+
+function switchTab(tab) {
+  ['basic','desmos'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    document.getElementById(`content-${t}`).classList.toggle('active', t === tab);
+  });
+  if (tab === 'desmos') initDesmos();
+}
+
+function initDesmos() {
+  if (desmosCalc) return;
+  const el = document.getElementById('desmos-container');
+  if (typeof Desmos === 'undefined') { el.innerHTML = '<div style="padding:1rem;font-size:13px;color:var(--gray-mid);">Desmos requires an internet connection.</div>'; return; }
+  desmosCalc = Desmos.GraphingCalculator(el, {
+    expressionsTopbar: true,
+    keypad: true,
+    expressions: true,
+    settingsMenu: true,
+    border: false
+  });
+}
+
+// ── Basic Calculator ──────────────────────────────────────────
+let calcExpr = '';
+function calcNum(n) { calcExpr += n; calcDisplay(); }
+function calcFn(f) {
+  if (f === '^') { calcExpr += '**'; }
+  else { calcExpr += f; }
+  calcDisplay();
+}
+function calcBackspace() {
+  // Remove last token
+  if (calcExpr.endsWith('**')) calcExpr = calcExpr.slice(0,-2);
+  else calcExpr = calcExpr.slice(0,-1);
+  calcDisplay();
+}
+function calcClear() { calcExpr = ''; document.getElementById('calc-result').textContent = '0'; calcDisplay(); }
+function calcDisplay() { document.getElementById('calc-expr').textContent = calcExpr.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
+function calcEval() {
+  try {
+    let expr = calcExpr
+      .replace(/sqrt\(/g,'Math.sqrt(')
+      .replace(/sin\(/g,'Math.sin(')
+      .replace(/cos\(/g,'Math.cos(')
+      .replace(/tan\(/g,'Math.tan(')
+      .replace(/log\(/g,'Math.log10(')
+      .replace(/ln\(/g,'Math.log(');
+    // eslint-disable-next-line no-eval
+    const result = Function('"use strict"; return (' + expr + ')')();
+    const rounded = parseFloat(result.toPrecision(10));
+    document.getElementById('calc-result').textContent = rounded;
+    calcExpr = String(rounded);
+    calcDisplay();
+  } catch(e) {
+    document.getElementById('calc-result').textContent = 'Error';
+  }
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('q-nav');
+  nav.innerHTML = '';
+  for (let i = 0; i < totalQ; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.id = `dot-${i}`;
+    dot.onclick = () => goToQuestion(i);
+    nav.appendChild(dot);
+  }
+  updateNav();
+}
+function updateNav() {
+  for (let i = 0; i < totalQ; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.className = 'q-dot';
+    if (i === currentQ) dot.classList.add('active');
+    const q = QUESTIONS[i];
+    const hasAnswer = q.type === 'grid' ? gridAnswers[i].trim() !== '' : answers[i] !== null;
+    if (hasAnswer) dot.classList.add('answered');
+    if (flagged[i]) dot.classList.add('flagged');
+  }
+}
+function goToQuestion(i) { currentQ = i; renderQuestion(i); updateNav(); }
+function prevQuestion() { if (currentQ > 0) goToQuestion(currentQ - 1); }
+function nextQuestion() { if (currentQ < totalQ - 1) goToQuestion(currentQ + 1); else openReview(); }
+
+// ── Render ────────────────────────────────────────────────────
+function renderQuestion(i) {
+  const q = QUESTIONS[i];
+  const qp = document.getElementById('question-pane');
+  let answerHTML = '';
+
+  if (q.type === 'mc') {
+    const letters = ['A','B','C','D'];
+    const opts = q.choices.map((c, ci) => {
+      let cls = 'answer-option';
+      if (submitted) {
+        if (ci === q.answer) cls += ' correct';
+        else if (ci === answers[i] && ci !== q.answer) cls += ' incorrect';
+      } else {
+        if (answers[i] === ci) cls += ' selected';
+      }
+      return `<div class="${cls}" onclick="selectAnswer(${i},${ci})">
+        <div class="answer-letter">${letters[ci]}</div>
+        <div class="answer-text">${c}</div>
+      </div>`;
+    }).join('');
+    answerHTML = `<div class="answers">${opts}</div>`;
+  } else {
+    // Grid-in
+    let inputCls = 'gridin-input';
+    if (submitted && gridAnswers[i].trim() !== '') {
+      const correct = gridAnswers[i].trim() === q.correctAnswer;
+      inputCls += correct ? ' correct-input' : ' incorrect-input';
+    }
+    answerHTML = `
+      <div class="gridin-wrap">
+        <div class="gridin-label">Student-Produced Response</div>
+        <input type="text" class="${inputCls}" id="gridin-${i}"
+          value="${gridAnswers[i]}"
+          placeholder="Answer"
+          ${submitted ? 'disabled' : ''}
+          oninput="saveGridIn(${i}, this.value)"
+          onchange="saveGridIn(${i}, this.value)" />
+        <div class="gridin-hint">Enter a number, fraction, or decimal. Do not include units.</div>
+        ${submitted ? `<div style="margin-top:0.5rem;font-size:12px;color:var(--gray-mid);">Correct answer: <strong style="color:var(--black)">${q.correctAnswer}</strong></div>` : ''}
+      </div>`;
+  }
+
+  qp.innerHTML = `
+    <div class="q-number">Question ${i + 1} of ${totalQ}</div>
+    <div class="q-text">${q.question}</div>
+    ${q.note ? `<div class="q-note">${q.note}</div>` : ''}
+    ${answerHTML}
+    <label class="flag-row">
+      <input type="checkbox" ${flagged[i] ? 'checked' : ''} onchange="toggleFlag(${i},this.checked)">
+      <span class="flag-label">Flag for review</span>
+    </label>`;
+
+  document.getElementById('btn-next').textContent = i === totalQ - 1 ? 'Review →' : 'Next →';
+}
+
+function selectAnswer(qi, ci) {
+  if (submitted) return;
+  answers[qi] = ci;
+  updateNav();
+  renderQuestion(qi);
+}
+
+function saveGridIn(qi, val) {
+  gridAnswers[qi] = val;
+  updateNav();
+}
+
+function toggleFlag(qi, checked) {
+  flagged[qi] = checked;
+  updateNav();
+}
+
+// ── Review ────────────────────────────────────────────────────
+function openReview() {
+  const unanswered = QUESTIONS.filter((q,i) => q.type === 'grid' ? gridAnswers[i].trim() === '' : answers[i] === null).length;
+  const flagCount  = flagged.filter(Boolean).length;
+  document.getElementById('review-sub').textContent = `${unanswered} unanswered · ${flagCount} flagged`;
+  const list = document.getElementById('review-list');
+  list.innerHTML = QUESTIONS.map((q,i) => {
+    let statusText;
+    if (q.type === 'grid') {
+      statusText = gridAnswers[i].trim() !== '' ? `<span style="color:var(--black)">Answer: ${gridAnswers[i]}</span>` : '<span style="color:var(--gray-mid)">Not answered</span>';
+    } else {
+      statusText = answers[i] !== null ? `<span style="color:var(--black)">Answer ${['A','B','C','D'][answers[i]]}</span>` : '<span style="color:var(--gray-mid)">Not answered</span>';
+    }
+    const flagMark = flagged[i] ? ' <span style="color:#c0392b;font-size:11px;">★ Flagged</span>' : '';
+    return `<div class="review-item" onclick="closeOverlay('review-overlay');goToQuestion(${i})">
+      <div class="review-num">${i+1}</div>
+      <div style="flex:1;font-size:13px;color:var(--black);">${q.question.substring(0,58)}…</div>
+      <div>${statusText}${flagMark}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('review-overlay').classList.add('active');
+}
+
+// ── Submit ────────────────────────────────────────────────────
+function submitTest() {
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, incorrect = 0, unanswered = 0;
+  QUESTIONS.forEach((q, i) => {
+    if (q.type === 'grid') {
+      if (gridAnswers[i].trim() === '') unanswered++;
+      else if (gridAnswers[i].trim() === q.correctAnswer) correct++;
+      else incorrect++;
+    } else {
+      if (answers[i] === null) unanswered++;
+      else if (answers[i] === q.answer) correct++;
+      else incorrect++;
+    }
+  });
+
+  const pct = Math.round((correct / totalQ) * 100);
+  document.getElementById('score-num').textContent  = `${correct}/${totalQ}`;
+  document.getElementById('score-pct').textContent  = `${pct}% correct`;
+  document.getElementById('sc-correct').textContent   = correct;
+  document.getElementById('sc-incorrect').textContent = incorrect;
+  document.getElementById('sc-unanswered').textContent = unanswered;
+
+  const scoreList = document.getElementById('score-review-list');
+  scoreList.innerHTML = QUESTIONS.map((q, i) => {
+    let statusClass = 'status-unanswered', statusLabel = 'Unanswered';
+    if (q.type === 'grid') {
+      if (gridAnswers[i].trim() !== '') { statusClass = gridAnswers[i].trim() === q.correctAnswer ? 'status-correct' : 'status-incorrect'; statusLabel = gridAnswers[i].trim() === q.correctAnswer ? 'Correct' : 'Incorrect'; }
+    } else {
+      if (answers[i] !== null) { statusClass = answers[i] === q.answer ? 'status-correct' : 'status-incorrect'; statusLabel = answers[i] === q.answer ? 'Correct' : 'Incorrect'; }
+    }
+    return `<div class="review-item" onclick="closeOverlay('score-overlay');goToQuestion(${i})">
+      <div class="review-num">${i+1}</div>
+      <div class="review-status ${statusClass}"></div>
+      <div style="flex:1;font-size:13px;color:var(--black);">${q.question.substring(0,55)}…</div>
+      <div style="font-size:12px;color:var(--gray-mid);">${statusLabel}</div>
+    </div>`;
+  }).join('');
+
+  closeOverlay('review-overlay');
+  document.getElementById('score-overlay').classList.add('active');
+  renderQuestion(currentQ);
+}
+
+function closeOverlay(id) { document.getElementById(id).classList.remove('active'); }
+function openOverlay(id)  { document.getElementById(id).classList.add('active'); }
+function confirmExit() {
+  if (confirm('Exit this module? Your progress will not be saved.')) window.location.href = 'index.html';
+}
+</script>
+</body>
+</html>
