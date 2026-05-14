@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAT Practice — Math</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400;500&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -15,709 +15,609 @@
     }
     html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
 
-    /* ── TOP BAR ── */
-    .top-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1.25rem; height: 52px;
-      border-bottom: 1px solid var(--gray-border);
-      background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    }
-    .top-bar-left { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
-    .top-bar-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; white-space: nowrap; }
-    .top-bar-sep { color: var(--gray-border); font-size: 18px; }
-    .top-bar-module { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
-    .top-bar-center { display: flex; align-items: center; gap: 0.5rem; }
+    /* TOP BAR */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid var(--gray-border); background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+    .top-bar-left { display: flex; align-items: center; gap: 0.75rem; overflow: hidden; }
+    .tb-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; white-space: nowrap; }
+    .tb-sep { color: var(--gray-border); font-size: 18px; }
+    .tb-module { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tb-center { display: flex; align-items: center; gap: 0.5rem; }
     .timer { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center; }
-    .timer.warning { color: var(--incorrect); }
-    .timer-toggle { font-size: 11px; color: var(--gray-mid); cursor: pointer; border: 1px solid var(--gray-border); border-radius: 4px; padding: 3px 8px; font-family: 'DM Mono', monospace; transition: color 0.15s, border-color 0.15s; }
-    .timer-toggle:hover { color: var(--black); border-color: var(--black); }
-    .top-bar-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
-
-    /* ── TOOL BUTTONS ── */
-    .tool-btn {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 12px; font-family: 'DM Sans', sans-serif;
-      border: 1px solid var(--gray-border); background: var(--white);
-      border-radius: 6px; padding: 6px 12px; cursor: pointer;
-      color: var(--gray-dark); transition: border-color 0.15s, background 0.15s, color 0.15s;
-      white-space: nowrap;
-    }
-    .tool-btn:hover { border-color: var(--black); color: var(--black); }
-    .tool-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
-    .tool-btn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
-    .btn-exit { font-size: 13px; color: var(--gray-mid); background: none; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.15s, border-color 0.15s; }
+    .timer.warn { color: var(--incorrect); }
+    .timer-tog { font-size: 11px; color: var(--gray-mid); cursor: pointer; border: 1px solid var(--gray-border); border-radius: 4px; padding: 3px 8px; font-family: 'DM Mono', monospace; }
+    .timer-tog:hover { color: var(--black); border-color: var(--black); }
+    .tb-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+    .tbtn { display: flex; align-items: center; gap: 5px; font-size: 12px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 6px 11px; cursor: pointer; color: var(--gray-dark); transition: border-color 0.15s, background 0.15s, color 0.15s; white-space: nowrap; }
+    .tbtn:hover { border-color: var(--black); color: var(--black); }
+    .tbtn.on { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-exit { font-size: 12px; color: var(--gray-mid); background: none; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
     .btn-exit:hover { color: var(--black); border-color: var(--black); }
-    .btn-submit { font-size: 13px; font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); border: 1px solid var(--black); border-radius: 6px; padding: 6px 14px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .btn-submit { font-size: 12px; font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); border: 1px solid var(--black); border-radius: 6px; padding: 6px 14px; cursor: pointer; white-space: nowrap; }
     .btn-submit:hover { background: var(--gray-dark); }
 
-    /* ── MAIN LAYOUT ── */
+    /* LOADING */
+    .loading { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; z-index: 500; }
+    .loading.gone { display: none; }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--gray-border); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .load-lbl { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: .08em; }
+
+    /* LAYOUT */
     .test-body { position: fixed; top: 52px; bottom: 56px; left: 0; right: 0; display: flex; overflow: hidden; }
 
-    /* ── QUESTION PANE (left) ── */
-    .question-pane { flex: 1; overflow-y: auto; padding: 2.25rem 2rem 2.25rem 2.5rem; border-right: 1px solid var(--gray-border); min-width: 0; }
-    .q-number { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem; }
-    .q-text { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 400; line-height: 1.7; color: var(--black); margin-bottom: 0.75rem; }
-    .q-note { font-size: 13px; color: var(--gray-mid); font-weight: 300; line-height: 1.55; margin-bottom: 1.75rem; font-style: italic; }
-    .q-image { max-width: 100%; margin-bottom: 1.5rem; border: 1px solid var(--gray-border); border-radius: 4px; }
+    /* QUESTION PANE */
+    .q-pane { flex: 1; overflow-y: auto; padding: 1.5rem 2rem 2rem 2.5rem; min-width: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+    .q-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .skill-tag { background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: 2px; padding: 2px 7px; }
+    .diff-tag { padding: 2px 7px; border-radius: 2px; border: 1px solid; }
+    .d-easy { color: #1a7a3c; border-color: #b7dfc7; background: #edf7f1; }
+    .d-med  { color: #7a5c00; border-color: #e0d0a0; background: #fdf9ed; }
+    .d-hard { color: #c0392b; border-color: #f0b0a8; background: #fdf0ee; }
+    .q-num { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
+    .q-img-wrap { border: 1px solid var(--gray-border); border-radius: 4px; overflow: hidden; background: var(--white); }
+    .q-img-wrap img { width: 100%; display: block; }
 
-    /* Multiple choice answers */
-    .answers { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
-    .answer-option { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.85rem 1rem; border: 1px solid var(--gray-border); border-radius: 4px; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--white); }
-    .answer-option:hover { border-color: var(--black); background: var(--gray-bg); }
-    .answer-option.selected { border-color: var(--black); background: var(--black); }
-    .answer-option.selected .answer-letter,
-    .answer-option.selected .answer-text { color: var(--white); }
-    .answer-option.correct { border-color: var(--correct); background: #edf7f1; }
-    .answer-option.correct .answer-letter,
-    .answer-option.correct .answer-text { color: var(--correct); }
-    .answer-option.incorrect { border-color: var(--incorrect); background: #fdf0ee; }
-    .answer-option.incorrect .answer-letter,
-    .answer-option.incorrect .answer-text { color: var(--incorrect); }
-    .answer-letter { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--gray-mid); min-width: 18px; padding-top: 1px; transition: color 0.15s; }
-    .answer-text { font-size: 14px; color: var(--black); line-height: 1.5; transition: color 0.15s; }
+    /* MC ANSWER BUTTONS */
+    .mc-btns { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .mc-btn { width: 44px; height: 44px; border: 1px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--gray-mid); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .mc-btn:hover { border-color: var(--black); color: var(--black); }
+    .mc-btn.sel { background: var(--black); color: var(--white); border-color: var(--black); }
+    .mc-btn.correct { background: #edf7f1; color: var(--correct); border-color: var(--correct); }
+    .mc-btn.wrong   { background: #fdf0ee; color: var(--incorrect); border-color: var(--incorrect); }
+    .ans-hint { font-size: 12px; color: var(--gray-mid); padding-left: 0.25rem; }
+    .ans-hint.ok  { color: var(--correct); font-weight: 500; }
+    .ans-hint.bad { color: var(--incorrect); font-weight: 500; }
 
-    /* Grid-in (free response) */
-    .gridin-wrap { margin-bottom: 1.5rem; }
-    .gridin-label { font-size: 12px; color: var(--gray-mid); margin-bottom: 0.5rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
-    .gridin-input { width: 160px; height: 48px; border: 2px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 22px; text-align: center; color: var(--black); outline: none; transition: border-color 0.15s; }
-    .gridin-input:focus { border-color: var(--black); }
-    .gridin-input.correct-input { border-color: var(--correct); color: var(--correct); }
-    .gridin-input.incorrect-input { border-color: var(--incorrect); color: var(--incorrect); }
-    .gridin-hint { font-size: 11px; color: var(--gray-mid); margin-top: 0.4rem; font-weight: 300; }
+    /* FREE RESPONSE INPUT */
+    .fr-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
+    .fr-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
+    .fr-input { width: 200px; padding: 10px 14px; border: 1px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 18px; color: var(--black); background: var(--white); outline: none; transition: border-color 0.15s; }
+    .fr-input:focus { border-color: var(--black); }
+    .fr-input.correct { border-color: var(--correct); background: #edf7f1; color: var(--correct); }
+    .fr-input.wrong   { border-color: var(--incorrect); background: #fdf0ee; color: var(--incorrect); }
+    .fr-result { font-size: 13px; font-family: 'DM Mono', monospace; }
+    .fr-result.ok  { color: var(--correct); }
+    .fr-result.bad { color: var(--incorrect); }
 
+    /* FLAG */
     .flag-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; width: fit-content; }
-    .flag-row input[type="checkbox"] { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
-    .flag-label { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
+    .flag-row input { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
+    .flag-lbl { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
 
-    /* ── TOOL PANE (right) ── */
-    .tool-pane { width: 440px; flex-shrink: 0; border-left: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.25s ease; }
-    .tool-pane.collapsed { width: 0; border-left: none; }
+    /* TOOL PANE */
+    .tool-pane { width: 420px; flex-shrink: 0; border-left: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.2s ease; }
+    .tool-pane.closed { width: 0; border-left: none; }
     .tool-tabs { display: flex; border-bottom: 1px solid var(--gray-border); background: var(--gray-bg); flex-shrink: 0; }
-    .tool-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-    .tool-tab.active { color: var(--black); border-bottom-color: var(--black); background: var(--white); }
-    .tool-tab:hover:not(.active) { color: var(--black); }
-    .tool-content { flex: 1; overflow: hidden; display: none; }
-    .tool-content.active { display: flex; flex-direction: column; }
-
-    /* Basic Calculator */
+    .ttab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+    .ttab.on { color: var(--black); border-bottom-color: var(--black); background: var(--white); }
+    .tcontent { flex: 1; overflow: hidden; display: none; }
+    .tcontent.on { display: flex; flex-direction: column; }
     .calc-wrap { padding: 1.25rem; display: flex; flex-direction: column; height: 100%; }
-    .calc-display { background: var(--black); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; min-height: 80px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 4px; }
-    .calc-expr { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); word-break: break-all; text-align: right; min-height: 18px; }
-    .calc-result { font-family: 'DM Mono', monospace; font-size: 28px; color: var(--white); word-break: break-all; text-align: right; }
-    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .calc-btn {
-      padding: 14px 0; border: 1px solid var(--gray-border); border-radius: 6px;
-      font-family: 'DM Mono', monospace; font-size: 15px; cursor: pointer;
-      background: var(--white); color: var(--black);
-      transition: background 0.1s, border-color 0.1s;
-      user-select: none;
-    }
-    .calc-btn:hover { background: var(--gray-bg); border-color: var(--black); }
-    .calc-btn:active { background: var(--gray-border); }
-    .calc-btn.op { background: var(--gray-bg); color: var(--black); }
-    .calc-btn.eq { background: var(--black); color: var(--white); border-color: var(--black); }
-    .calc-btn.eq:hover { background: var(--gray-dark); }
-    .calc-btn.fn { font-size: 12px; color: var(--gray-mid); }
-    .calc-btn.fn:hover { color: var(--black); }
-    .calc-btn.clear { color: var(--incorrect); }
-
-    /* Desmos */
+    .calc-disp { background: var(--black); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; min-height: 76px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 4px; }
+    .c-expr { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); word-break: break-all; text-align: right; min-height: 16px; }
+    .c-res  { font-family: 'DM Mono', monospace; font-size: 26px; color: var(--white); word-break: break-all; text-align: right; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; }
+    .cbtn { padding: 12px 0; border: 1px solid var(--gray-border); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 14px; cursor: pointer; background: var(--white); color: var(--black); transition: background .1s; user-select: none; }
+    .cbtn:hover { background: var(--gray-bg); border-color: var(--black); }
+    .cbtn.op { background: var(--gray-bg); }
+    .cbtn.eq { background: var(--black); color: var(--white); border-color: var(--black); }
+    .cbtn.fn { font-size: 11px; color: var(--gray-mid); }
+    .cbtn.fn:hover { color: var(--black); }
+    .cbtn.clr { color: var(--incorrect); }
     .desmos-wrap { flex: 1; overflow: hidden; }
-    #desmos-container { width: 100%; height: 100%; }
+    #desmos-el { width: 100%; height: 100%; }
 
-    /* ── BOTTOM BAR ── */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; border-top: 1px solid var(--gray-border); background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
+    /* BOTTOM BAR */
+    .bot-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; border-top: 1px solid var(--gray-border); background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
     .q-nav { display: flex; align-items: center; gap: 5px; flex: 1; overflow-x: auto; padding: 4px 0; }
-    .q-dot { width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid); cursor: pointer; flex-shrink: 0; transition: border-color 0.15s, background 0.15s, color 0.15s; }
-    .q-dot:hover { border-color: var(--black); color: var(--black); }
-    .q-dot.active { border-color: var(--black); background: var(--black); color: var(--white); }
-    .q-dot.answered { border-color: var(--black); color: var(--black); }
-    .q-dot.flagged { border-color: var(--incorrect); color: var(--incorrect); }
-    .nav-buttons { display: flex; gap: 0.6rem; flex-shrink: 0; }
-    .btn-nav { font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 7px 18px; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s, background 0.15s; }
-    .btn-nav:hover { color: var(--black); border-color: var(--black); }
-    .btn-nav.primary { background: var(--black); color: var(--white); border-color: var(--black); }
-    .btn-nav.primary:hover { background: var(--gray-dark); border-color: var(--gray-dark); }
+    .qdot { width: 29px; height: 29px; border-radius: 4px; border: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid); cursor: pointer; flex-shrink: 0; transition: all .12s; }
+    .qdot:hover { border-color: var(--black); color: var(--black); }
+    .qdot.cur { border-color: var(--black); background: var(--black); color: var(--white); }
+    .qdot.ans { border-color: var(--black); color: var(--black); }
+    .qdot.flag { border-color: var(--incorrect); color: var(--incorrect); }
+    .qdot.fr-dot { border-style: dashed; }
+    .nav-btns { display: flex; gap: 0.6rem; flex-shrink: 0; }
+    .bnav { font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 7px 16px; cursor: pointer; color: var(--gray-mid); transition: all .15s; }
+    .bnav:hover { color: var(--black); border-color: var(--black); }
+    .bnav.pri { background: var(--black); color: var(--white); border-color: var(--black); }
+    .bnav.pri:hover { background: var(--gray-dark); }
 
-    /* ── OVERLAYS ── */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 400; align-items: center; justify-content: center; }
-    .overlay.active { display: flex; }
-    .overlay-box { background: var(--white); border-radius: 6px; width: 100%; max-width: 520px; max-height: 82vh; overflow-y: auto; padding: 2.5rem; animation: fadeUp 0.2s ease; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .overlay-title { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 300; color: var(--black); margin-bottom: 0.4rem; }
-    .overlay-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
-    .score-big { font-family: 'Source Serif 4', serif; font-size: 52px; font-weight: 300; color: var(--black); line-height: 1; }
-    .score-label { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
-    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
-    .score-stat .num { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--black); }
-    .score-stat .lbl { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
-    .review-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
-    .review-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; transition: background 0.1s; }
-    .review-item:hover { background: var(--gray-bg); }
-    .review-num { font-family: 'DM Mono', monospace; width: 28px; color: var(--gray-mid); font-size: 11px; flex-shrink: 0; }
-    .review-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .status-correct { background: var(--correct); }
-    .status-incorrect { background: var(--incorrect); }
-    .status-unanswered { background: var(--gray-light); }
-    .overlay-btn-row { display: flex; gap: 0.75rem; }
-    .overlay-btn { flex: 1; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s; }
-    .overlay-btn:hover { color: var(--black); border-color: var(--black); }
-    .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
-    .overlay-btn.primary:hover { background: var(--gray-dark); }
-
-    /* Reference sheet overlay */
-    .ref-overlay-box { max-width: 640px; }
+    /* OVERLAYS */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 400; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .obox { background: var(--white); border-radius: 6px; width: 100%; max-width: 520px; max-height: 84vh; overflow-y: auto; padding: 2.5rem; animation: up .2s ease; }
+    @keyframes up { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .o-title { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 300; margin-bottom: .4rem; }
+    .o-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-big { font-family: 'Source Serif 4', serif; font-size: 52px; font-weight: 300; line-height: 1; }
+    .score-pct { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-row { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
+    .sstat .n { font-family: 'DM Mono', monospace; font-size: 22px; }
+    .sstat .l { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: .08em; font-family: 'DM Mono', monospace; }
+    .dom-break { margin-bottom: 2rem; }
+    .dom-row { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; border-bottom: 1px solid var(--gray-border); font-size: 12px; }
+    .dom-name { flex: 1; }
+    .bar-wrap { width: 80px; height: 4px; background: var(--gray-border); border-radius: 2px; }
+    .bar-fill { height: 4px; background: var(--black); border-radius: 2px; }
+    .dom-sc { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); }
+    .rev-list { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+    .rev-item { display: flex; align-items: center; gap: .75rem; padding: .6rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; }
+    .rev-item:hover { background: var(--gray-bg); }
+    .rev-num { font-family: 'DM Mono', monospace; width: 24px; color: var(--gray-mid); font-size: 11px; flex-shrink: 0; }
+    .rev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .rd-ok { background: var(--correct); }
+    .rd-bad { background: var(--incorrect); }
+    .rd-skip { background: var(--gray-light); }
+    .o-btns { display: flex; gap: .75rem; }
+    .obtn { flex: 1; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: all .15s; }
+    .obtn:hover { color: var(--black); border-color: var(--black); }
+    .obtn.pri { background: var(--black); color: var(--white); border-color: var(--black); }
+    .obtn.pri:hover { background: var(--gray-dark); }
     .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
     .ref-item { border: 1px solid var(--gray-border); border-radius: 4px; padding: 1rem; }
-    .ref-item-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 0.5rem; }
-    .ref-formula { font-family: 'Source Serif 4', serif; font-size: 15px; color: var(--black); line-height: 1.6; }
-
-    @media (max-width: 768px) {
-      .tool-pane { display: none; }
-      .top-bar-module { display: none; }
-    }
+    .ref-ttl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: .5rem; }
+    .ref-f { font-family: 'Source Serif 4', serif; font-size: 14px; line-height: 1.6; }
   </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div class="load-lbl" id="load-lbl">Loading…</div>
+</div>
+
 <div class="top-bar">
   <div class="top-bar-left">
-    <div class="top-bar-logo">SAT Practice</div>
-    <div class="top-bar-sep">|</div>
-    <div class="top-bar-module" id="bar-module">Math · December 2025 · Module 1A</div>
+    <div class="tb-logo">SAT Practice</div>
+    <div class="tb-sep">|</div>
+    <div class="tb-module" id="tb-module">Math</div>
   </div>
-  <div class="top-bar-center">
+  <div class="tb-center">
     <div class="timer" id="timer">35:00</div>
-    <div class="timer-toggle" id="timer-toggle" onclick="toggleTimer()">Hide</div>
+    <div class="timer-tog" id="ttog" onclick="toggleTimer()">Hide</div>
   </div>
-  <div class="top-bar-right">
-    <!-- Reference -->
-    <button class="tool-btn" onclick="openOverlay('ref-overlay')" title="Formula Reference Sheet">
-      <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/></svg>
-      Reference
-    </button>
-    <!-- Basic calc toggle -->
-    <button class="tool-btn" id="btn-calc" onclick="toggleTool('basic')" title="Basic Calculator">
-      <svg viewBox="0 0 16 16"><path d="M3 1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm0 1v12h10V2H3zm1 1h8v3H4V3zm0 4h2v2H4V7zm3 0h2v2H7V7zm3 0h2v2h-2V7zM4 10h2v2H4v-2zm3 0h2v2H7v-2zm3 0h2v2h-2v-2z"/></svg>
-      Calculator
-    </button>
-    <!-- Desmos toggle -->
-    <button class="tool-btn" id="btn-desmos" onclick="toggleTool('desmos')" title="Desmos Graphing Calculator">
-      <svg viewBox="0 0 16 16"><path d="M1 8h14M8 1v14M3 4l2 2-2 2M13 4l-2 2 2 2" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
-      Desmos
-    </button>
+  <div class="tb-right">
+    <button class="tbtn" onclick="openO('ref-o')">Reference</button>
+    <button class="tbtn" id="btn-calc" onclick="toggleTool('calc')">Calculator</button>
+    <button class="tbtn" id="btn-desmos" onclick="toggleTool('desmos')">Desmos</button>
     <button class="btn-exit" onclick="confirmExit()">Exit</button>
-    <button class="btn-submit" onclick="openReview()">Review & Submit</button>
+    <button class="btn-submit" onclick="openReview()">Review &amp; Submit</button>
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="test-body">
-
-  <!-- Question Pane -->
-  <div class="question-pane" id="question-pane"></div>
-
-  <!-- Tool Pane -->
-  <div class="tool-pane collapsed" id="tool-pane">
+  <div class="q-pane" id="q-pane"></div>
+  <div class="tool-pane closed" id="tool-pane">
     <div class="tool-tabs">
-      <div class="tool-tab active" id="tab-basic" onclick="switchTab('basic')">Calculator</div>
-      <div class="tool-tab" id="tab-desmos" onclick="switchTab('desmos')">Desmos</div>
+      <div class="ttab on" id="ttab-calc" onclick="switchTab('calc')">Calculator</div>
+      <div class="ttab" id="ttab-desmos" onclick="switchTab('desmos')">Desmos</div>
     </div>
-
-    <!-- Basic Calculator -->
-    <div class="tool-content active" id="content-basic">
+    <div class="tcontent on" id="tc-calc">
       <div class="calc-wrap">
-        <div class="calc-display">
-          <div class="calc-expr" id="calc-expr"></div>
-          <div class="calc-result" id="calc-result">0</div>
+        <div class="calc-disp">
+          <div class="c-expr" id="c-expr"></div>
+          <div class="c-res"  id="c-res">0</div>
         </div>
         <div class="calc-grid">
-          <!-- Row 1 -->
-          <button class="calc-btn fn" onclick="calcFn('sin(')">sin</button>
-          <button class="calc-btn fn" onclick="calcFn('cos(')">cos</button>
-          <button class="calc-btn fn" onclick="calcFn('tan(')">tan</button>
-          <button class="calc-btn fn" onclick="calcFn('sqrt(')">√</button>
-          <!-- Row 2 -->
-          <button class="calc-btn fn" onclick="calcFn('log(')">log</button>
-          <button class="calc-btn fn" onclick="calcFn('ln(')">ln</button>
-          <button class="calc-btn fn" onclick="calcFn('Math.PI')">π</button>
-          <button class="calc-btn fn" onclick="calcFn('^')">xʸ</button>
-          <!-- Row 3 -->
-          <button class="calc-btn clear" onclick="calcClear()">AC</button>
-          <button class="calc-btn op" onclick="calcFn('(')">(</button>
-          <button class="calc-btn op" onclick="calcFn(')')">)</button>
-          <button class="calc-btn op" onclick="calcFn('/')">÷</button>
-          <!-- Row 4 -->
-          <button class="calc-btn" onclick="calcNum('7')">7</button>
-          <button class="calc-btn" onclick="calcNum('8')">8</button>
-          <button class="calc-btn" onclick="calcNum('9')">9</button>
-          <button class="calc-btn op" onclick="calcFn('*')">×</button>
-          <!-- Row 5 -->
-          <button class="calc-btn" onclick="calcNum('4')">4</button>
-          <button class="calc-btn" onclick="calcNum('5')">5</button>
-          <button class="calc-btn" onclick="calcNum('6')">6</button>
-          <button class="calc-btn op" onclick="calcFn('-')">−</button>
-          <!-- Row 6 -->
-          <button class="calc-btn" onclick="calcNum('1')">1</button>
-          <button class="calc-btn" onclick="calcNum('2')">2</button>
-          <button class="calc-btn" onclick="calcNum('3')">3</button>
-          <button class="calc-btn op" onclick="calcFn('+')">+</button>
-          <!-- Row 7 -->
-          <button class="calc-btn" onclick="calcNum('0')" style="grid-column:span 1;">0</button>
-          <button class="calc-btn" onclick="calcNum('.')">.</button>
-          <button class="calc-btn op" onclick="calcBackspace()">⌫</button>
-          <button class="calc-btn eq" onclick="calcEval()">=</button>
+          <button class="cbtn fn" onclick="cf('sin(')">sin</button>
+          <button class="cbtn fn" onclick="cf('cos(')">cos</button>
+          <button class="cbtn fn" onclick="cf('tan(')">tan</button>
+          <button class="cbtn fn" onclick="cf('sqrt(')">√</button>
+          <button class="cbtn fn" onclick="cf('log(')">log</button>
+          <button class="cbtn fn" onclick="cf('ln(')">ln</button>
+          <button class="cbtn fn" onclick="cf('Math.PI')">π</button>
+          <button class="cbtn fn" onclick="cf('**')">xʸ</button>
+          <button class="cbtn clr" onclick="cClr()">AC</button>
+          <button class="cbtn op" onclick="cf('(')">(</button>
+          <button class="cbtn op" onclick="cf(')')">)</button>
+          <button class="cbtn op" onclick="cf('/')">÷</button>
+          <button class="cbtn" onclick="cn('7')">7</button>
+          <button class="cbtn" onclick="cn('8')">8</button>
+          <button class="cbtn" onclick="cn('9')">9</button>
+          <button class="cbtn op" onclick="cf('*')">×</button>
+          <button class="cbtn" onclick="cn('4')">4</button>
+          <button class="cbtn" onclick="cn('5')">5</button>
+          <button class="cbtn" onclick="cn('6')">6</button>
+          <button class="cbtn op" onclick="cf('-')">−</button>
+          <button class="cbtn" onclick="cn('1')">1</button>
+          <button class="cbtn" onclick="cn('2')">2</button>
+          <button class="cbtn" onclick="cn('3')">3</button>
+          <button class="cbtn op" onclick="cf('+')">+</button>
+          <button class="cbtn" onclick="cn('0')">0</button>
+          <button class="cbtn" onclick="cn('.')">.</button>
+          <button class="cbtn op" onclick="cBk()">⌫</button>
+          <button class="cbtn eq" onclick="cEval()">=</button>
         </div>
       </div>
     </div>
-
-    <!-- Desmos -->
-    <div class="tool-content" id="content-desmos">
-      <div class="desmos-wrap">
-        <div id="desmos-container"></div>
-      </div>
+    <div class="tcontent" id="tc-desmos">
+      <div class="desmos-wrap"><div id="desmos-el"></div></div>
     </div>
   </div>
-
 </div>
 
-<!-- BOTTOM BAR -->
-<div class="bottom-bar">
+<div class="bot-bar">
   <div class="q-nav" id="q-nav"></div>
-  <div class="nav-buttons">
-    <button class="btn-nav" onclick="prevQuestion()">← Back</button>
-    <button class="btn-nav primary" id="btn-next" onclick="nextQuestion()">Next →</button>
+  <div class="nav-btns">
+    <button class="bnav" onclick="prevQ()">← Back</button>
+    <button class="bnav pri" id="btn-next" onclick="nextQ()">Next →</button>
   </div>
 </div>
 
-<!-- REVIEW OVERLAY -->
-<div class="overlay" id="review-overlay">
-  <div class="overlay-box">
-    <div class="overlay-title">Review Answers</div>
-    <div class="overlay-sub" id="review-sub">Check before submitting.</div>
-    <div class="review-list" id="review-list"></div>
-    <div class="overlay-btn-row">
-      <button class="overlay-btn" onclick="closeOverlay('review-overlay')">Continue Test</button>
-      <button class="overlay-btn primary" onclick="submitTest()">Submit</button>
+<!-- REVIEW -->
+<div class="overlay" id="rev-o">
+  <div class="obox">
+    <div class="o-title">Review Answers</div>
+    <div class="o-sub" id="rev-sub"></div>
+    <div class="rev-list" id="rev-list"></div>
+    <div class="o-btns">
+      <button class="obtn" onclick="closeO('rev-o')">Continue</button>
+      <button class="obtn pri" onclick="submitTest()">Submit</button>
     </div>
   </div>
 </div>
 
-<!-- SCORE OVERLAY -->
-<div class="overlay" id="score-overlay">
-  <div class="overlay-box">
-    <div class="overlay-title">Module Complete</div>
-    <div class="overlay-sub" id="score-sub">December 2025 · Module 1A</div>
-    <div class="score-big" id="score-num">—</div>
-    <div class="score-label" id="score-pct">— correct</div>
-    <div class="score-breakdown">
-      <div class="score-stat"><div class="num" id="sc-correct">—</div><div class="lbl">Correct</div></div>
-      <div class="score-stat"><div class="num" id="sc-incorrect">—</div><div class="lbl">Incorrect</div></div>
-      <div class="score-stat"><div class="num" id="sc-unanswered">—</div><div class="lbl">Unanswered</div></div>
+<!-- SCORE -->
+<div class="overlay" id="score-o">
+  <div class="obox">
+    <div class="o-title">Module Complete</div>
+    <div class="o-sub" id="score-sub"></div>
+    <div class="score-big" id="score-num"></div>
+    <div class="score-pct" id="score-pct"></div>
+    <div class="score-row">
+      <div class="sstat"><div class="n" id="sc-ok"></div><div class="l">Correct</div></div>
+      <div class="sstat"><div class="n" id="sc-bad"></div><div class="l">Incorrect</div></div>
+      <div class="sstat"><div class="n" id="sc-skip"></div><div class="l">Unanswered</div></div>
     </div>
-    <div class="review-list" id="score-review-list"></div>
-    <div class="overlay-btn-row">
-      <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Tests</button>
-      <button class="overlay-btn primary" onclick="closeOverlay('score-overlay')">Review Answers</button>
+    <div class="dom-break" id="dom-break"></div>
+    <div class="rev-list" id="score-rev-list"></div>
+    <div class="o-btns">
+      <button class="obtn" onclick="window.location.href='index.html'">← Back to Tests</button>
+      <button class="obtn pri" onclick="closeO('score-o')">Review Answers</button>
     </div>
   </div>
 </div>
 
-<!-- REFERENCE SHEET OVERLAY -->
-<div class="overlay" id="ref-overlay">
-  <div class="overlay-box ref-overlay-box">
-    <div class="overlay-title">Formula Reference</div>
-    <div class="overlay-sub">These formulas are provided on the SAT Math section.</div>
+<!-- REFERENCE -->
+<div class="overlay" id="ref-o">
+  <div class="obox" style="max-width:640px">
+    <div class="o-title">Formula Reference</div>
+    <div class="o-sub">Provided on the SAT Math section.</div>
     <div class="ref-grid">
-      <div class="ref-item"><div class="ref-item-title">Circle</div><div class="ref-formula">A = πr²<br>C = 2πr</div></div>
-      <div class="ref-item"><div class="ref-item-title">Rectangle</div><div class="ref-formula">A = lw</div></div>
-      <div class="ref-item"><div class="ref-item-title">Triangle</div><div class="ref-formula">A = ½bh</div></div>
-      <div class="ref-item"><div class="ref-item-title">Pythagorean Theorem</div><div class="ref-formula">a² + b² = c²</div></div>
-      <div class="ref-item"><div class="ref-item-title">Special Right Triangles</div><div class="ref-formula">30–60–90: 1, √3, 2<br>45–45–90: 1, 1, √2</div></div>
-      <div class="ref-item"><div class="ref-item-title">Rectangular Solid</div><div class="ref-formula">V = lwh</div></div>
-      <div class="ref-item"><div class="ref-item-title">Cylinder</div><div class="ref-formula">V = πr²h</div></div>
-      <div class="ref-item"><div class="ref-item-title">Sphere</div><div class="ref-formula">V = (4/3)πr³</div></div>
-      <div class="ref-item"><div class="ref-item-title">Cone</div><div class="ref-formula">V = (1/3)πr²h</div></div>
-      <div class="ref-item"><div class="ref-item-title">Pyramid</div><div class="ref-formula">V = (1/3)lwh</div></div>
+      <div class="ref-item"><div class="ref-ttl">Circle</div><div class="ref-f">A = πr²&nbsp;&nbsp;C = 2πr</div></div>
+      <div class="ref-item"><div class="ref-ttl">Rectangle</div><div class="ref-f">A = lw</div></div>
+      <div class="ref-item"><div class="ref-ttl">Triangle</div><div class="ref-f">A = ½bh</div></div>
+      <div class="ref-item"><div class="ref-ttl">Pythagorean Theorem</div><div class="ref-f">a² + b² = c²</div></div>
+      <div class="ref-item"><div class="ref-ttl">Special Right Triangles</div><div class="ref-f">30-60-90: 1, √3, 2<br>45-45-90: 1, 1, √2</div></div>
+      <div class="ref-item"><div class="ref-ttl">Cylinder</div><div class="ref-f">V = πr²h</div></div>
+      <div class="ref-item"><div class="ref-ttl">Sphere</div><div class="ref-f">V = (4/3)πr³</div></div>
+      <div class="ref-item"><div class="ref-ttl">Cone</div><div class="ref-f">V = (1/3)πr²h</div></div>
+      <div class="ref-item"><div class="ref-ttl">Pyramid</div><div class="ref-f">V = (1/3)lwh</div></div>
+      <div class="ref-item"><div class="ref-ttl">Rectangular Solid</div><div class="ref-f">V = lwh</div></div>
     </div>
-    <div style="font-size:12px;color:var(--gray-mid);margin-bottom:1.5rem;">The number of degrees in a circle is 360. The number of radians in a circle is 2π. The sum of measures of angles in a triangle is 180°.</div>
-    <div class="overlay-btn-row">
-      <button class="overlay-btn primary" onclick="closeOverlay('ref-overlay')">Close</button>
-    </div>
+    <div style="font-size:12px;color:var(--gray-mid);margin-bottom:1.5rem">360° in a circle · 2π radians · 180° in a triangle</div>
+    <div class="o-btns"><button class="obtn pri" onclick="closeO('ref-o')">Close</button></div>
   </div>
 </div>
 
-<!-- Desmos API -->
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
-
+<script src="math_modules.js"></script>
+<script src="math_images.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════════
-//  QUESTION DATA  — replace with real questions
-//  type: 'mc'    → multiple choice (choices + answer index)
-//  type: 'grid'  → student-produced response (correctAnswer string)
-// ══════════════════════════════════════════════════════════════
-const QUESTIONS = [
-  {
-    type: 'mc',
-    question: 'If 3x + 7 = 22, what is the value of x?',
-    note: '',
-    choices: ['3', '4', '5', '6'],
-    answer: 2   // C: 5
-  },
-  {
-    type: 'mc',
-    question: 'A line passes through the points (0, 4) and (2, 10). What is the slope of the line?',
-    note: '',
-    choices: ['2', '3', '4', '5'],
-    answer: 1   // B: 3
-  },
-  {
-    type: 'mc',
-    question: 'Which of the following is equivalent to (x + 3)² − 9?',
-    note: '',
-    choices: ['x² + 6x', 'x² + 9', 'x² + 6x + 9', 'x² − 6x'],
-    answer: 0   // A: x² + 6x
-  },
-  {
-    type: 'grid',
-    question: 'A rectangle has a length of 12 and a width of 7. What is its area?',
-    note: 'Enter your answer in the box. Do not enter units.',
-    correctAnswer: '84'
-  },
-  {
-    type: 'mc',
-    question: 'The function f is defined by f(x) = 2x² − 3x + 1. What is f(3)?',
-    note: '',
-    choices: ['8', '10', '12', '14'],
-    answer: 1   // B: 10
-  },
-  {
-    type: 'mc',
-    question: 'In the xy-plane, the graph of y = x² − 4 intersects the x-axis at two points. What is the positive x-intercept?',
-    note: '',
-    choices: ['1', '2', '3', '4'],
-    answer: 1   // B: 2
-  },
-  {
-    type: 'grid',
-    question: 'If 5y − 3 = 2y + 12, what is the value of y?',
-    note: 'Enter your answer in the box.',
-    correctAnswer: '5'
-  },
-  {
-    type: 'mc',
-    question: 'A right triangle has legs of length 5 and 12. What is the length of the hypotenuse?',
-    note: '',
-    choices: ['10', '13', '15', '17'],
-    answer: 1   // B: 13
+const P = new URLSearchParams(location.search);
+const testId    = P.get('test')   || 'mathtest01';
+const testLabel = P.get('label')  || 'Practice Test 1';
+const modId     = P.get('module') || '1A';
+const modKey    = `${testId}_${modId}`;
+
+let QS = [], answers = [], flagged = [], frInputs = [];
+let cur = 0, submitted = false;
+let timerSecs = 35*60, timerHidden = false, timerTick = null;
+let activeTool = null, desmosCalc = null;
+
+window.addEventListener('load', () => {
+  if (typeof MATH_MODULES === 'undefined' || typeof MATH_IMAGES === 'undefined') {
+    document.getElementById('load-lbl').textContent = 'Error: math_modules.js or math_images.js missing.';
+    return;
   }
-];
+  QS = MATH_MODULES[modKey];
+  if (!QS || !QS.length) {
+    document.getElementById('load-lbl').textContent = `No questions for: ${modKey}`;
+    return;
+  }
+  answers   = new Array(QS.length).fill(null);
+  flagged   = new Array(QS.length).fill(false);
+  frInputs  = new Array(QS.length).fill('');
+  document.getElementById('tb-module').textContent  = `Math · ${testLabel} · Module ${modId}`;
+  document.getElementById('score-sub').textContent  = `${testLabel} · Module ${modId}`;
+  document.getElementById('loading').classList.add('gone');
+  buildNav(); renderQ(0); startTimer();
+});
 
-// ══════════════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════════════
-const params    = new URLSearchParams(window.location.search);
-const subject = 'math';
-const testLabel = params.get('label')  || 'December 2025';
-const moduleId  = params.get('module') || '1A';
-
-const totalQ      = QUESTIONS.length;
-const totalSecs   = 35 * 60; // 35 minutes
-let currentQ      = 0;
-let answers       = new Array(totalQ).fill(null);
-let gridAnswers   = new Array(totalQ).fill('');
-let flagged       = new Array(totalQ).fill(false);
-let timerSecs     = totalSecs;
-let timerHidden   = false;
-let timerInterval = null;
-let submitted     = false;
-let activeTool    = null; // 'basic' | 'desmos' | null
-let desmosCalc    = null;
-
-// ── Init ──────────────────────────────────────────────────────
-document.getElementById('bar-module').textContent = `Math · ${testLabel} · Module ${moduleId}`;
-document.getElementById('score-sub').textContent  = `${testLabel} · Module ${moduleId}`;
-
-buildNav();
-renderQuestion(0);
-startTimer();
-
-// ── Timer ─────────────────────────────────────────────────────
+// ── Timer ──────────────────────────────────────────────────────
 function startTimer() {
-  timerInterval = setInterval(() => {
+  timerTick = setInterval(() => {
     if (submitted) return;
     timerSecs--;
-    updateTimerDisplay();
-    if (timerSecs <= 0) { clearInterval(timerInterval); submitTest(); }
+    drawTimer();
+    if (timerSecs <= 0) { clearInterval(timerTick); submitTest(); }
   }, 1000);
 }
-function updateTimerDisplay() {
+function drawTimer() {
   const el = document.getElementById('timer');
-  if (timerHidden) { el.textContent = 'Hidden'; el.classList.remove('warning'); return; }
-  const m = Math.floor(timerSecs / 60).toString().padStart(2,'0');
-  const s = (timerSecs % 60).toString().padStart(2,'0');
+  if (timerHidden) { el.textContent='Hidden'; el.classList.remove('warn'); return; }
+  const m = String(Math.floor(timerSecs/60)).padStart(2,'0');
+  const s = String(timerSecs%60).padStart(2,'0');
   el.textContent = `${m}:${s}`;
-  el.classList.toggle('warning', timerSecs <= 300);
+  el.classList.toggle('warn', timerSecs<=300);
 }
 function toggleTimer() {
   timerHidden = !timerHidden;
-  document.getElementById('timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
-  updateTimerDisplay();
+  document.getElementById('ttog').textContent = timerHidden ? 'Show' : 'Hide';
+  drawTimer();
 }
 
-// ── Tool Pane ─────────────────────────────────────────────────
-function toggleTool(tool) {
+// ── Tools ──────────────────────────────────────────────────────
+function toggleTool(t) {
   const pane = document.getElementById('tool-pane');
-  if (activeTool === tool) {
-    // close
-    activeTool = null;
-    pane.classList.add('collapsed');
-    document.getElementById('btn-calc').classList.remove('active');
-    document.getElementById('btn-desmos').classList.remove('active');
-  } else {
-    activeTool = tool;
-    pane.classList.remove('collapsed');
-    document.getElementById('btn-calc').classList.toggle('active', tool === 'basic');
-    document.getElementById('btn-desmos').classList.toggle('active', tool === 'desmos');
-    switchTab(tool);
-    if (tool === 'desmos') initDesmos();
-  }
+  if (activeTool===t) { activeTool=null; pane.classList.add('closed'); }
+  else { activeTool=t; pane.classList.remove('closed'); switchTab(t); if(t==='desmos') initDesmos(); }
+  document.getElementById('btn-calc').classList.toggle('on', activeTool==='calc');
+  document.getElementById('btn-desmos').classList.toggle('on', activeTool==='desmos');
 }
-
-function switchTab(tab) {
-  ['basic','desmos'].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
-    document.getElementById(`content-${t}`).classList.toggle('active', t === tab);
+function switchTab(t) {
+  ['calc','desmos'].forEach(x => {
+    document.getElementById(`ttab-${x}`).classList.toggle('on', x===t);
+    document.getElementById(`tc-${x}`).classList.toggle('on', x===t);
   });
-  if (tab === 'desmos') initDesmos();
+  if (t==='desmos') initDesmos();
 }
-
 function initDesmos() {
   if (desmosCalc) return;
-  const el = document.getElementById('desmos-container');
-  if (typeof Desmos === 'undefined') { el.innerHTML = '<div style="padding:1rem;font-size:13px;color:var(--gray-mid);">Desmos requires an internet connection.</div>'; return; }
-  desmosCalc = Desmos.GraphingCalculator(el, {
-    expressionsTopbar: true,
-    keypad: true,
-    expressions: true,
-    settingsMenu: true,
-    border: false
-  });
+  const el = document.getElementById('desmos-el');
+  if (typeof Desmos==='undefined') { el.innerHTML='<div style="padding:1rem;font-size:13px;color:var(--gray-mid)">Desmos needs internet.</div>'; return; }
+  desmosCalc = Desmos.GraphingCalculator(el, {expressionsTopbar:true, keypad:true, border:false});
 }
 
-// ── Basic Calculator ──────────────────────────────────────────
-let calcExpr = '';
-function calcNum(n) { calcExpr += n; calcDisplay(); }
-function calcFn(f) {
-  if (f === '^') { calcExpr += '**'; }
-  else { calcExpr += f; }
-  calcDisplay();
-}
-function calcBackspace() {
-  // Remove last token
-  if (calcExpr.endsWith('**')) calcExpr = calcExpr.slice(0,-2);
-  else calcExpr = calcExpr.slice(0,-1);
-  calcDisplay();
-}
-function calcClear() { calcExpr = ''; document.getElementById('calc-result').textContent = '0'; calcDisplay(); }
-function calcDisplay() { document.getElementById('calc-expr').textContent = calcExpr.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
-function calcEval() {
+// ── Calculator ─────────────────────────────────────────────────
+let ce = '';
+function cn(n) { ce+=n; cd(); }
+function cf(f) { ce+=f; cd(); }
+function cBk() { ce=ce.endsWith('**')?ce.slice(0,-2):ce.slice(0,-1); cd(); }
+function cClr() { ce=''; document.getElementById('c-res').textContent='0'; cd(); }
+function cd() { document.getElementById('c-expr').textContent=ce.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
+function cEval() {
   try {
-    let expr = calcExpr
-      .replace(/sqrt\(/g,'Math.sqrt(')
-      .replace(/sin\(/g,'Math.sin(')
-      .replace(/cos\(/g,'Math.cos(')
-      .replace(/tan\(/g,'Math.tan(')
-      .replace(/log\(/g,'Math.log10(')
-      .replace(/ln\(/g,'Math.log(');
-    // eslint-disable-next-line no-eval
-    const result = Function('"use strict"; return (' + expr + ')')();
-    const rounded = parseFloat(result.toPrecision(10));
-    document.getElementById('calc-result').textContent = rounded;
-    calcExpr = String(rounded);
-    calcDisplay();
-  } catch(e) {
-    document.getElementById('calc-result').textContent = 'Error';
-  }
+    let e=ce.replace(/sqrt\(/g,'Math.sqrt(').replace(/sin\(/g,'Math.sin(').replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(');
+    const r=parseFloat(Function('"use strict";return('+e+')')().toPrecision(10));
+    document.getElementById('c-res').textContent=r; ce=String(r); cd();
+  } catch(e) { document.getElementById('c-res').textContent='Error'; }
 }
 
-// ── Navigation ────────────────────────────────────────────────
+// ── Nav ────────────────────────────────────────────────────────
 function buildNav() {
   const nav = document.getElementById('q-nav');
   nav.innerHTML = '';
-  for (let i = 0; i < totalQ; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'q-dot';
-    dot.textContent = i + 1;
-    dot.id = `dot-${i}`;
-    dot.onclick = () => goToQuestion(i);
-    nav.appendChild(dot);
-  }
-  updateNav();
+  QS.forEach((q,i) => {
+    const d = document.createElement('div');
+    d.className = 'qdot' + (q.is_mc ? '' : ' fr-dot');
+    d.textContent = i+1; d.id=`dot-${i}`;
+    d.title = q.is_mc ? 'Multiple choice' : 'Free response';
+    d.onclick = () => goTo(i);
+    nav.appendChild(d);
+  });
+  upNav();
 }
-function updateNav() {
-  for (let i = 0; i < totalQ; i++) {
-    const dot = document.getElementById(`dot-${i}`);
-    dot.className = 'q-dot';
-    if (i === currentQ) dot.classList.add('active');
-    const q = QUESTIONS[i];
-    const hasAnswer = q.type === 'grid' ? gridAnswers[i].trim() !== '' : answers[i] !== null;
-    if (hasAnswer) dot.classList.add('answered');
-    if (flagged[i]) dot.classList.add('flagged');
-  }
+function upNav() {
+  QS.forEach((q,i) => {
+    const d = document.getElementById(`dot-${i}`);
+    d.className = 'qdot' + (q.is_mc ? '' : ' fr-dot');
+    if (i===cur) d.classList.add('cur');
+    const hasAns = q.is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
+    if (hasAns) d.classList.add('ans');
+    if (flagged[i]) d.classList.add('flag');
+  });
 }
-function goToQuestion(i) { currentQ = i; renderQuestion(i); updateNav(); }
-function prevQuestion() { if (currentQ > 0) goToQuestion(currentQ - 1); }
-function nextQuestion() { if (currentQ < totalQ - 1) goToQuestion(currentQ + 1); else openReview(); }
+function goTo(i) { saveFrInput(); cur=i; renderQ(i); upNav(); }
+function prevQ() { if(cur>0) goTo(cur-1); }
+function nextQ() { if(cur<QS.length-1) goTo(cur+1); else openReview(); }
 
-// ── Render ────────────────────────────────────────────────────
-function renderQuestion(i) {
-  const q = QUESTIONS[i];
-  const qp = document.getElementById('question-pane');
-  let answerHTML = '';
+function saveFrInput() {
+  const inp = document.getElementById('fr-inp');
+  if (inp) frInputs[cur] = inp.value;
+}
 
-  if (q.type === 'mc') {
+// ── Render ─────────────────────────────────────────────────────
+function renderQ(i) {
+  const q = QS[i];
+  const imgSrc = MATH_IMAGES[String(q.page)]
+    ? `data:image/jpeg;base64,${MATH_IMAGES[String(q.page)]}` : '';
+  const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
+
+  // Build answer section
+  let ansHtml = '';
+  if (q.is_mc) {
     const letters = ['A','B','C','D'];
-    const opts = q.choices.map((c, ci) => {
-      let cls = 'answer-option';
+    const btns = letters.map((l,li) => {
+      let cls = 'mc-btn';
       if (submitted) {
-        if (ci === q.answer) cls += ' correct';
-        else if (ci === answers[i] && ci !== q.answer) cls += ' incorrect';
+        if (li===q.answer_idx) cls+=' correct';
+        else if (answers[i]===li && li!==q.answer_idx) cls+=' wrong';
       } else {
-        if (answers[i] === ci) cls += ' selected';
+        if (answers[i]===li) cls+=' sel';
       }
-      return `<div class="${cls}" onclick="selectAnswer(${i},${ci})">
-        <div class="answer-letter">${letters[ci]}</div>
-        <div class="answer-text">${c}</div>
-      </div>`;
+      return `<button class="${cls}" onclick="selMC(${i},${li})">${l}</button>`;
     }).join('');
-    answerHTML = `<div class="answers">${opts}</div>`;
-  } else {
-    // Grid-in
-    let inputCls = 'gridin-input';
-    if (submitted && gridAnswers[i].trim() !== '') {
-      const correct = gridAnswers[i].trim() === q.correctAnswer;
-      inputCls += correct ? ' correct-input' : ' incorrect-input';
+
+    let hint = '';
+    if (submitted) {
+      if (answers[i]===null) hint=`<span class="ans-hint">Unanswered — correct: ${letters[q.answer_idx]}</span>`;
+      else if (answers[i]===q.answer_idx) hint=`<span class="ans-hint ok">✓ Correct</span>`;
+      else hint=`<span class="ans-hint bad">✗ Incorrect — correct: ${letters[q.answer_idx]}</span>`;
     }
-    answerHTML = `
-      <div class="gridin-wrap">
-        <div class="gridin-label">Student-Produced Response</div>
-        <input type="text" class="${inputCls}" id="gridin-${i}"
-          value="${gridAnswers[i]}"
-          placeholder="Answer"
-          ${submitted ? 'disabled' : ''}
-          oninput="saveGridIn(${i}, this.value)"
-          onchange="saveGridIn(${i}, this.value)" />
-        <div class="gridin-hint">Enter a number, fraction, or decimal. Do not include units.</div>
-        ${submitted ? `<div style="margin-top:0.5rem;font-size:12px;color:var(--gray-mid);">Correct answer: <strong style="color:var(--black)">${q.correctAnswer}</strong></div>` : ''}
+    ansHtml = `<div class="mc-btns">${btns}${hint}</div>`;
+  } else {
+    // Free response
+    const val = frInputs[i] || '';
+    if (submitted) {
+      const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
+      const clsInp  = !val ? '' : correct ? ' correct' : ' wrong';
+      const resHtml = !val
+        ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`
+        : correct
+          ? `<div class="fr-result ok">✓ Correct</div>`
+          : `<div class="fr-result bad">✗ Incorrect — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`;
+      ansHtml = `<div class="fr-wrap">
+        <div class="fr-label">Your answer</div>
+        <input class="fr-input${clsInp}" value="${escH(val)}" readonly />
+        ${resHtml}
       </div>`;
+    } else {
+      ansHtml = `<div class="fr-wrap">
+        <div class="fr-label">Enter your answer</div>
+        <input id="fr-inp" class="fr-input" type="text" inputmode="decimal"
+          value="${escH(val)}" placeholder="e.g. 3/2"
+          oninput="frInputs[${i}]=this.value;upNav()"
+          onkeydown="if(event.key==='Enter'&&${i}<QS.length-1)goTo(${i}+1)" />
+      </div>`;
+    }
   }
 
-  qp.innerHTML = `
-    <div class="q-number">Question ${i + 1} of ${totalQ}</div>
-    <div class="q-text">${q.question}</div>
-    ${q.note ? `<div class="q-note">${q.note}</div>` : ''}
-    ${answerHTML}
+  document.getElementById('q-pane').innerHTML = `
+    <div class="q-meta">
+      <span>${q.domain}</span>
+      <span class="skill-tag">${q.skill}</span>
+      ${q.difficulty?`<span class="diff-tag ${diffCls}">${q.difficulty}</span>`:''}
+      ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
+    </div>
+    <div class="q-num">Question ${i+1} of ${QS.length}</div>
+    ${imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}"/></div>`
+            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">Image unavailable</div>`}
+    ${ansHtml}
     <label class="flag-row">
-      <input type="checkbox" ${flagged[i] ? 'checked' : ''} onchange="toggleFlag(${i},this.checked)">
-      <span class="flag-label">Flag for review</span>
+      <input type="checkbox" ${flagged[i]?'checked':''} onchange="flagged[${i}]=this.checked;upNav()">
+      <span class="flag-lbl">Flag for review</span>
     </label>`;
 
-  document.getElementById('btn-next').textContent = i === totalQ - 1 ? 'Review →' : 'Next →';
+  document.getElementById('btn-next').textContent = i===QS.length-1 ? 'Review →' : 'Next →';
+
+  // Auto-focus FR input
+  if (!submitted && !q.is_mc) {
+    setTimeout(() => { const el=document.getElementById('fr-inp'); if(el) el.focus(); }, 50);
+  }
 }
 
-function selectAnswer(qi, ci) {
+function selMC(qi, li) {
   if (submitted) return;
-  answers[qi] = ci;
-  updateNav();
-  renderQuestion(qi);
+  answers[qi]=li; upNav(); renderQ(qi);
 }
 
-function saveGridIn(qi, val) {
-  gridAnswers[qi] = val;
-  updateNav();
+function escH(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function toggleFlag(qi, checked) {
-  flagged[qi] = checked;
-  updateNav();
+// Check free response — supports decimals, fractions, equivalent forms
+function checkFR(input, correct) {
+  if (!input || !correct) return false;
+  const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
+  const a = norm(input), b = norm(String(correct));
+  if (a===b) return true;
+  // Try numeric equivalence
+  try {
+    const evalFrac = s => {
+      if (s.includes('/')) {
+        const [n,d] = s.split('/');
+        return parseFloat(n)/parseFloat(d);
+      }
+      return parseFloat(s);
+    };
+    const va = evalFrac(a), vb = evalFrac(b);
+    if (!isNaN(va) && !isNaN(vb) && Math.abs(va-vb) < 0.0001) return true;
+  } catch(e) {}
+  return false;
 }
 
-// ── Review ────────────────────────────────────────────────────
+// ── Review ─────────────────────────────────────────────────────
 function openReview() {
-  const unanswered = QUESTIONS.filter((q,i) => q.type === 'grid' ? gridAnswers[i].trim() === '' : answers[i] === null).length;
-  const flagCount  = flagged.filter(Boolean).length;
-  document.getElementById('review-sub').textContent = `${unanswered} unanswered · ${flagCount} flagged`;
-  const list = document.getElementById('review-list');
-  list.innerHTML = QUESTIONS.map((q,i) => {
-    let statusText;
-    if (q.type === 'grid') {
-      statusText = gridAnswers[i].trim() !== '' ? `<span style="color:var(--black)">Answer: ${gridAnswers[i]}</span>` : '<span style="color:var(--gray-mid)">Not answered</span>';
-    } else {
-      statusText = answers[i] !== null ? `<span style="color:var(--black)">Answer ${['A','B','C','D'][answers[i]]}</span>` : '<span style="color:var(--gray-mid)">Not answered</span>';
-    }
-    const flagMark = flagged[i] ? ' <span style="color:#c0392b;font-size:11px;">★ Flagged</span>' : '';
-    return `<div class="review-item" onclick="closeOverlay('review-overlay');goToQuestion(${i})">
-      <div class="review-num">${i+1}</div>
-      <div style="flex:1;font-size:13px;color:var(--black);">${q.question.substring(0,58)}…</div>
-      <div>${statusText}${flagMark}</div>
+  saveFrInput();
+  const ua = QS.filter((q,i) => q.is_mc ? answers[i]===null : frInputs[i].trim()==='').length;
+  const fl = flagged.filter(Boolean).length;
+  document.getElementById('rev-sub').textContent = `${ua} unanswered · ${fl} flagged`;
+  const letters = ['A','B','C','D'];
+  document.getElementById('rev-list').innerHTML = QS.map((q,i) => {
+    let st, stCls;
+    if (q.is_mc) { st = answers[i]===null ? 'Not answered' : `Answer ${letters[answers[i]]}`; }
+    else { st = frInputs[i].trim()==='' ? 'Not answered' : `"${frInputs[i].trim().slice(0,12)}"` ; }
+    const fl = flagged[i] ? ' <span style="color:#c0392b;font-size:11px">★</span>':''
+    const frBadge = q.is_mc ? '' : ' <span style="font-size:10px;color:var(--gray-mid)">[FR]</span>';
+    return `<div class="rev-item" onclick="closeO('rev-o');goTo(${i})">
+      <div class="rev-num">${i+1}</div>
+      <div style="flex:1;color:var(--black)">${q.domain}${frBadge}</div>
+      <div style="font-size:12px;color:var(--gray-mid)">${st}${fl}</div>
     </div>`;
   }).join('');
-  document.getElementById('review-overlay').classList.add('active');
+  openO('rev-o');
 }
 
-// ── Submit ────────────────────────────────────────────────────
+// ── Submit ─────────────────────────────────────────────────────
 function submitTest() {
-  submitted = true;
-  clearInterval(timerInterval);
+  saveFrInput();
+  submitted = true; clearInterval(timerTick);
+  const total = QS.length;
 
-  let correct = 0, incorrect = 0, unanswered = 0;
-  QUESTIONS.forEach((q, i) => {
-    if (q.type === 'grid') {
-      if (gridAnswers[i].trim() === '') unanswered++;
-      else if (gridAnswers[i].trim() === q.correctAnswer) correct++;
-      else incorrect++;
-    } else {
-      if (answers[i] === null) unanswered++;
-      else if (answers[i] === q.answer) correct++;
-      else incorrect++;
-    }
+  // Determine correctness per question
+  const isCorrect = QS.map((q,i) => {
+    if (q.is_mc) return answers[i]===q.answer_idx;
+    return checkFR(frInputs[i], q.answer_raw);
   });
+  const correct   = isCorrect.filter(Boolean).length;
+  const incorrect = QS.filter((_,i) => {
+    const hasAns = QS[i].is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
+    return hasAns && !isCorrect[i];
+  }).length;
+  const unanswered = QS.filter((q,i) => q.is_mc ? answers[i]===null : frInputs[i].trim()==='').length;
+  const pct = Math.round(correct/total*100);
 
-  const pct = Math.round((correct / totalQ) * 100);
-  document.getElementById('score-num').textContent  = `${correct}/${totalQ}`;
-  document.getElementById('score-pct').textContent  = `${pct}% correct`;
-  document.getElementById('sc-correct').textContent   = correct;
-  document.getElementById('sc-incorrect').textContent = incorrect;
-  document.getElementById('sc-unanswered').textContent = unanswered;
+  document.getElementById('score-num').textContent = `${correct}/${total}`;
+  document.getElementById('score-pct').textContent = `${pct}% correct`;
+  document.getElementById('sc-ok').textContent    = correct;
+  document.getElementById('sc-bad').textContent   = incorrect;
+  document.getElementById('sc-skip').textContent  = unanswered;
 
-  const scoreList = document.getElementById('score-review-list');
-  scoreList.innerHTML = QUESTIONS.map((q, i) => {
-    let statusClass = 'status-unanswered', statusLabel = 'Unanswered';
-    if (q.type === 'grid') {
-      if (gridAnswers[i].trim() !== '') { statusClass = gridAnswers[i].trim() === q.correctAnswer ? 'status-correct' : 'status-incorrect'; statusLabel = gridAnswers[i].trim() === q.correctAnswer ? 'Correct' : 'Incorrect'; }
-    } else {
-      if (answers[i] !== null) { statusClass = answers[i] === q.answer ? 'status-correct' : 'status-incorrect'; statusLabel = answers[i] === q.answer ? 'Correct' : 'Incorrect'; }
-    }
-    return `<div class="review-item" onclick="closeOverlay('score-overlay');goToQuestion(${i})">
-      <div class="review-num">${i+1}</div>
-      <div class="review-status ${statusClass}"></div>
-      <div style="flex:1;font-size:13px;color:var(--black);">${q.question.substring(0,55)}…</div>
-      <div style="font-size:12px;color:var(--gray-mid);">${statusLabel}</div>
+  // Domain breakdown
+  const domains = ['Algebra','Advanced Math','Problem-Solving and Data Analysis','Geometry and Trigonometry'];
+  const shortD  = {'Algebra':'Algebra','Advanced Math':'Advanced Math','Problem-Solving and Data Analysis':'PS & Data Analysis','Geometry and Trigonometry':'Geometry & Trig'};
+  let dHtml = '';
+  for (const d of domains) {
+    const dqs = QS.map((q,i)=>({q,i})).filter(({q})=>q.domain===d);
+    if (!dqs.length) continue;
+    const dc = dqs.filter(({q,i})=>isCorrect[i]).length;
+    const bp = Math.round(dc/dqs.length*100);
+    dHtml += `<div class="dom-row"><div class="dom-name">${shortD[d]}</div><div class="bar-wrap"><div class="bar-fill" style="width:${bp}%"></div></div><div class="dom-sc">${dc}/${dqs.length}</div></div>`;
+  }
+  document.getElementById('dom-break').innerHTML = dHtml;
+
+  const letters=['A','B','C','D'];
+  document.getElementById('score-rev-list').innerHTML = QS.map((q,i) => {
+    let cls='rd-skip', lbl='Unanswered';
+    const hasAns = q.is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
+    if (hasAns) { cls=isCorrect[i]?'rd-ok':'rd-bad'; lbl=isCorrect[i]?'Correct':'Incorrect'; }
+    const frB = q.is_mc ? '' : ' [FR]';
+    return `<div class="rev-item" onclick="closeO('score-o');goTo(${i})">
+      <div class="rev-num">${i+1}</div>
+      <div class="rev-dot ${cls}"></div>
+      <div style="flex:1;color:var(--black)">${q.domain}${frB}</div>
+      <div style="font-size:12px;color:var(--gray-mid)">${lbl}</div>
     </div>`;
   }).join('');
 
-  closeOverlay('review-overlay');
-  document.getElementById('score-overlay').classList.add('active');
-  renderQuestion(currentQ);
+  closeO('rev-o'); openO('score-o');
+  renderQ(cur);
 }
 
-function closeOverlay(id) { document.getElementById(id).classList.remove('active'); }
-function openOverlay(id)  { document.getElementById(id).classList.add('active'); }
-function confirmExit() {
-  if (confirm('Exit this module? Your progress will not be saved.')) window.location.href = 'index.html';
-}
+function openO(id)  { document.getElementById(id).classList.add('open'); }
+function closeO(id) { document.getElementById(id).classList.remove('open'); }
+function confirmExit() { if(confirm('Exit? Progress will not be saved.')) location.href='index.html'; }
 </script>
 </body>
 </html>
