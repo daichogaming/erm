@@ -333,12 +333,22 @@ function initTest() {
     return;
   }
 
-  QUESTIONS = QUESTION_BANK[moduleKey];
-  if (!QUESTIONS || QUESTIONS.length === 0) {
+  const rawQuestions = QUESTION_BANK[moduleKey];
+  if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
       `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for module: ${moduleKey}</div>`;
     return;
   }
+
+  // Sort into SAT RW domain order: Craft & Structure → Information & Ideas → Standard English → Expression of Ideas
+  const DOMAIN_ORDER = ['Craft and Structure', 'Information and Ideas', 'Standard English', 'Expression of Ideas'];
+  const _grouped = {};
+  DOMAIN_ORDER.forEach(d => _grouped[d] = []);
+  rawQuestions.forEach(q => {
+    const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
+    if (match) _grouped[match].push(q);
+  });
+  QUESTIONS = DOMAIN_ORDER.flatMap(d => _grouped[d]);
 
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
