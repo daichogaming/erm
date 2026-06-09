@@ -516,24 +516,31 @@ function escH(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Check free response — supports decimals, fractions, equivalent forms
+// Check free response — supports decimals, fractions, equivalent forms,
+// and multiple valid answers separated by commas (e.g. "11/4, 2.75" or "-6, 4")
 function checkFR(input, correct) {
   if (!input || !correct) return false;
   const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
-  const a = norm(input), b = norm(String(correct));
-  if (a===b) return true;
-  // Try numeric equivalence
-  try {
-    const evalFrac = s => {
-      if (s.includes('/')) {
-        const [n,d] = s.split('/');
-        return parseFloat(n)/parseFloat(d);
-      }
-      return parseFloat(s);
-    };
-    const va = evalFrac(a), vb = evalFrac(b);
-    if (!isNaN(va) && !isNaN(vb) && Math.abs(va-vb) < 0.0001) return true;
-  } catch(e) {}
+  const evalFrac = s => {
+    s = norm(s);
+    if (s.includes('/')) {
+      const parts = s.split('/');
+      if (parts.length === 2) return parseFloat(parts[0]) / parseFloat(parts[1]);
+    }
+    return parseFloat(s);
+  };
+  const a = norm(input);
+  const va = evalFrac(a);
+  // correct may contain multiple valid answers split by comma
+  const acceptedRaw = String(correct).split(',').map(s => s.trim());
+  for (const acc of acceptedRaw) {
+    const b = norm(acc);
+    if (a === b) return true;
+    try {
+      const vb = evalFrac(b);
+      if (!isNaN(va) && !isNaN(vb) && Math.abs(va - vb) < 0.0001) return true;
+    } catch(e) {}
+  }
   return false;
 }
 

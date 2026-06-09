@@ -70,10 +70,28 @@
       display: flex; overflow: hidden;
     }
 
+    /* ── DRAGGABLE DIVIDER ── */
+    .divider {
+      width: 6px; flex-shrink: 0; cursor: col-resize;
+      background: var(--gray-border);
+      position: relative; z-index: 10;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .divider:hover, .divider.dragging { background: var(--gray-mid); }
+    .divider::after {
+      content: '';
+      width: 2px; height: 32px;
+      background: var(--gray-light);
+      border-radius: 2px;
+      display: block;
+    }
+    .divider:hover::after, .divider.dragging::after { background: var(--white); }
+
     /* ── PASSAGE PANE ── */
     .passage-pane {
       flex: 1; overflow-y: auto; padding: 2.5rem 2rem 2.5rem 2.5rem;
-      border-right: 1px solid var(--gray-border);
+      min-width: 200px;
     }
     .passage-context {
       font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
@@ -109,6 +127,7 @@
       width: 420px; flex-shrink: 0; overflow-y: auto;
       padding: 2.5rem 2.5rem 2.5rem 2rem;
       display: flex; flex-direction: column;
+      min-width: 280px;
     }
     .q-number {
       font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
@@ -224,7 +243,8 @@
 
     @media (max-width: 720px) {
       .passage-pane { display: none; }
-      .question-pane { width: 100%; padding: 1.5rem; }
+      .divider { display: none; }
+      .question-pane { width: 100% !important; padding: 1.5rem; }
     }
   </style>
 </head>
@@ -256,6 +276,7 @@
 <!-- MAIN -->
 <div class="test-body">
   <div class="passage-pane" id="passage-pane"></div>
+  <div class="divider" id="divider"></div>
   <div class="question-pane" id="question-pane"></div>
 </div>
 
@@ -490,7 +511,7 @@ function renderQuestion(i) {
   const rationaleHTML = submitted && q.rationale ? `
     <div class="rationale-box">
       <div class="rationale-label">Explanation</div>
-      ${escHtml(q.rationale.substring(0, 600))}${q.rationale.length > 600 ? '…' : ''}
+      ${escHtml(q.rationale)}
     </div>` : '';
 
   qp.innerHTML = `
@@ -610,12 +631,88 @@ function submitTest() {
   renderQuestion(currentQ);
 }
 
+
 // ── Exit ──────────────────────────────────────────────────────
 function confirmExit() {
   if (confirm('Exit this module? Your progress will not be saved.')) {
     window.location.href = 'index.html';
   }
 }
+
+// ── Draggable Divider ─────────────────────────────────────────
+(function() {
+  const divider   = document.getElementById('divider');
+  const passPane  = document.getElementById('passage-pane');
+  const qPane     = document.getElementById('question-pane');
+  const container = document.querySelector('.test-body');
+
+  let isDragging = false;
+  let startX = 0;
+  let startPassWidth = 0;
+
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  divider.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    startX = e.clientX;
+    startPassWidth = passPane.getBoundingClientRect().width;
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    const containerWidth = container.getBoundingClientRect().width;
+    const dividerWidth   = divider.getBoundingClientRect().width;
+    const availableWidth = containerWidth - dividerWidth;
+    const delta = e.clientX - startX;
+    const newPassWidth = clamp(startPassWidth + delta, 200, availableWidth - 280);
+    const newQWidth    = availableWidth - newPassWidth;
+    passPane.style.flex  = 'none';
+    passPane.style.width = newPassWidth + 'px';
+    qPane.style.flex     = 'none';
+    qPane.style.width    = newQWidth + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!isDragging) return;
+    isDragging = false;
+    divider.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+
+  // Touch support
+  divider.addEventListener('touchstart', function(e) {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startPassWidth = passPane.getBoundingClientRect().width;
+    divider.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    const containerWidth = container.getBoundingClientRect().width;
+    const dividerWidth   = divider.getBoundingClientRect().width;
+    const availableWidth = containerWidth - dividerWidth;
+    const delta = e.touches[0].clientX - startX;
+    const newPassWidth = clamp(startPassWidth + delta, 200, availableWidth - 280);
+    const newQWidth    = availableWidth - newPassWidth;
+    passPane.style.flex  = 'none';
+    passPane.style.width = newPassWidth + 'px';
+    qPane.style.flex     = 'none';
+    qPane.style.width    = newQWidth + 'px';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', function() {
+    isDragging = false;
+    divider.classList.remove('dragging');
+  });
+})();
 </script>
 </body>
 </html>
