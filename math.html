@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TMX8HFTQVZ');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAT Practice — Math</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,7 +19,7 @@
     :root {
       --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
       --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
-      --white: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
+      --white: #f2f2f2; --correct: #1a7a3c; --incorrect: #c0392b;
     }
     html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
 
@@ -516,31 +524,24 @@ function escH(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Check free response — supports decimals, fractions, equivalent forms,
-// and multiple valid answers separated by commas (e.g. "11/4, 2.75" or "-6, 4")
+// Check free response — supports decimals, fractions, equivalent forms
 function checkFR(input, correct) {
   if (!input || !correct) return false;
   const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
-  const evalFrac = s => {
-    s = norm(s);
-    if (s.includes('/')) {
-      const parts = s.split('/');
-      if (parts.length === 2) return parseFloat(parts[0]) / parseFloat(parts[1]);
-    }
-    return parseFloat(s);
-  };
-  const a = norm(input);
-  const va = evalFrac(a);
-  // correct may contain multiple valid answers split by comma
-  const acceptedRaw = String(correct).split(',').map(s => s.trim());
-  for (const acc of acceptedRaw) {
-    const b = norm(acc);
-    if (a === b) return true;
-    try {
-      const vb = evalFrac(b);
-      if (!isNaN(va) && !isNaN(vb) && Math.abs(va - vb) < 0.0001) return true;
-    } catch(e) {}
-  }
+  const a = norm(input), b = norm(String(correct));
+  if (a===b) return true;
+  // Try numeric equivalence
+  try {
+    const evalFrac = s => {
+      if (s.includes('/')) {
+        const [n,d] = s.split('/');
+        return parseFloat(n)/parseFloat(d);
+      }
+      return parseFloat(s);
+    };
+    const va = evalFrac(a), vb = evalFrac(b);
+    if (!isNaN(va) && !isNaN(vb) && Math.abs(va-vb) < 0.0001) return true;
+  } catch(e) {}
   return false;
 }
 

@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TMX8HFTQVZ');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAT Practice — Test</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,7 +19,7 @@
     :root {
       --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
       --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
-      --white: #FFFFFF; --answer-hover: #F0F0F0; --answer-selected: #111111;
+      --white: #f2f2f2; --answer-hover: #F0F0F0; --answer-selected: #111111;
       --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
     }
     html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
@@ -241,6 +249,157 @@
     .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
     .overlay-btn.primary:hover { background: var(--gray-dark); }
 
+    /* ── HIGHLIGHT & NOTES TOOLBAR ── */
+    .passage-toolbar {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .toolbar-label {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray-mid); margin-right: 0.25rem;
+    }
+    .hl-btn {
+      width: 22px; height: 22px; border-radius: 3px; border: 2px solid transparent;
+      cursor: pointer; transition: transform 0.1s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+    .hl-btn:hover { transform: scale(1.15); }
+    .hl-btn.active { border-color: var(--black); }
+    .hl-btn.hl-yellow { background: #FFE066; }
+    .hl-btn.hl-green  { background: #A8E6CF; }
+    .hl-btn.hl-blue   { background: #A8D4F5; }
+    .hl-btn.hl-pink   { background: #F5A8C8; }
+    .toolbar-sep { width: 1px; height: 18px; background: var(--gray-border); margin: 0 0.25rem; }
+    .toolbar-action {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--gray-mid); background: none;
+      border: 1px solid var(--gray-border); border-radius: 3px;
+      padding: 3px 8px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .toolbar-action:hover { color: var(--black); border-color: var(--black); }
+    .toolbar-action.note-active { color: var(--black); border-color: var(--black); background: var(--gray-bg); }
+
+    /* Highlighted text spans */
+    .hl-yellow { background: #FFE066; border-radius: 2px; cursor: pointer; }
+    .hl-green  { background: #A8E6CF; border-radius: 2px; cursor: pointer; }
+    .hl-blue   { background: #A8D4F5; border-radius: 2px; cursor: pointer; }
+    .hl-pink   { background: #F5A8C8; border-radius: 2px; cursor: pointer; }
+    .hl-yellow:hover, .hl-green:hover, .hl-blue:hover, .hl-pink:hover {
+      filter: brightness(0.92);
+    }
+    /* Highlighted text with note indicator */
+    .has-note::after {
+      content: '✎'; font-size: 10px; vertical-align: super;
+      margin-left: 1px; opacity: 0.7;
+    }
+
+    /* ── NOTE POPUP ── */
+    .note-popup {
+      position: fixed; z-index: 350; background: var(--white);
+      border: 1px solid var(--gray-border); border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      width: 260px; padding: 0.75rem;
+      animation: fadeSlide 0.15s ease;
+    }
+    .note-popup-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .note-popup-label {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid);
+    }
+    .note-popup-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 16px; color: var(--gray-mid); line-height: 1;
+      padding: 0; transition: color 0.15s;
+    }
+    .note-popup-close:hover { color: var(--black); }
+    .note-textarea {
+      width: 100%; min-height: 80px; resize: vertical;
+      border: 1px solid var(--gray-border); border-radius: 4px;
+      padding: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 13px;
+      color: var(--black); outline: none; line-height: 1.5;
+      transition: border-color 0.15s;
+    }
+    .note-textarea:focus { border-color: var(--black); }
+    .note-popup-actions {
+      display: flex; gap: 0.5rem; margin-top: 0.5rem;
+    }
+    .note-save-btn {
+      flex: 1; font-size: 12px; font-family: 'DM Sans', sans-serif;
+      background: var(--black); color: var(--white); border: none;
+      border-radius: 4px; padding: 6px 0; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .note-save-btn:hover { background: var(--gray-dark); }
+    .note-delete-btn {
+      font-size: 12px; font-family: 'DM Sans', sans-serif;
+      background: none; color: var(--incorrect);
+      border: 1px solid var(--incorrect); border-radius: 4px;
+      padding: 6px 10px; cursor: pointer; transition: background 0.15s;
+    }
+    .note-delete-btn:hover { background: #fdf0ee; }
+
+    /* ── NOTES PANEL (sidebar in question pane) ── */
+    .notes-panel {
+      margin-top: 1.5rem; border: 1px solid var(--gray-border);
+      border-radius: 4px; overflow: hidden;
+    }
+    .notes-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 0.75rem; background: var(--gray-bg);
+      border-bottom: 1px solid var(--gray-border); cursor: pointer;
+    }
+    .notes-panel-title {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid);
+    }
+    .notes-panel-count {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      background: var(--black); color: var(--white);
+      border-radius: 10px; padding: 1px 6px;
+    }
+    .notes-panel-body { padding: 0.5rem 0.75rem; }
+    .note-entry {
+      padding: 0.5rem 0; border-bottom: 1px solid var(--gray-border);
+      font-size: 12px; line-height: 1.5;
+    }
+    .note-entry:last-child { border-bottom: none; }
+    .note-entry-quote {
+      font-style: italic; color: var(--gray-mid); margin-bottom: 0.2rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .note-entry-text { color: var(--black); }
+    .note-entry-edit {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--gray-mid); cursor: pointer; margin-top: 0.2rem;
+      display: inline-block;
+    }
+    .note-entry-edit:hover { color: var(--black); }
+    .passage-text u {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ── PASSAGE LAYOUT ── */
+    .passage-text { font-size: 15px; line-height: 1.75; color: var(--black); }
+    .passage-text p { margin: 0 0 1em 0; }
+    .passage-text p:last-child { margin-bottom: 0; }
+    /* Poem / structured text */
+    .passage-poem { font-size: 15px; line-height: 1.9; color: var(--black); font-family: 'DM Sans', sans-serif; }
+    .passage-poem .pline { display: block; }
+    .passage-poem .pline-blank { display: block; height: 0.6em; }
+    .passage-poem .indent-0 { padding-left: 0; }
+    .passage-poem .indent-1 { padding-left: 1.2em; }
+    .passage-poem .indent-2 { padding-left: 2.4em; }
+    .passage-poem .indent-3 { padding-left: 3.6em; }
+    .passage-poem .indent-4 { padding-left: 4.8em; }
+    .passage-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--gray-mid); margin: 1.25rem 0 0.5rem 0; }
+    .passage-label:first-child { margin-top: 0; }
+
     @media (max-width: 720px) {
       .passage-pane { display: none; }
       .divider { display: none; }
@@ -374,6 +533,7 @@ function initTest() {
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
   flagged = new Array(totalQ).fill(false);
+  initHighlights(totalQ);
 
   document.getElementById('bar-module').textContent =
     `English · ${label} · Module ${moduleId}`;
@@ -463,24 +623,135 @@ function renderQuestion(i) {
   const diffClass = { Easy: 'diff-easy', Medium: 'diff-medium', Hard: 'diff-hard' }[q.difficulty] || '';
   const diffLabel = q.difficulty || '';
 
-  // Handle dual-passage (Text 1 / Text 2)
-  let passageHTML = '';
-  const raw = q.passage || '';
-  if (/^Text 1\b/i.test(raw)) {
-    const t2idx = raw.search(/Text 2\b/i);
-    if (t2idx > 0) {
-      const t1 = raw.slice(0, t2idx).replace(/^Text 1\s*/i, '').trim();
-      const t2 = raw.slice(t2idx).replace(/^Text 2\s*/i, '').trim();
-      passageHTML = `
-        <div class="passage-label">Text 1</div>
-        <div class="passage-text"><p>${escHtml(t1)}</p></div>
-        <div class="passage-label">Text 2</div>
-        <div class="passage-text"><p>${escHtml(t2)}</p></div>`;
-    } else {
-      passageHTML = `<div class="passage-text">${raw.split('\n\n').map(p=>`<p>${escHtml(p)}</p>`).join('')}</div>`;
+  // Build passage HTML from structured passage_lines (preserves indentation, blank lines, poems)
+  function buildPassageHTML(q) {
+    const lines = q.passage_lines;
+
+    // Helper: render a passage_lines array to HTML
+    function renderLines(lineArr) {
+      // Detect if this block is poem/structured (any indent > 0 or multiple blank lines)
+      const hasIndent = lineArr.some(l => l.type === 'line' && l.indent > 0);
+      const blankCount = lineArr.filter(l => l.type === 'blank').length;
+      const isPoem = hasIndent || blankCount > 2;
+
+      if (isPoem) {
+        const html = lineArr.map(l => {
+          if (l.type === 'blank') return '<span class="pline-blank"></span>';
+          return `<span class="pline indent-${l.indent}">${escHtml(l.text)}</span>`;
+        }).join('');
+        return `<div class="passage-poem">${html}</div>`;
+      } else {
+        // Prose: group consecutive non-blank lines into paragraphs
+        const paras = [];
+        let cur = [];
+        for (const l of lineArr) {
+          if (l.type === 'blank') {
+            if (cur.length) { paras.push(cur); cur = []; }
+          } else {
+            cur.push(l.text);
+          }
+        }
+        if (cur.length) paras.push(cur);
+        if (!paras.length) return '';
+        return `<div class="passage-text">${paras.map(p => `<p>${escHtml(p.join(' '))}</p>`).join('')}</div>`;
+      }
     }
-  } else {
-    passageHTML = `<div class="passage-text">${raw.split('\n\n').map(p=>`<p>${escHtml(p)}</p>`).join('')}</div>`;
+
+    if (lines && lines.length) {
+      // Check for Text 1 / Text 2 split
+      const text1Idx = lines.findIndex(l => l.type === 'line' && /^Text\s+1\s*$/i.test(l.text));
+      const text2Idx = lines.findIndex(l => l.type === 'line' && /^Text\s+2\s*$/i.test(l.text));
+
+      if (text1Idx !== -1 && text2Idx !== -1 && text2Idx > text1Idx) {
+        const t1Lines = lines.slice(text1Idx + 1, text2Idx).filter(l => !(l.type === 'blank' && lines.slice(text1Idx + 1, text1Idx + 2).includes(l)));
+        const t2Lines = lines.slice(text2Idx + 1);
+        return `<div class="passage-label">Text 1</div>${renderLines(t1Lines)}<div class="passage-label">Text 2</div>${renderLines(t2Lines)}`;
+      }
+
+      return renderLines(lines);
+    }
+
+    // Fallback to old flat passage string
+    const raw = q.passage || '';
+    if (/^Text 1\b/i.test(raw)) {
+      const t2idx = raw.search(/Text 2\b/i);
+      if (t2idx > 0) {
+        const t1 = raw.slice(0, t2idx).replace(/^Text 1\s*/i, '').trim();
+        const t2 = raw.slice(t2idx).replace(/^Text 2\s*/i, '').trim();
+        return `<div class="passage-label">Text 1</div><div class="passage-text"><p>${escHtml(t1)}</p></div><div class="passage-label">Text 2</div><div class="passage-text"><p>${escHtml(t2)}</p></div>`;
+      }
+    }
+    return `<div class="passage-text">${raw.split('\n\n').map(p=>`<p>${escHtml(p)}</p>`).join('')}</div>`;
+  }
+
+  let passageHTML = buildPassageHTML(q);
+
+  // Apply underline formatting using precise PDF-extracted segments
+  function applyUnderline(html, q) {
+    const segments = q.underline_segments;
+    if (!segments || !segments.length) return html;
+
+    function norm(s) {
+      return s.replace(/\s+/g, ' ')
+              .replace(/[\u2018\u2019\u02bc]/g, "'")
+              .replace(/[\u201c\u201d]/g, '"')
+              .replace(/[\u2013\u2014]/g, '-')
+              .replace(/\u2019/g, "'")
+              .trim();
+    }
+
+    // Walk the HTML char-by-char, skipping tag content, to find and wrap each segment
+    function wrapSegment(htmlStr, segText) {
+      const segNorm = norm(segText);
+      if (!segNorm) return htmlStr;
+
+      // Build plain-text version (strip tags) to locate the segment
+      let plain = '';
+      let inTag = false;
+      for (let i = 0; i < htmlStr.length; i++) {
+        if (htmlStr[i] === '<') { inTag = true; continue; }
+        if (htmlStr[i] === '>') { inTag = false; continue; }
+        if (!inTag) plain += htmlStr[i];
+      }
+      const plainNorm = norm(plain);
+
+      // Try exact match
+      let idx = plainNorm.indexOf(segNorm);
+      if (idx === -1) {
+        // Try first 40 chars of segment (handles truncated multi-line rects)
+        const partial = segNorm.substring(0, Math.min(40, segNorm.length));
+        idx = plainNorm.indexOf(partial);
+        if (idx === -1) return htmlStr; // can't find it
+      }
+
+      const endIdx = idx + segNorm.length;
+
+      // Map plain-text char positions back to HTML positions and wrap
+      let charCount = 0, inT = false;
+      let startHtmlPos = -1, endHtmlPos = -1;
+      for (let i = 0; i < htmlStr.length; i++) {
+        if (htmlStr[i] === '<') { inT = true; }
+        if (!inT) {
+          if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
+          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
+          charCount++;
+        }
+        if (htmlStr[i] === '>') { inT = false; }
+      }
+      if (endHtmlPos === -1) endHtmlPos = htmlStr.length;
+      if (startHtmlPos === -1) return htmlStr;
+
+      return htmlStr.slice(0, startHtmlPos) +
+             '<u>' + htmlStr.slice(startHtmlPos, endHtmlPos) + '</u>' +
+             htmlStr.slice(endHtmlPos);
+    }
+
+    // Apply each segment in order
+    let result = html;
+    for (const seg of segments) {
+      result = wrapSegment(result, seg);
+    }
+    return result;
   }
 
   pp.innerHTML = `
@@ -489,7 +760,16 @@ function renderQuestion(i) {
       <span class="passage-skill-tag">${q.skill || ''}</span>
       ${diffLabel ? `<span class="passage-difficulty ${diffClass}">${diffLabel}</span>` : ''}
     </div>
-    ${passageHTML}`;
+    <div class="passage-toolbar">
+      <span class="toolbar-label">Highlight</span>
+      <div class="hl-btn hl-yellow" id="hl-yellow" title="Yellow" onclick="setHighlightColor('hl-yellow')"></div>
+      <div class="hl-btn hl-green"  id="hl-green"  title="Green"  onclick="setHighlightColor('hl-green')"></div>
+      <div class="hl-btn hl-blue"   id="hl-blue"   title="Blue"   onclick="setHighlightColor('hl-blue')"></div>
+      <div class="hl-btn hl-pink"   id="hl-pink"   title="Pink"   onclick="setHighlightColor('hl-pink')"></div>
+      <div class="toolbar-sep"></div>
+      <button class="toolbar-action" id="btn-clear-hl" onclick="clearAllHighlights()" title="Remove all highlights">Clear</button>
+    </div>
+    <div id="passage-content">${applyUnderline(passageHTML, q)}</div>`;
 
   // Question pane
   const qp = document.getElementById('question-pane');
@@ -522,7 +802,13 @@ function renderQuestion(i) {
       <input type="checkbox" id="flag-cb" ${flagged[i] ? 'checked' : ''} onchange="toggleFlag(${i})">
       <span class="flag-label">Flag for review</span>
     </label>
-    ${rationaleHTML}`;
+    ${rationaleHTML}
+    <div id="notes-panel"></div>`;
+
+  renderNotesPanel(i);
+  restoreHighlights(i);
+  updateHighlightButtons();
+  attachPassageListener(i);
 
   document.getElementById('btn-next').textContent =
     i === totalQ - 1 ? 'Review →' : 'Next →';
@@ -631,6 +917,235 @@ function submitTest() {
   renderQuestion(currentQ);
 }
 
+// ── Highlights & Notes ────────────────────────────────────────
+// Storage: highlights[qIndex] = [{id, color, text, note}]
+let highlights = [];   // per question array of highlight objects
+let activeColor = 'hl-yellow';
+let hlCounter   = 0;
+
+function initHighlights(total) {
+  highlights = Array.from({length: total}, () => []);
+}
+
+function setHighlightColor(color) {
+  activeColor = color;
+  updateHighlightButtons();
+}
+
+function updateHighlightButtons() {
+  ['hl-yellow','hl-green','hl-blue','hl-pink'].forEach(c => {
+    const btn = document.getElementById(c);
+    if (btn) btn.classList.toggle('active', c === activeColor);
+  });
+}
+
+// Apply saved highlights back to passage DOM after re-render
+function restoreHighlights(qi) {
+  const content = document.getElementById('passage-content');
+  if (!content) return;
+  highlights[qi].forEach(h => applyHighlightSpan(content, h));
+  attachHighlightListeners(qi);
+}
+
+// Called on mouseup in the passage pane — highlight selected text
+function handlePassageMouseUp(e, qi) {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+
+  const range = sel.getRangeAt(0);
+  const content = document.getElementById('passage-content');
+  if (!content || !content.contains(range.commonAncestorContainer)) {
+    sel.removeAllRanges(); return;
+  }
+
+  const selectedText = sel.toString().trim();
+  if (!selectedText) return;
+
+  const id = 'hl_' + (++hlCounter);
+  const h = { id, color: activeColor, text: selectedText, note: '' };
+  highlights[qi].push(h);
+
+  try {
+    const span = document.createElement('span');
+    span.className = activeColor;
+    span.dataset.hlId = id;
+    range.surroundContents(span);
+  } catch(err) {
+    // Selection spans multiple nodes — fallback: just record, no DOM wrap
+    highlights[qi].pop();
+    sel.removeAllRanges();
+    return;
+  }
+
+  sel.removeAllRanges();
+  attachHighlightListeners(qi);
+  renderNotesPanel(qi);
+}
+
+function attachHighlightListeners(qi) {
+  const content = document.getElementById('passage-content');
+  if (!content) return;
+  content.querySelectorAll('[data-hl-id]').forEach(span => {
+    span.onclick = (e) => {
+      e.stopPropagation();
+      openNotePopup(span.dataset.hlId, qi, span);
+    };
+  });
+}
+
+// Re-apply a saved highlight to the current DOM (best-effort text search)
+function applyHighlightSpan(container, h) {
+  // Walk text nodes and wrap first match
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const idx = node.textContent.indexOf(h.text);
+    if (idx === -1) continue;
+    // Don't re-wrap already-wrapped spans
+    if (node.parentElement && node.parentElement.dataset && node.parentElement.dataset.hlId) continue;
+    const range = document.createRange();
+    range.setStart(node, idx);
+    range.setEnd(node, idx + h.text.length);
+    const span = document.createElement('span');
+    span.className = h.color + (h.note ? ' has-note' : '');
+    span.dataset.hlId = h.id;
+    try { range.surroundContents(span); } catch(e) {}
+    break;
+  }
+}
+
+function clearAllHighlights() {
+  highlights[currentQ] = [];
+  restorePassageContent();
+  renderNotesPanel(currentQ);
+}
+
+function restorePassageContent() {
+  // Re-render the passage (strips all spans) then re-attach listeners
+  renderQuestion(currentQ);
+}
+
+// ── Note Popup ────────────────────────────────────────────────
+let activePopup = null;
+
+function openNotePopup(hlId, qi, anchorEl) {
+  closeNotePopup();
+  const h = highlights[qi].find(x => x.id === hlId);
+  if (!h) return;
+
+  const popup = document.createElement('div');
+  popup.className = 'note-popup';
+  popup.id = 'note-popup';
+  popup.innerHTML = `
+    <div class="note-popup-header">
+      <span class="note-popup-label">Note</span>
+      <button class="note-popup-close" onclick="closeNotePopup()">×</button>
+    </div>
+    <div style="font-size:11px;color:var(--gray-mid);margin-bottom:0.4rem;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"${escHtml(h.text.substring(0,60))}${h.text.length>60?'…':''}"</div>
+    <textarea class="note-textarea" id="note-input" placeholder="Add a note…">${escHtml(h.note)}</textarea>
+    <div class="note-popup-actions">
+      <button class="note-save-btn" onclick="saveNote('${hlId}',${qi})">Save</button>
+      <button class="note-delete-btn" onclick="deleteHighlight('${hlId}',${qi})">Remove</button>
+    </div>`;
+
+  document.body.appendChild(popup);
+  activePopup = popup;
+
+  // Position near the anchor
+  const rect = anchorEl.getBoundingClientRect();
+  let top = rect.bottom + 6;
+  let left = rect.left;
+  if (left + 260 > window.innerWidth - 10) left = window.innerWidth - 270;
+  if (top + 200 > window.innerHeight - 10) top = rect.top - 206;
+  popup.style.top  = top  + 'px';
+  popup.style.left = left + 'px';
+
+  document.getElementById('note-input').focus();
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('mousedown', outsidePopupClose);
+  }, 10);
+}
+
+function outsidePopupClose(e) {
+  if (activePopup && !activePopup.contains(e.target)) {
+    closeNotePopup();
+  }
+}
+
+function closeNotePopup() {
+  if (activePopup) {
+    activePopup.remove();
+    activePopup = null;
+  }
+  document.removeEventListener('mousedown', outsidePopupClose);
+}
+
+function saveNote(hlId, qi) {
+  const h = highlights[qi].find(x => x.id === hlId);
+  if (h) {
+    h.note = document.getElementById('note-input').value.trim();
+    // Update has-note class on span
+    const span = document.querySelector(`[data-hl-id="${hlId}"]`);
+    if (span) span.className = h.color + (h.note ? ' has-note' : '');
+  }
+  closeNotePopup();
+  renderNotesPanel(qi);
+}
+
+function deleteHighlight(hlId, qi) {
+  highlights[qi] = highlights[qi].filter(x => x.id !== hlId);
+  closeNotePopup();
+  restorePassageContent();
+}
+
+// ── Notes Panel ───────────────────────────────────────────────
+function renderNotesPanel(qi) {
+  const panel = document.getElementById('notes-panel');
+  if (!panel) return;
+  const qHighlights = highlights[qi] || [];
+  const withNotes = qHighlights.filter(h => h.note);
+
+  if (qHighlights.length === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+
+  const entries = qHighlights.map(h => `
+    <div class="note-entry">
+      <div class="note-entry-quote" style="border-left:3px solid var(--${colorToVar(h.color)});padding-left:6px;">
+        "${escHtml(h.text.substring(0,50))}${h.text.length>50?'…':''}"
+      </div>
+      ${h.note ? `<div class="note-entry-text">${escHtml(h.note)}</div>` : '<div class="notes-empty">No note yet — click highlight to add.</div>'}
+      <span class="note-entry-edit" onclick="(function(){var s=document.querySelector('[data-hl-id=\\'${h.id}\\']');if(s)openNotePopup('${h.id}',${qi},s);})()">Edit ↗</span>
+    </div>`).join('');
+
+  panel.innerHTML = `
+    <div class="notes-panel">
+      <div class="notes-panel-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span class="notes-panel-title">Highlights & Notes</span>
+        <span class="notes-panel-count">${qHighlights.length}</span>
+      </div>
+      <div class="notes-panel-body">${entries}</div>
+    </div>`;
+}
+
+function colorToVar(cls) {
+  return {
+    'hl-yellow': '--hl-y', 'hl-green': '--hl-g',
+    'hl-blue': '--hl-b',   'hl-pink': '--hl-p'
+  }[cls] || 'black';
+}
+
+// Attach mouseup listener to passage pane for highlighting
+function attachPassageListener(qi) {
+  const pp = document.getElementById('passage-pane');
+  if (!pp) return;
+  pp._hlHandler && pp.removeEventListener('mouseup', pp._hlHandler);
+  pp._hlHandler = (e) => handlePassageMouseUp(e, qi);
+  pp.addEventListener('mouseup', pp._hlHandler);
+}
 
 // ── Exit ──────────────────────────────────────────────────────
 function confirmExit() {
