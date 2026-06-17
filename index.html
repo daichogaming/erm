@@ -38,7 +38,7 @@
     .hero-title { font-family:'Source Serif 4',serif; font-size:clamp(38px,5vw,58px); font-weight:300; line-height:1.12; color:var(--black); margin-bottom:1.25rem; }
     .hero-sub { font-size:15px; color:var(--gray-mid); max-width:420px; line-height:1.7; font-weight:300; }
     .divider { border:none; border-top:1px solid var(--gray-border); margin:0 2.5rem; }
-    .subject-row { max-width:860px; margin:0 auto; width:100%; padding:3rem 2.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .subject-row { max-width:860px; margin:0 auto; width:100%; padding:3rem 2.5rem; display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; }
     .subject-card { border:1px solid var(--gray-border); border-radius:4px; padding:2rem 1.75rem; cursor:pointer; transition:border-color .2s,background .2s,transform .2s; }
     .subject-card:hover { border-color:var(--black); background:var(--gray-bg); transform:translateY(-2px); }
     .card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; }
@@ -154,6 +154,19 @@
         </div>
       </div>
     </div>
+    <div class="subject-card" onclick="show('fulltests')">
+      <div class="card-top"><div class="card-tag">All Sections</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Full Test</div>
+      <div class="card-desc">Complete Digital SAT simulation: Reading &amp; Writing + Math, scored out of 1600.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">4 modules · ~2h 14m total</div>
+          <div class="card-test-item">Randomized from question bank</div>
+          <div class="card-test-item">Official scoring curve · /1600</div>
+        </div>
+      </div>
+    </div>
   </div>
   <hr class="divider" />
   <div class="home-stats">
@@ -182,6 +195,27 @@
   <div class="tests-section">
     <div class="sec-label">Available practice tests</div>
     <div class="tests-list" id="math-list"></div>
+  </div>
+  <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<!-- FULL-LENGTH TESTS -->
+<div id="fulltests" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="show('home')">SAT Practice</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Full Test</span></div>
+      <button class="back-btn" onclick="show('home')">← Back</button>
+    </div>
+  </header>
+  <div class="subj-hero">
+    <div class="subj-label">SAT · Full-Length Practice</div>
+    <div class="subj-title">Full Test</div>
+    <div class="subj-meta">Reading &amp; Writing (Module 1 &amp; 2) + Math (Module 1 &amp; 2) · Randomized questions · Scored out of 1600</div>
+  </div>
+  <div class="tests-section">
+    <div class="sec-label">Available full-length tests</div>
+    <div class="tests-list" id="full-list"></div>
   </div>
   <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
@@ -283,6 +317,16 @@
     return `<div class="test-row" onclick="showMods('english','${id}','${name}')">
       <div class="test-idx">${String(n).padStart(2,'0')}</div>
       <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min · All 4 skill domains</div></div>
+      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+    </div>`;
+  }).join('');
+
+  // Build full-length test list (10 tests)
+  document.getElementById('full-list').innerHTML = Array.from({length:10},(_,i)=>{
+    const n=i+1, name=`Full-Length Test ${n}`;
+    return `<div class="test-row" onclick="window.location.href='fulltest.html?test=${n}'">
+      <div class="test-idx">${String(n).padStart(2,'0')}</div>
+      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">R&amp;W Module 1 &amp; 2 (27 questions each) · Math Module 1 &amp; 2 (22 questions each) · ~2h 14m total</div></div>
       <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
     </div>`;
   }).join('');

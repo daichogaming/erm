@@ -333,6 +333,16 @@ window.addEventListener('load', () => {
     document.getElementById('load-lbl').textContent = `No questions for: ${modKey}`;
     return;
   }
+
+  // ── Diagnostic: check every question's page key exists in MATH_IMAGES ──
+  const missingImgs = QS.filter(q => !MATH_IMAGES[String(q.page)]);
+  if (missingImgs.length) {
+    console.warn(`[math.html] ${missingImgs.length}/${QS.length} questions in "${modKey}" have no matching image in MATH_IMAGES.`);
+    console.warn('Missing pages:', missingImgs.map(q => q.page));
+    console.warn('Sample MATH_IMAGES keys:', Object.keys(MATH_IMAGES).slice(0, 10));
+    console.warn('If your keys look offset by 1 (e.g. images use 0-based paging), that is the bug — regenerate math_images.js with 1-based PDF page numbers matching math_modules.js.');
+  }
+
   answers   = new Array(QS.length).fill(null);
   flagged   = new Array(QS.length).fill(false);
   frInputs  = new Array(QS.length).fill('');
@@ -499,8 +509,8 @@ function renderQ(i) {
       ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
     </div>
     <div class="q-num">Question ${i+1} of ${QS.length}</div>
-    ${imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}"/></div>`
-            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">Image unavailable</div>`}
+    ${imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check that math_images.js has a key &quot;${q.page}&quot;.</div>'"/></div>`
+            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}). Check that math_images.js has a key "${q.page}".</div>`}
     ${ansHtml}
     <label class="flag-row">
       <input type="checkbox" ${flagged[i]?'checked':''} onchange="flagged[${i}]=this.checked;upNav()">

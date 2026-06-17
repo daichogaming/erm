@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TMX8HFTQVZ');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Practice — Full-Length Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400;500&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
+      --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
+      --white: #f2f2f2; --answer-hover: #F0F0F0; --answer-selected: #111111;
+      --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
+    }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 52px;
+      border-bottom: 1px solid var(--gray-border);
+      background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 1rem; overflow: hidden; }
+    .top-bar-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; white-space: nowrap; }
+    .top-bar-sep { color: var(--gray-border); font-size: 18px; font-weight: 200; }
+    .top-bar-module { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-bar-center { display: flex; align-items: center; gap: 0.5rem; }
+    .timer {
+      font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500;
+      color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center;
+    }
+    .timer.warning { color: #c0392b; }
+    .timer-toggle {
+      font-size: 11px; color: var(--gray-mid); cursor: pointer;
+      border: 1px solid var(--gray-border); border-radius: 4px;
+      padding: 3px 8px; font-family: 'DM Mono', monospace;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .timer-toggle:hover { color: var(--black); border-color: var(--black); }
+    .top-bar-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+    .tbtn { display: flex; align-items: center; gap: 5px; font-size: 12px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 6px 11px; cursor: pointer; color: var(--gray-dark); transition: border-color 0.15s, background 0.15s, color 0.15s; white-space: nowrap; }
+    .tbtn:hover { border-color: var(--black); color: var(--black); }
+    .tbtn.on { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-exit {
+      font-size: 13px; color: var(--gray-mid); background: none;
+      border: 1px solid var(--gray-border); border-radius: 6px;
+      padding: 6px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-exit:hover { color: var(--black); border-color: var(--black); }
+    .btn-submit { font-size: 12px; font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); border: 1px solid var(--black); border-radius: 6px; padding: 6px 14px; cursor: pointer; white-space: nowrap; }
+    .btn-submit:hover { background: var(--gray-dark); }
+
+    /* ── LOADING STATE ── */
+    .loading-screen {
+      position: fixed; inset: 0; background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem; z-index: 500;
+    }
+    .loading-screen.hidden { display: none; }
+    .loading-spinner {
+      width: 32px; height: 32px; border: 2px solid var(--gray-border);
+      border-top-color: var(--black); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.08em; }
+
+    /* ── MAIN LAYOUT ── */
+    .test-body {
+      position: fixed; top: 52px; bottom: 56px; left: 0; right: 0;
+      display: flex; overflow: hidden;
+    }
+
+    /* ── DRAGGABLE DIVIDER ── */
+    .divider {
+      width: 6px; flex-shrink: 0; cursor: col-resize;
+      background: var(--gray-border);
+      position: relative; z-index: 10;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .divider:hover, .divider.dragging { background: var(--gray-mid); }
+    .divider::after {
+      content: '';
+      width: 2px; height: 32px;
+      background: var(--gray-light);
+      border-radius: 2px;
+      display: block;
+    }
+    .divider:hover::after, .divider.dragging::after { background: var(--white); }
+
+    /* ── PASSAGE PANE (English) ── */
+    .passage-pane {
+      flex: 1; overflow-y: auto; padding: 2.5rem 2rem 2.5rem 2.5rem;
+      min-width: 200px;
+    }
+    .passage-context {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .passage-skill-tag {
+      background: var(--gray-bg); border: 1px solid var(--gray-border);
+      border-radius: 2px; padding: 2px 8px; font-size: 10px; color: var(--gray-mid);
+      font-family: 'DM Mono', monospace; letter-spacing: 0.06em;
+    }
+    .passage-difficulty {
+      padding: 2px 8px; border-radius: 2px; font-size: 10px;
+      font-family: 'DM Mono', monospace; letter-spacing: 0.06em;
+      border: 1px solid var(--gray-border);
+    }
+    .diff-easy { color: #1a7a3c; border-color: #b7dfc7; background: #edf7f1; }
+    .diff-medium { color: #7a5c00; border-color: #e0d0a0; background: #fdf9ed; }
+    .diff-hard { color: #c0392b; border-color: #f0b0a8; background: #fdf0ee; }
+    .passage-text u { text-decoration: underline; text-underline-offset: 3px; }
+    .passage-text { font-size: 15px; line-height: 1.75; color: var(--black); }
+    .passage-text p { margin: 0 0 1em 0; }
+    .passage-text p:last-child { margin-bottom: 0; }
+    .passage-poem { font-size: 15px; line-height: 1.9; color: var(--black); font-family: 'DM Sans', sans-serif; }
+    .passage-poem .pline { display: block; }
+    .passage-poem .pline-blank { display: block; height: 0.6em; }
+    .passage-poem .indent-0 { padding-left: 0; }
+    .passage-poem .indent-1 { padding-left: 1.2em; }
+    .passage-poem .indent-2 { padding-left: 2.4em; }
+    .passage-poem .indent-3 { padding-left: 3.6em; }
+    .passage-poem .indent-4 { padding-left: 4.8em; }
+    .passage-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--gray-mid); margin: 1.25rem 0 0.5rem 0; }
+    .passage-label:first-child { margin-top: 0; }
+
+    /* ── QUESTION PANE (English) ── */
+    .question-pane {
+      width: 420px; flex-shrink: 0; overflow-y: auto;
+      padding: 2.5rem 2.5rem 2.5rem 2rem;
+      display: flex; flex-direction: column;
+      min-width: 280px;
+    }
+    .q-number {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem;
+    }
+    .q-text {
+      font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 400;
+      line-height: 1.65; color: var(--black); margin-bottom: 2rem;
+    }
+    .answers { display: flex; flex-direction: column; gap: 0.6rem; }
+    .answer-option {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      padding: 0.85rem 1rem; border: 1px solid var(--gray-border);
+      border-radius: 4px; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: var(--white);
+    }
+    .answer-option:hover { border-color: var(--black); background: var(--answer-hover); }
+    .answer-option.selected { border-color: var(--black); background: var(--answer-selected); }
+    .answer-option.selected .answer-letter,
+    .answer-option.selected .answer-text { color: var(--white); }
+    .answer-option.correct { border-color: var(--correct); background: #edf7f1; }
+    .answer-option.correct .answer-letter,
+    .answer-option.correct .answer-text { color: var(--correct); }
+    .answer-option.incorrect { border-color: var(--incorrect); background: #fdf0ee; }
+    .answer-option.incorrect .answer-letter,
+    .answer-option.incorrect .answer-text { color: var(--incorrect); }
+    .answer-letter {
+      font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500;
+      color: var(--gray-mid); min-width: 18px; padding-top: 1px;
+      transition: color 0.15s;
+    }
+    .answer-text { font-size: 14px; color: var(--black); line-height: 1.5; transition: color 0.15s; }
+    .flag-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; cursor: pointer; width: fit-content; }
+    .flag-row input[type="checkbox"] { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
+    .flag-label { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
+
+    .rationale-box {
+      margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--gray-border);
+      border-radius: 4px; background: var(--gray-bg);
+      font-size: 13px; color: var(--gray-dark); line-height: 1.6;
+    }
+    .rationale-label {
+      font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--gray-mid); margin-bottom: 0.5rem;
+    }
+
+    /* ── MATH LAYOUT ── */
+    .q-pane { flex: 1; overflow-y: auto; padding: 1.5rem 2rem 2rem 2.5rem; min-width: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+    .q-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .skill-tag { background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: 2px; padding: 2px 7px; }
+    .diff-tag { padding: 2px 7px; border-radius: 2px; border: 1px solid; }
+    .d-easy { color: #1a7a3c; border-color: #b7dfc7; background: #edf7f1; }
+    .d-med  { color: #7a5c00; border-color: #e0d0a0; background: #fdf9ed; }
+    .d-hard { color: #c0392b; border-color: #f0b0a8; background: #fdf0ee; }
+    .q-num { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
+    .q-img-wrap { border: 1px solid var(--gray-border); border-radius: 4px; overflow-y: auto; overflow-x: hidden; background: var(--white); max-height: calc(100vh - 220px); }
+    .q-img-wrap img { width: 100%; display: block; min-height: 0; }
+
+    .mc-btns { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .mc-btn { width: 44px; height: 44px; border: 1px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--gray-mid); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .mc-btn:hover { border-color: var(--black); color: var(--black); }
+    .mc-btn.sel { background: var(--black); color: var(--white); border-color: var(--black); }
+    .mc-btn.correct { background: #edf7f1; color: var(--correct); border-color: var(--correct); }
+    .mc-btn.wrong   { background: #fdf0ee; color: var(--incorrect); border-color: var(--incorrect); }
+    .ans-hint { font-size: 12px; color: var(--gray-mid); padding-left: 0.25rem; }
+    .ans-hint.ok  { color: var(--correct); font-weight: 500; }
+    .ans-hint.bad { color: var(--incorrect); font-weight: 500; }
+
+    .fr-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
+    .fr-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
+    .fr-input { width: 200px; padding: 10px 14px; border: 1px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 18px; color: var(--black); background: var(--white); outline: none; transition: border-color 0.15s; }
+    .fr-input:focus { border-color: var(--black); }
+    .fr-input.correct { border-color: var(--correct); background: #edf7f1; color: var(--correct); }
+    .fr-input.wrong   { border-color: var(--incorrect); background: #fdf0ee; color: var(--incorrect); }
+    .fr-result { font-size: 13px; font-family: 'DM Mono', monospace; }
+    .fr-result.ok  { color: var(--correct); }
+    .fr-result.bad { color: var(--incorrect); }
+
+    /* ── TOOL PANE (Math calculator/Desmos) ── */
+    .tool-pane { width: 420px; flex-shrink: 0; border-left: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.2s ease; }
+    .tool-pane.closed { width: 0; border-left: none; }
+    .tool-tabs { display: flex; border-bottom: 1px solid var(--gray-border); background: var(--gray-bg); flex-shrink: 0; }
+    .ttab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+    .ttab.on { color: var(--black); border-bottom-color: var(--black); background: var(--white); }
+    .tcontent { flex: 1; overflow: hidden; display: none; }
+    .tcontent.on { display: flex; flex-direction: column; }
+    .calc-wrap { padding: 1.25rem; display: flex; flex-direction: column; height: 100%; }
+    .calc-disp { background: var(--black); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; min-height: 76px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 4px; }
+    .c-expr { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); word-break: break-all; text-align: right; min-height: 16px; }
+    .c-res  { font-family: 'DM Mono', monospace; font-size: 26px; color: var(--white); word-break: break-all; text-align: right; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; }
+    .cbtn { padding: 12px 0; border: 1px solid var(--gray-border); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 14px; cursor: pointer; background: var(--white); color: var(--black); transition: background .1s; user-select: none; }
+    .cbtn:hover { background: var(--gray-bg); border-color: var(--black); }
+    .cbtn.op { background: var(--gray-bg); }
+    .cbtn.eq { background: var(--black); color: var(--white); border-color: var(--black); }
+    .cbtn.fn { font-size: 11px; color: var(--gray-mid); }
+    .cbtn.fn:hover { color: var(--black); }
+    .cbtn.clr { color: var(--incorrect); }
+    .desmos-wrap { flex: 1; overflow: hidden; }
+    #desmos-el { width: 100%; height: 100%; }
+
+    /* ── HIGHLIGHT & NOTES TOOLBAR (English) ── */
+    .passage-toolbar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .toolbar-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid); margin-right: 0.25rem; }
+    .hl-btn { width: 22px; height: 22px; border-radius: 3px; border: 2px solid transparent; cursor: pointer; transition: transform 0.1s, border-color 0.15s; flex-shrink: 0; }
+    .hl-btn:hover { transform: scale(1.15); }
+    .hl-btn.active { border-color: var(--black); }
+    .hl-btn.hl-yellow { background: #FFE066; }
+    .hl-btn.hl-green  { background: #A8E6CF; }
+    .hl-btn.hl-blue   { background: #A8D4F5; }
+    .hl-btn.hl-pink   { background: #F5A8C8; }
+    .toolbar-sep { width: 1px; height: 18px; background: var(--gray-border); margin: 0 0.25rem; }
+    .toolbar-action {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--gray-mid); background: none;
+      border: 1px solid var(--gray-border); border-radius: 3px;
+      padding: 3px 8px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .toolbar-action:hover { color: var(--black); border-color: var(--black); }
+    .hl-yellow { background: #FFE066; border-radius: 2px; cursor: pointer; }
+    .hl-green  { background: #A8E6CF; border-radius: 2px; cursor: pointer; }
+    .hl-blue   { background: #A8D4F5; border-radius: 2px; cursor: pointer; }
+    .hl-pink   { background: #F5A8C8; border-radius: 2px; cursor: pointer; }
+    .hl-yellow:hover, .hl-green:hover, .hl-blue:hover, .hl-pink:hover { filter: brightness(0.92); }
+    .has-note::after { content: '✎'; font-size: 10px; vertical-align: super; margin-left: 1px; opacity: 0.7; }
+
+    .note-popup {
+      position: fixed; z-index: 350; background: var(--white);
+      border: 1px solid var(--gray-border); border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      width: 260px; padding: 0.75rem;
+      animation: fadeSlide 0.15s ease;
+    }
+    .note-popup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .note-popup-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid); }
+    .note-popup-close { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--gray-mid); line-height: 1; padding: 0; transition: color 0.15s; }
+    .note-popup-close:hover { color: var(--black); }
+    .note-textarea {
+      width: 100%; min-height: 80px; resize: vertical;
+      border: 1px solid var(--gray-border); border-radius: 4px;
+      padding: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 13px;
+      color: var(--black); outline: none; line-height: 1.5;
+      transition: border-color 0.15s;
+    }
+    .note-textarea:focus { border-color: var(--black); }
+    .note-popup-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .note-save-btn { flex: 1; font-size: 12px; font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); border: none; border-radius: 4px; padding: 6px 0; cursor: pointer; transition: background 0.15s; }
+    .note-save-btn:hover { background: var(--gray-dark); }
+    .note-delete-btn { font-size: 12px; font-family: 'DM Sans', sans-serif; background: none; color: var(--incorrect); border: 1px solid var(--incorrect); border-radius: 4px; padding: 6px 10px; cursor: pointer; transition: background 0.15s; }
+    .note-delete-btn:hover { background: #fdf0ee; }
+
+    .notes-panel { margin-top: 1.5rem; border: 1px solid var(--gray-border); border-radius: 4px; overflow: hidden; }
+    .notes-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; background: var(--gray-bg); border-bottom: 1px solid var(--gray-border); cursor: pointer; }
+    .notes-panel-title { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid); }
+    .notes-panel-count { font-family: 'DM Mono', monospace; font-size: 10px; background: var(--black); color: var(--white); border-radius: 10px; padding: 1px 6px; }
+    .notes-panel-body { padding: 0.5rem 0.75rem; }
+    .note-entry { padding: 0.5rem 0; border-bottom: 1px solid var(--gray-border); font-size: 12px; line-height: 1.5; }
+    .note-entry:last-child { border-bottom: none; }
+    .note-entry-quote { font-style: italic; color: var(--gray-mid); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-entry-text { color: var(--black); }
+    .note-entry-edit { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gray-mid); cursor: pointer; margin-top: 0.2rem; display: inline-block; }
+    .note-entry-edit:hover { color: var(--black); }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
+      border-top: 1px solid var(--gray-border); background: var(--white);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; gap: 1rem;
+    }
+    .q-nav { display: flex; align-items: center; gap: 6px; flex: 1; overflow-x: auto; padding: 4px 0; }
+    .q-dot {
+      width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--gray-border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid);
+      cursor: pointer; flex-shrink: 0; transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .q-dot:hover { border-color: var(--black); color: var(--black); }
+    .q-dot.active { border-color: var(--black); background: var(--black); color: var(--white); }
+    .q-dot.answered { border-color: var(--black); color: var(--black); }
+    .q-dot.flagged { border-color: #c0392b; color: #c0392b; }
+    .q-dot.flagged.answered { background: #fff5f5; }
+    .q-dot.fr-dot { border-style: dashed; }
+    .nav-buttons { display: flex; gap: 0.6rem; flex-shrink: 0; }
+    .btn-nav {
+      font-size: 13px; font-family: 'DM Sans', sans-serif;
+      border: 1px solid var(--gray-border); background: var(--white);
+      border-radius: 6px; padding: 7px 18px; cursor: pointer;
+      color: var(--gray-mid); transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .btn-nav:hover { color: var(--black); border-color: var(--black); }
+    .btn-nav.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-nav.primary:hover { background: var(--gray-dark); border-color: var(--gray-dark); }
+
+    /* ── OVERLAYS ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
+    .overlay.active { display: flex; }
+    .overlay-box {
+      background: var(--white); border-radius: 6px; width: 100%; max-width: 520px;
+      max-height: 84vh; overflow-y: auto; padding: 2.5rem; animation: fadeSlide 0.2s ease;
+    }
+    .overlay-box.wide { max-width: 680px; }
+    @keyframes fadeSlide { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .overlay-title { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 300; color: var(--black); margin-bottom: 0.5rem; }
+    .overlay-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-big { font-family: 'Source Serif 4', serif; font-size: 56px; font-weight: 300; color: var(--black); line-height: 1; }
+    .score-label { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
+    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
+    .score-stat .num { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--black); }
+    .score-stat .lbl { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+    .domain-breakdown { margin-bottom: 2rem; }
+    .domain-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-border); font-size: 12px; }
+    .domain-name { flex: 1; color: var(--black); }
+    .domain-score { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); }
+    .domain-bar-wrap { width: 80px; height: 4px; background: var(--gray-border); border-radius: 2px; }
+    .domain-bar { height: 4px; background: var(--black); border-radius: 2px; }
+    .review-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+    .review-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; }
+    .review-item:hover { background: var(--gray-bg); }
+    .review-num { font-family: 'DM Mono', monospace; width: 28px; color: var(--gray-mid); }
+    .review-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-correct { background: var(--correct); }
+    .status-incorrect { background: var(--incorrect); }
+    .status-unanswered { background: var(--gray-light); }
+    .overlay-btn-row { display: flex; gap: 0.75rem; }
+    .overlay-btn { flex: 1; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s; }
+    .overlay-btn:hover { color: var(--black); border-color: var(--black); }
+    .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .overlay-btn.primary:hover { background: var(--gray-dark); }
+
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .ref-item { border: 1px solid var(--gray-border); border-radius: 4px; padding: 1rem; }
+    .ref-ttl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: .5rem; }
+    .ref-f { font-family: 'Source Serif 4', serif; font-size: 14px; line-height: 1.6; }
+
+    /* ── START SCREEN ── */
+    .start-screen {
+      position: fixed; inset: 0; background: var(--white); z-index: 600;
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .start-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem; height: 56px; border-bottom: 1px solid var(--gray-border);
+    }
+    .start-content { max-width: 720px; margin: 0 auto; width: 100%; padding: 3.5rem 2.5rem; flex: 1; }
+    .start-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem; }
+    .start-title { font-family: 'Source Serif 4', serif; font-size: 42px; font-weight: 300; line-height: 1.15; margin-bottom: 1rem; }
+    .start-desc { font-size: 14px; color: var(--gray-mid); line-height: 1.7; max-width: 480px; margin-bottom: 2.5rem; }
+    .section-flow { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2.5rem; }
+    .flow-item {
+      display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+      border: 1px solid var(--gray-border); border-radius: 4px;
+    }
+    .flow-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-light); width: 24px; }
+    .flow-info { flex: 1; }
+    .flow-name { font-size: 14px; font-weight: 500; }
+    .flow-detail { font-size: 12px; color: var(--gray-mid); margin-top: 2px; }
+    .flow-time { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); }
+    .start-actions { display: flex; gap: 1rem; }
+    .btn-start {
+      font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--black);
+      color: var(--white); border: 1px solid var(--black); border-radius: 6px;
+      padding: 12px 28px; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-start:hover { background: var(--gray-dark); }
+    .btn-back-home {
+      font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--white);
+      color: var(--gray-mid); border: 1px solid var(--gray-border); border-radius: 6px;
+      padding: 12px 28px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-back-home:hover { color: var(--black); border-color: var(--black); }
+
+    /* ── BREAK SCREEN ── */
+    .break-screen {
+      position: fixed; inset: 0; background: var(--white); z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .break-box { max-width: 480px; text-align: center; padding: 2.5rem; }
+    .break-title { font-family: 'Source Serif 4', serif; font-size: 32px; font-weight: 300; margin-bottom: 0.75rem; }
+    .break-desc { font-size: 14px; color: var(--gray-mid); line-height: 1.7; margin-bottom: 2rem; }
+    .break-timer { font-family: 'DM Mono', monospace; font-size: 48px; font-weight: 500; margin-bottom: 2rem; }
+
+    /* ── FINAL SCORE REPORT ── */
+    .report-screen {
+      position: fixed; inset: 0; background: var(--white); z-index: 600;
+      overflow-y: auto;
+    }
+    .report-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem; height: 56px; border-bottom: 1px solid var(--gray-border);
+      position: sticky; top: 0; background: var(--white); z-index: 10;
+    }
+    .report-content { max-width: 760px; margin: 0 auto; padding: 3rem 2.5rem 4rem; }
+    .report-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem; }
+    .report-title { font-family: 'Source Serif 4', serif; font-size: 38px; font-weight: 300; margin-bottom: 2rem; }
+    .total-score-card {
+      border: 1px solid var(--gray-border); border-radius: 6px; padding: 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1.5rem;
+    }
+    .total-score-num { font-family: 'Source Serif 4', serif; font-size: 72px; font-weight: 300; line-height: 1; }
+    .total-score-max { font-size: 14px; color: var(--gray-mid); margin-top: 0.5rem; }
+    .section-scores { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .section-score-item { text-align: right; }
+    .section-score-num { font-family: 'Source Serif 4', serif; font-size: 32px; font-weight: 300; }
+    .section-score-lbl { font-size: 12px; color: var(--gray-mid); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+    .report-section-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-mid); margin: 2.5rem 0 1.25rem; display: flex; align-items: center; gap: 12px; }
+    .report-section-title::after { content: ''; flex: 1; height: 1px; background: var(--gray-border); }
+    .module-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .module-result-card { border: 1px solid var(--gray-border); border-radius: 4px; padding: 1.25rem; }
+    .module-result-name { font-size: 13px; font-weight: 500; margin-bottom: 0.5rem; }
+    .module-result-score { font-family: 'DM Mono', monospace; font-size: 20px; }
+    .module-result-detail { font-size: 12px; color: var(--gray-mid); margin-top: 4px; }
+    .report-actions { display: flex; gap: 1rem; margin-top: 2.5rem; }
+
+    @media (max-width: 720px) {
+      .passage-pane { display: none; }
+      .divider { display: none; }
+      .question-pane { width: 100% !important; padding: 1.5rem; }
+      .tool-pane { display: none; }
+      .module-result-grid { grid-template-columns: 1fr; }
+      .total-score-card { flex-direction: column; align-items: flex-start; }
+      .section-scores { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loading-screen">
+  <div class="loading-spinner"></div>
+  <div class="loading-label" id="loading-label">Loading…</div>
+</div>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="start-screen" style="display:none;">
+  <div class="start-header">
+    <div class="top-bar-logo">SAT Practice</div>
+    <button class="back-btn" style="font-size:13px;color:var(--gray-mid);background:none;border:1px solid var(--gray-border);border-radius:6px;padding:6px 14px;cursor:pointer;" onclick="window.location.href='index.html'">← Back to Tests</button>
+  </div>
+  <div class="start-content">
+    <div class="start-label">Full-Length Practice Test</div>
+    <h1 class="start-title" id="start-title">Full-Length Test 1</h1>
+    <p class="start-desc">
+      This full-length practice test mirrors the structure of the official Digital SAT:
+      two Reading &amp; Writing modules followed by two Math modules. Questions are randomly
+      drawn from the question bank. At the end, you'll receive a scaled score out of 1600,
+      just like the real exam.
+    </p>
+    <div class="section-flow" id="section-flow"></div>
+    <div class="start-actions">
+      <button class="btn-start" onclick="beginFullTest()">Start Full Test</button>
+      <button class="btn-back-home" onclick="window.location.href='index.html'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREAK SCREEN -->
+<div class="break-screen" id="break-screen" style="display:none;">
+  <div class="break-box">
+    <div class="break-title">Break</div>
+    <div class="break-desc">You've completed the Reading &amp; Writing section. Take a 10-minute break before starting Math.</div>
+    <div class="break-timer" id="break-timer">10:00</div>
+    <button class="btn-start" onclick="endBreak()">Skip Break →</button>
+  </div>
+</div>
+
+<!-- ══════════════ ENGLISH MODULE UI ══════════════ -->
+<div id="english-ui" style="display:none;">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-logo">SAT Practice</div>
+      <div class="top-bar-sep">|</div>
+      <div class="top-bar-module" id="eng-bar-module">English · Module</div>
+    </div>
+    <div class="top-bar-center">
+      <div class="timer" id="eng-timer">32:00</div>
+      <div class="timer-toggle" id="eng-timer-toggle" onclick="toggleTimerEng()">Hide</div>
+    </div>
+    <div class="top-bar-right" id="eng-top-bar-right">
+      <button class="btn-exit" onclick="confirmExitFull()">Exit</button>
+      <button class="btn-submit" onclick="openReviewEng()">Review &amp; Submit</button>
+    </div>
+  </div>
+  <div class="test-body">
+    <div class="passage-pane" id="passage-pane"></div>
+    <div class="divider" id="divider"></div>
+    <div class="question-pane" id="question-pane"></div>
+  </div>
+  <div class="bottom-bar">
+    <div class="q-nav" id="eng-q-nav"></div>
+    <div class="nav-buttons">
+      <button class="btn-nav" onclick="prevQuestionEng()">← Back</button>
+      <button class="btn-nav primary" id="eng-btn-next" onclick="nextQuestionEng()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MATH MODULE UI ══════════════ -->
+<div id="math-ui" style="display:none;">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-logo">SAT Practice</div>
+      <div class="top-bar-sep">|</div>
+      <div class="top-bar-module" id="math-bar-module">Math · Module</div>
+    </div>
+    <div class="top-bar-center">
+      <div class="timer" id="math-timer">35:00</div>
+      <div class="timer-toggle" id="math-timer-toggle" onclick="toggleTimerMath()">Hide</div>
+    </div>
+    <div class="top-bar-right" id="math-top-bar-right">
+      <button class="tbtn" onclick="openOverlay('ref-overlay')">Reference</button>
+      <button class="tbtn" id="btn-calc" onclick="toggleTool('calc')">Calculator</button>
+      <button class="tbtn" id="btn-desmos" onclick="toggleTool('desmos')">Desmos</button>
+      <button class="btn-exit" onclick="confirmExitFull()">Exit</button>
+      <button class="btn-submit" onclick="openReviewMath()">Review &amp; Submit</button>
+    </div>
+  </div>
+  <div class="test-body">
+    <div class="q-pane" id="q-pane"></div>
+    <div class="tool-pane closed" id="tool-pane">
+      <div class="tool-tabs">
+        <div class="ttab on" id="ttab-calc" onclick="switchTab('calc')">Calculator</div>
+        <div class="ttab" id="ttab-desmos" onclick="switchTab('desmos')">Desmos</div>
+      </div>
+      <div class="tcontent on" id="tc-calc">
+        <div class="calc-wrap">
+          <div class="calc-disp">
+            <div class="c-expr" id="c-expr"></div>
+            <div class="c-res" id="c-res">0</div>
+          </div>
+          <div class="calc-grid">
+            <button class="cbtn fn" onclick="cf('sin(')">sin</button>
+            <button class="cbtn fn" onclick="cf('cos(')">cos</button>
+            <button class="cbtn fn" onclick="cf('tan(')">tan</button>
+            <button class="cbtn fn" onclick="cf('sqrt(')">√</button>
+            <button class="cbtn fn" onclick="cf('log(')">log</button>
+            <button class="cbtn fn" onclick="cf('ln(')">ln</button>
+            <button class="cbtn fn" onclick="cf('Math.PI')">π</button>
+            <button class="cbtn fn" onclick="cf('**')">xʸ</button>
+            <button class="cbtn clr" onclick="cClr()">AC</button>
+            <button class="cbtn op" onclick="cf('(')">(</button>
+            <button class="cbtn op" onclick="cf(')')">)</button>
+            <button class="cbtn op" onclick="cf('/')">÷</button>
+            <button class="cbtn" onclick="cn('7')">7</button>
+            <button class="cbtn" onclick="cn('8')">8</button>
+            <button class="cbtn" onclick="cn('9')">9</button>
+            <button class="cbtn op" onclick="cf('*')">×</button>
+            <button class="cbtn" onclick="cn('4')">4</button>
+            <button class="cbtn" onclick="cn('5')">5</button>
+            <button class="cbtn" onclick="cn('6')">6</button>
+            <button class="cbtn op" onclick="cf('-')">−</button>
+            <button class="cbtn" onclick="cn('1')">1</button>
+            <button class="cbtn" onclick="cn('2')">2</button>
+            <button class="cbtn" onclick="cn('3')">3</button>
+            <button class="cbtn op" onclick="cf('+')">+</button>
+            <button class="cbtn" onclick="cn('0')">0</button>
+            <button class="cbtn" onclick="cn('.')">.</button>
+            <button class="cbtn op" onclick="cBk()">⌫</button>
+            <button class="cbtn eq" onclick="cEval()">=</button>
+          </div>
+        </div>
+      </div>
+      <div class="tcontent" id="tc-desmos">
+        <div class="desmos-wrap"><div id="desmos-el"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="q-nav" id="math-q-nav"></div>
+    <div class="nav-buttons">
+      <button class="btn-nav" onclick="prevQuestionMath()">← Back</button>
+      <button class="btn-nav primary" id="math-btn-next" onclick="nextQuestionMath()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ OVERLAYS ══════════════ -->
+
+<!-- ENGLISH REVIEW OVERLAY -->
+<div class="overlay" id="eng-review-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Review Answers</div>
+    <div class="overlay-sub" id="eng-review-sub">Check your answers before submitting.</div>
+    <div class="review-list" id="eng-review-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="closeOverlay('eng-review-overlay')">Continue Test</button>
+      <button class="overlay-btn primary" onclick="submitEngModule()">Submit Module</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATH REVIEW OVERLAY -->
+<div class="overlay" id="math-review-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Review Answers</div>
+    <div class="overlay-sub" id="math-review-sub"></div>
+    <div class="review-list" id="math-review-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="closeOverlay('math-review-overlay')">Continue</button>
+      <button class="overlay-btn primary" onclick="submitMathModule()">Submit Module</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE COMPLETE OVERLAY (shown briefly between modules) -->
+<div class="overlay" id="module-complete-overlay">
+  <div class="overlay-box">
+    <div class="overlay-title">Module Submitted</div>
+    <div class="overlay-sub" id="mc-sub">—</div>
+    <p style="font-size:13px;color:var(--gray-mid);line-height:1.6;margin-bottom:1.5rem;">
+      Your answers have been recorded. Scores are revealed after you complete all four modules.
+    </p>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn primary" onclick="proceedToNextSection()" id="mc-continue-btn">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFERENCE OVERLAY (Math) -->
+<div class="overlay" id="ref-overlay">
+  <div class="overlay-box wide">
+    <div class="overlay-title">Formula Reference</div>
+    <div class="overlay-sub">Provided on the SAT Math section.</div>
+    <div class="ref-grid">
+      <div class="ref-item"><div class="ref-ttl">Circle</div><div class="ref-f">A = πr²&nbsp;&nbsp;C = 2πr</div></div>
+      <div class="ref-item"><div class="ref-ttl">Rectangle</div><div class="ref-f">A = lw</div></div>
+      <div class="ref-item"><div class="ref-ttl">Triangle</div><div class="ref-f">A = ½bh</div></div>
+      <div class="ref-item"><div class="ref-ttl">Pythagorean Theorem</div><div class="ref-f">a² + b² = c²</div></div>
+      <div class="ref-item"><div class="ref-ttl">Special Right Triangles</div><div class="ref-f">30-60-90: 1, √3, 2<br>45-45-90: 1, 1, √2</div></div>
+      <div class="ref-item"><div class="ref-ttl">Cylinder</div><div class="ref-f">V = πr²h</div></div>
+      <div class="ref-item"><div class="ref-ttl">Sphere</div><div class="ref-f">V = (4/3)πr³</div></div>
+      <div class="ref-item"><div class="ref-ttl">Cone</div><div class="ref-f">V = (1/3)πr²h</div></div>
+      <div class="ref-item"><div class="ref-ttl">Pyramid</div><div class="ref-f">V = (1/3)lwh</div></div>
+      <div class="ref-item"><div class="ref-ttl">Rectangular Solid</div><div class="ref-f">V = lwh</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--gray-mid);margin-bottom:1.5rem">360° in a circle · 2π radians · 180° in a triangle</div>
+    <div class="overlay-btn-row"><button class="overlay-btn primary" onclick="closeOverlay('ref-overlay')">Close</button></div>
+  </div>
+</div>
+
+<!-- ══════════════ FINAL REPORT ══════════════ -->
+<div class="report-screen" id="report-screen" style="display:none;">
+  <div class="report-header">
+    <div class="top-bar-logo">SAT Practice</div>
+    <button class="back-btn" style="font-size:13px;color:var(--gray-mid);background:none;border:1px solid var(--gray-border);border-radius:6px;padding:6px 14px;cursor:pointer;" onclick="window.location.href='index.html'">← Back to Tests</button>
+  </div>
+  <div class="report-content">
+    <div class="report-label">Full-Length Practice Test · Results</div>
+    <h1 class="report-title" id="report-title">Full-Length Test 1</h1>
+
+    <div class="total-score-card">
+      <div>
+        <div class="total-score-num" id="total-score">—</div>
+        <div class="total-score-max">out of 1600</div>
+      </div>
+      <div class="section-scores">
+        <div class="section-score-item">
+          <div class="section-score-num" id="rw-score">—</div>
+          <div class="section-score-lbl">Reading &amp; Writing</div>
+        </div>
+        <div class="section-score-item">
+          <div class="section-score-num" id="math-score">—</div>
+          <div class="section-score-lbl">Math</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-section-title">Reading &amp; Writing</div>
+    <div class="module-result-grid" id="rw-module-grid"></div>
+    <div class="domain-breakdown" id="rw-domain-breakdown"></div>
+
+    <div class="report-section-title">Math</div>
+    <div class="module-result-grid" id="math-module-grid"></div>
+    <div class="domain-breakdown" id="math-domain-breakdown"></div>
+
+    <div class="report-actions">
+      <button class="btn-start" onclick="window.location.href='fulltest.html'">Take Another Full Test</button>
+      <button class="btn-back-home" onclick="window.location.href='index.html'">← Back to Tests</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+<script src="questionbank.js"></script>
+<script src="math_modules.js"></script>
+<script src="math_images.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SAT SCORING CURVES (approximate official Digital SAT curves)
+//  Raw score (# correct) → Scaled score (200-800)
+// ══════════════════════════════════════════════════════════════
+// Reading & Writing: raw 0-54 (2 modules x 27 questions)
+const RW_CURVE = {
+  0:200, 1:210, 2:220, 3:230, 4:240, 5:250, 6:260, 7:270, 8:280, 9:290,
+  10:300, 11:310, 12:320, 13:330, 14:340, 15:350, 16:360, 17:370, 18:380, 19:390,
+  20:400, 21:410, 22:420, 23:430, 24:440, 25:450, 26:460, 27:470, 28:480, 29:490,
+  30:500, 31:510, 32:520, 33:530, 34:540, 35:550, 36:560, 37:570, 38:580, 39:590,
+  40:600, 41:610, 42:620, 43:630, 44:640, 45:650, 46:660, 47:670, 48:680, 49:700,
+  50:720, 51:740, 52:760, 53:780, 54:800
+};
+// Math: raw 0-44 (2 modules x 22 questions)
+const MATH_CURVE = {
+  0:200, 1:210, 2:220, 3:230, 4:240, 5:250, 6:260, 7:270, 8:280, 9:290,
+  10:300, 11:310, 12:320, 13:330, 14:340, 15:350, 16:360, 17:370, 18:380, 19:390,
+  20:400, 21:410, 22:420, 23:430, 24:440, 25:450, 26:460, 27:470, 28:490, 29:510,
+  30:530, 31:550, 32:570, 33:590, 34:610, 35:630, 36:650, 37:670, 38:690, 39:710,
+  40:730, 41:750, 42:770, 43:790, 44:800
+};
+
+function rawToScaled(raw, curve, maxRaw) {
+  raw = Math.max(0, Math.min(maxRaw, raw));
+  return curve[raw] !== undefined ? curve[raw] : 200;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+const params = new URLSearchParams(window.location.search);
+const fullTestNum = params.get('test') || '1';
+const fullTestLabel = `Full-Length Test ${fullTestNum}`;
+
+// Section sequence: eng1, eng2, math1, math2
+const SECTIONS = ['eng1', 'eng2', 'math1', 'math2'];
+let currentSectionIdx = 0;
+
+// Per-section data stores
+const sectionData = {
+  eng1:  { questions: [], answers: [], flagged: [], highlights: [], timerSecs: 32*60, label: 'Reading & Writing · Module 1', submitted: false },
+  eng2:  { questions: [], answers: [], flagged: [], highlights: [], timerSecs: 32*60, label: 'Reading & Writing · Module 2', submitted: false },
+  math1: { questions: [], answers: [], flagged: [], frInputs: [], timerSecs: 35*60, label: 'Math · Module 1', submitted: false },
+  math2: { questions: [], answers: [], flagged: [], frInputs: [], timerSecs: 35*60, label: 'Math · Module 2', submitted: false },
+};
+
+let currentQ = 0;
+let timerInterval = null;
+let timerHidden = false;
+let reviewMode = false;
+let reviewKey = null;
+
+// ── Seeded random (so test number gives reproducible question sets) ──
+function seededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+function shuffleArray(arr, rng) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Build random English module (27 questions, domain-balanced) ──
+function buildEnglishModule(rng, excludeIds) {
+  // Pool: all questions from all test modules in QUESTION_BANK
+  const DOMAIN_ORDER = ['Craft and Structure', 'Information and Ideas', 'Standard English', 'Expression of Ideas'];
+  // Target distribution for 27 questions (approximates real SAT R&W module)
+  const TARGET = {
+    'Craft and Structure': 7,
+    'Information and Ideas': 6,
+    'Standard English': 8,
+    'Expression of Ideas': 6
+  };
+
+  // Build domain pools from entire question bank
+  const pools = {};
+  DOMAIN_ORDER.forEach(d => pools[d] = []);
+  for (const modKey in QUESTION_BANK) {
+    for (const q of QUESTION_BANK[modKey]) {
+      const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
+      if (match && !excludeIds.has(q.id)) pools[match].push(q);
+    }
+  }
+  DOMAIN_ORDER.forEach(d => pools[d] = shuffleArray(pools[d], rng));
+
+  const selected = [];
+  DOMAIN_ORDER.forEach(d => {
+    const need = TARGET[d];
+    const avail = pools[d];
+    for (let i = 0; i < need && i < avail.length; i++) {
+      selected.push(avail[i]);
+      excludeIds.add(avail[i].id);
+    }
+  });
+
+  // Fill any shortfall from remaining pool
+  while (selected.length < 27) {
+    let added = false;
+    for (const d of DOMAIN_ORDER) {
+      const avail = pools[d];
+      for (const q of avail) {
+        if (!excludeIds.has(q.id)) {
+          selected.push(q); excludeIds.add(q.id); added = true; break;
+        }
+      }
+      if (selected.length >= 27) break;
+    }
+    if (!added) break;
+  }
+
+  // Order: Craft & Structure -> Information & Ideas -> Standard English -> Expression of Ideas
+  const grouped = {};
+  DOMAIN_ORDER.forEach(d => grouped[d] = []);
+  selected.forEach(q => {
+    const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
+    if (match) grouped[match].push(q);
+  });
+  return DOMAIN_ORDER.flatMap(d => grouped[d]);
+}
+
+// ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──
+function buildMathModule(rng, excludeIds) {
+  const DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
+  const MC_PER = {'Algebra': 5, 'Advanced Math': 5, 'Problem-Solving and Data Analysis': 4, 'Geometry and Trigonometry': 3};
+  const FR_PER = {'Algebra': 1, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 2, 'Geometry and Trigonometry': 1};
+
+  const mcPools = {}, frPools = {};
+  DOMAINS.forEach(d => { mcPools[d] = []; frPools[d] = []; });
+
+  for (const modKey in MATH_MODULES) {
+    for (const q of MATH_MODULES[modKey]) {
+      if (excludeIds.has(q.id)) continue;
+      if (!DOMAINS.includes(q.domain)) continue;
+      if (q.is_mc) mcPools[q.domain].push(q);
+      else frPools[q.domain].push(q);
+    }
+  }
+  DOMAINS.forEach(d => {
+    mcPools[d] = shuffleArray(mcPools[d], rng);
+    frPools[d] = shuffleArray(frPools[d], rng);
+  });
+
+  const selected = [];
+  DOMAINS.forEach(d => {
+    for (let i = 0; i < MC_PER[d] && i < mcPools[d].length; i++) {
+      selected.push(mcPools[d][i]); excludeIds.add(mcPools[d][i].id);
+    }
+    for (let i = 0; i < FR_PER[d] && i < frPools[d].length; i++) {
+      selected.push(frPools[d][i]); excludeIds.add(frPools[d][i].id);
+    }
+  });
+
+  // Fill shortfall from any remaining pool
+  while (selected.length < 22) {
+    let added = false;
+    for (const d of DOMAINS) {
+      for (const arr of [mcPools[d], frPools[d]]) {
+        for (const q of arr) {
+          if (!excludeIds.has(q.id)) {
+            selected.push(q); excludeIds.add(q.id); added = true; break;
+          }
+        }
+        if (selected.length >= 22) break;
+      }
+      if (selected.length >= 22) break;
+    }
+    if (!added) break;
+  }
+
+  return shuffleArray(selected, rng);
+}
+
+// ── Initialize all sections ──
+function initFullTest() {
+  if (typeof QUESTION_BANK === 'undefined' || typeof MATH_MODULES === 'undefined') {
+    document.getElementById('loading-label').textContent = 'Error: questionbank.js or math_modules.js not found.';
+    return;
+  }
+
+  const seed = parseInt(fullTestNum) * 7919 + 1009; // deterministic per test number
+  const rng = seededRandom(seed);
+  const usedIds = new Set();
+
+  sectionData.eng1.questions = buildEnglishModule(rng, usedIds);
+  sectionData.eng2.questions = buildEnglishModule(rng, usedIds);
+
+  const usedMathIds = new Set();
+  sectionData.math1.questions = buildMathModule(rng, usedMathIds);
+  sectionData.math2.questions = buildMathModule(rng, usedMathIds);
+
+  // ── Diagnostic: check every math question's page key exists in MATH_IMAGES ──
+  if (typeof MATH_IMAGES !== 'undefined') {
+    const allMathQs = [...sectionData.math1.questions, ...sectionData.math2.questions];
+    const missingImgs = allMathQs.filter(q => !MATH_IMAGES[String(q.page)]);
+    if (missingImgs.length) {
+      console.warn(`[fulltest.html] ${missingImgs.length}/${allMathQs.length} math questions have no matching image in MATH_IMAGES.`);
+      console.warn('Missing pages:', missingImgs.map(q => q.page));
+      console.warn('Sample MATH_IMAGES keys:', Object.keys(MATH_IMAGES).slice(0, 10));
+    }
+  } else {
+    console.warn('[fulltest.html] MATH_IMAGES is not defined — check that math_images.js is loaded.');
+  }
+
+  // Init per-section arrays
+  ['eng1','eng2'].forEach(key => {
+    const n = sectionData[key].questions.length;
+    sectionData[key].answers = new Array(n).fill(null);
+    sectionData[key].flagged = new Array(n).fill(false);
+    sectionData[key].highlights = Array.from({length:n}, () => []);
+  });
+  ['math1','math2'].forEach(key => {
+    const n = sectionData[key].questions.length;
+    sectionData[key].answers = new Array(n).fill(null);
+    sectionData[key].flagged = new Array(n).fill(false);
+    sectionData[key].frInputs = new Array(n).fill('');
+  });
+
+  document.getElementById('loading-screen').classList.add('hidden');
+  showStartScreen();
+}
+
+function showStartScreen() {
+  document.getElementById('start-title').textContent = fullTestLabel;
+  const flowHtml = `
+    <div class="flow-item"><div class="flow-num">1</div><div class="flow-info"><div class="flow-name">Reading &amp; Writing — Module 1</div><div class="flow-detail">27 questions · All domains</div></div><div class="flow-time">32 min</div></div>
+    <div class="flow-item"><div class="flow-num">2</div><div class="flow-info"><div class="flow-name">Reading &amp; Writing — Module 2</div><div class="flow-detail">27 questions · All domains</div></div><div class="flow-time">32 min</div></div>
+    <div class="flow-item"><div class="flow-num">3</div><div class="flow-info"><div class="flow-name">Math — Module 1</div><div class="flow-detail">22 questions · MC + Free Response</div></div><div class="flow-time">35 min</div></div>
+    <div class="flow-item"><div class="flow-num">4</div><div class="flow-info"><div class="flow-name">Math — Module 2</div><div class="flow-detail">22 questions · MC + Free Response</div></div><div class="flow-time">35 min</div></div>
+  `;
+  document.getElementById('section-flow').innerHTML = flowHtml;
+  document.getElementById('start-screen').style.display = 'flex';
+}
+
+function beginFullTest() {
+  document.getElementById('start-screen').style.display = 'none';
+  currentSectionIdx = 0;
+  loadSection(SECTIONS[0]);
+}
+
+window.addEventListener('load', initFullTest);
+
+// ── Exit ──
+function confirmExitFull() {
+  if (confirm('Exit this full-length test? Your progress will not be saved.')) {
+    window.location.href = 'index.html';
+  }
+}
+
+function openOverlay(id) { document.getElementById(id).classList.add('active'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('active'); }
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SECTION ORCHESTRATION
+// ══════════════════════════════════════════════════════════════
+function loadSection(key) {
+  currentQ = 0;
+  document.getElementById('english-ui').style.display = 'none';
+  document.getElementById('math-ui').style.display = 'none';
+
+  if (key === 'eng1' || key === 'eng2') {
+    document.getElementById('english-ui').style.display = 'block';
+    initHighlights(sectionData[key].questions.length, key);
+    document.getElementById('eng-bar-module').textContent = `English · ${fullTestLabel} · ${sectionData[key].label.split('· ')[1]}`;
+    buildNavEng(key);
+    renderQuestionEng(key, 0);
+    startTimerEng(key);
+  } else {
+    document.getElementById('math-ui').style.display = 'block';
+    document.getElementById('math-bar-module').textContent = `Math · ${fullTestLabel} · ${sectionData[key].label.split('· ')[1]}`;
+    buildNavMath(key);
+    renderQuestionMath(key, 0);
+    startTimerMath(key);
+  }
+}
+
+function getCurrentSectionKey() {
+  return reviewMode ? reviewKey : SECTIONS[currentSectionIdx];
+}
+
+// ── Review mode: inspect a completed module after the final report ──
+function reviewModule(key) {
+  reviewMode = true;
+  reviewKey = key;
+  currentQ = 0;
+  document.getElementById('report-screen').style.display = 'none';
+  clearInterval(timerInterval);
+
+  if (key === 'eng1' || key === 'eng2') {
+    document.getElementById('math-ui').style.display = 'none';
+    document.getElementById('english-ui').style.display = 'block';
+    document.getElementById('eng-bar-module').textContent = `Review · ${fullTestLabel} · ${sectionData[key].label}`;
+    document.getElementById('eng-top-bar-right').innerHTML =
+      `<button class="btn-exit" onclick="backToReport()">← Back to Results</button>`;
+    document.getElementById('eng-timer').textContent = 'Review';
+    document.getElementById('eng-timer-toggle').style.display = 'none';
+    buildNavEng(key);
+    renderQuestionEng(key, 0);
+  } else {
+    document.getElementById('english-ui').style.display = 'none';
+    document.getElementById('math-ui').style.display = 'block';
+    document.getElementById('math-bar-module').textContent = `Review · ${fullTestLabel} · ${sectionData[key].label}`;
+    document.getElementById('math-top-bar-right').innerHTML =
+      `<button class="tbtn" onclick="openOverlay('ref-overlay')">Reference</button>
+       <button class="tbtn" id="btn-calc" onclick="toggleTool('calc')">Calculator</button>
+       <button class="tbtn" id="btn-desmos" onclick="toggleTool('desmos')">Desmos</button>
+       <button class="btn-exit" onclick="backToReport()">← Back to Results</button>`;
+    document.getElementById('math-timer').textContent = 'Review';
+    document.getElementById('math-timer-toggle').style.display = 'none';
+    buildNavMath(key);
+    renderQuestionMath(key, 0);
+  }
+}
+
+function backToReport() {
+  reviewMode = false;
+  reviewKey = null;
+  document.getElementById('english-ui').style.display = 'none';
+  document.getElementById('math-ui').style.display = 'none';
+  document.getElementById('report-screen').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function proceedToNextSection() {
+  closeOverlay('module-complete-overlay');
+  currentSectionIdx++;
+  if (currentSectionIdx >= SECTIONS.length) {
+    showFinalReport();
+    return;
+  }
+  // Show a break screen between Reading & Writing and Math sections
+  if (SECTIONS[currentSectionIdx] === 'math1') {
+    showBreakScreen();
+    return;
+  }
+  loadSection(SECTIONS[currentSectionIdx]);
+}
+
+let breakSecs = 10 * 60;
+let breakInterval = null;
+function showBreakScreen() {
+  breakSecs = 10 * 60;
+  document.getElementById('break-screen').style.display = 'flex';
+  updateBreakDisplay();
+  clearInterval(breakInterval);
+  breakInterval = setInterval(() => {
+    breakSecs--;
+    updateBreakDisplay();
+    if (breakSecs <= 0) endBreak();
+  }, 1000);
+}
+function updateBreakDisplay() {
+  const m = Math.floor(breakSecs / 60).toString().padStart(2, '0');
+  const s = (breakSecs % 60).toString().padStart(2, '0');
+  document.getElementById('break-timer').textContent = `${m}:${s}`;
+}
+function endBreak() {
+  clearInterval(breakInterval);
+  document.getElementById('break-screen').style.display = 'none';
+  loadSection(SECTIONS[currentSectionIdx]);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ENGLISH MODULE
+// ══════════════════════════════════════════════════════════════
+function startTimerEng(key) {
+  clearInterval(timerInterval);
+  updateTimerDisplayEng(key);
+  timerInterval = setInterval(() => {
+    const sd = sectionData[key];
+    if (sd.submitted) return;
+    sd.timerSecs--;
+    updateTimerDisplayEng(key);
+    if (sd.timerSecs <= 0) { clearInterval(timerInterval); submitEngModule(); }
+  }, 1000);
+}
+function updateTimerDisplayEng(key) {
+  const el = document.getElementById('eng-timer');
+  const sd = sectionData[key];
+  if (timerHidden) { el.textContent = 'Hidden'; el.classList.remove('warning'); return; }
+  const m = Math.floor(sd.timerSecs / 60).toString().padStart(2, '0');
+  const s = (sd.timerSecs % 60).toString().padStart(2, '0');
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle('warning', sd.timerSecs <= 300);
+}
+function toggleTimerEng() {
+  timerHidden = !timerHidden;
+  document.getElementById('eng-timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  updateTimerDisplayEng(getCurrentSectionKey());
+}
+
+function buildNavEng(key) {
+  const sd = sectionData[key];
+  const nav = document.getElementById('eng-q-nav');
+  nav.innerHTML = '';
+  for (let i = 0; i < sd.questions.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.id = `eng-dot-${i}`;
+    dot.onclick = () => goToQuestionEng(key, i);
+    nav.appendChild(dot);
+  }
+  updateNavEng(key);
+}
+function updateNavEng(key) {
+  const sd = sectionData[key];
+  for (let i = 0; i < sd.questions.length; i++) {
+    const dot = document.getElementById(`eng-dot-${i}`);
+    if (!dot) continue;
+    dot.className = 'q-dot';
+    if (i === currentQ) dot.classList.add('active');
+    if (sd.answers[i] !== null) dot.classList.add('answered');
+    if (sd.flagged[i]) dot.classList.add('flagged');
+  }
+}
+
+function goToQuestionEng(key, i) {
+  currentQ = i;
+  renderQuestionEng(key, i);
+  updateNavEng(key);
+}
+function prevQuestionEng() {
+  if (currentQ > 0) goToQuestionEng(getCurrentSectionKey(), currentQ - 1);
+}
+function nextQuestionEng() {
+  const key = getCurrentSectionKey();
+  if (currentQ < sectionData[key].questions.length - 1) goToQuestionEng(key, currentQ + 1);
+  else if (!reviewMode) openReviewEng();
+}
+
+// ── Render English Question ──
+function renderQuestionEng(key, i) {
+  const sd = sectionData[key];
+  const q = sd.questions[i];
+  const totalQ = sd.questions.length;
+  const submitted = sd.submitted;
+
+  const pp = document.getElementById('passage-pane');
+  const diffClass = { Easy: 'diff-easy', Medium: 'diff-medium', Hard: 'diff-hard' }[q.difficulty] || '';
+  const diffLabel = q.difficulty || '';
+
+  function buildPassageHTML(q) {
+    const lines = q.passage_lines;
+    function renderLines(lineArr) {
+      const hasIndent = lineArr.some(l => l.type === 'line' && l.indent > 0);
+      const blankCount = lineArr.filter(l => l.type === 'blank').length;
+      const isPoem = hasIndent || blankCount > 2;
+      if (isPoem) {
+        const html = lineArr.map(l => {
+          if (l.type === 'blank') return '<span class="pline-blank"></span>';
+          return `<span class="pline indent-${l.indent}">${escHtml(l.text)}</span>`;
+        }).join('');
+        return `<div class="passage-poem">${html}</div>`;
+      } else {
+        const paras = [];
+        let cur = [];
+        for (const l of lineArr) {
+          if (l.type === 'blank') { if (cur.length) { paras.push(cur); cur = []; } }
+          else cur.push(l.text);
+        }
+        if (cur.length) paras.push(cur);
+        if (!paras.length) return '';
+        return `<div class="passage-text">${paras.map(p => `<p>${escHtml(p.join(' '))}</p>`).join('')}</div>`;
+      }
+    }
+    if (lines && lines.length) {
+      const text1Idx = lines.findIndex(l => l.type === 'line' && /^Text\s+1\s*$/i.test(l.text));
+      const text2Idx = lines.findIndex(l => l.type === 'line' && /^Text\s+2\s*$/i.test(l.text));
+      if (text1Idx !== -1 && text2Idx !== -1 && text2Idx > text1Idx) {
+        const t1Lines = lines.slice(text1Idx + 1, text2Idx);
+        const t2Lines = lines.slice(text2Idx + 1);
+        return `<div class="passage-label">Text 1</div>${renderLines(t1Lines)}<div class="passage-label">Text 2</div>${renderLines(t2Lines)}`;
+      }
+      return renderLines(lines);
+    }
+    const raw = q.passage || '';
+    if (/^Text 1\b/i.test(raw)) {
+      const t2idx = raw.search(/Text 2\b/i);
+      if (t2idx > 0) {
+        const t1 = raw.slice(0, t2idx).replace(/^Text 1\s*/i, '').trim();
+        const t2 = raw.slice(t2idx).replace(/^Text 2\s*/i, '').trim();
+        return `<div class="passage-label">Text 1</div><div class="passage-text"><p>${escHtml(t1)}</p></div><div class="passage-label">Text 2</div><div class="passage-text"><p>${escHtml(t2)}</p></div>`;
+      }
+    }
+    return `<div class="passage-text">${raw.split('\n\n').map(p=>`<p>${escHtml(p)}</p>`).join('')}</div>`;
+  }
+
+  let passageHTML = buildPassageHTML(q);
+
+  function applyUnderline(html, q) {
+    const segments = q.underline_segments;
+    if (!segments || !segments.length) return html;
+    function norm(s) {
+      return s.replace(/\s+/g, ' ').replace(/[\u2018\u2019\u02bc]/g, "'")
+              .replace(/[\u201c\u201d]/g, '"').replace(/[\u2013\u2014]/g, '-').trim();
+    }
+    function wrapSegment(htmlStr, segText) {
+      const segNorm = norm(segText);
+      if (!segNorm) return htmlStr;
+      let plain = '', inTag = false;
+      for (let i = 0; i < htmlStr.length; i++) {
+        if (htmlStr[i] === '<') { inTag = true; continue; }
+        if (htmlStr[i] === '>') { inTag = false; continue; }
+        if (!inTag) plain += htmlStr[i];
+      }
+      const plainNorm = norm(plain);
+      let idx = plainNorm.indexOf(segNorm);
+      if (idx === -1) {
+        const partial = segNorm.substring(0, Math.min(40, segNorm.length));
+        idx = plainNorm.indexOf(partial);
+        if (idx === -1) return htmlStr;
+      }
+      const endIdx = idx + segNorm.length;
+      let charCount = 0, inT = false, startHtmlPos = -1, endHtmlPos = -1;
+      for (let i = 0; i < htmlStr.length; i++) {
+        if (htmlStr[i] === '<') inT = true;
+        if (!inT) {
+          if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
+          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
+          charCount++;
+        }
+        if (htmlStr[i] === '>') inT = false;
+      }
+      if (endHtmlPos === -1) endHtmlPos = htmlStr.length;
+      if (startHtmlPos === -1) return htmlStr;
+      return htmlStr.slice(0, startHtmlPos) + '<u>' + htmlStr.slice(startHtmlPos, endHtmlPos) + '</u>' + htmlStr.slice(endHtmlPos);
+    }
+    let result = html;
+    for (const seg of segments) result = wrapSegment(result, seg);
+    return result;
+  }
+
+  pp.innerHTML = `
+    <div class="passage-context">
+      <span>${q.domain || 'Reading and Writing'}</span>
+      <span class="passage-skill-tag">${q.skill || ''}</span>
+      ${diffLabel ? `<span class="passage-difficulty ${diffClass}">${diffLabel}</span>` : ''}
+    </div>
+    <div class="passage-toolbar">
+      <span class="toolbar-label">Highlight</span>
+      <div class="hl-btn hl-yellow" id="hl-yellow" title="Yellow" onclick="setHighlightColor('hl-yellow')"></div>
+      <div class="hl-btn hl-green"  id="hl-green"  title="Green"  onclick="setHighlightColor('hl-green')"></div>
+      <div class="hl-btn hl-blue"   id="hl-blue"   title="Blue"   onclick="setHighlightColor('hl-blue')"></div>
+      <div class="hl-btn hl-pink"   id="hl-pink"   title="Pink"   onclick="setHighlightColor('hl-pink')"></div>
+      <div class="toolbar-sep"></div>
+      <button class="toolbar-action" onclick="clearAllHighlights('${key}')" title="Remove all highlights">Clear</button>
+    </div>
+    <div id="passage-content">${applyUnderline(passageHTML, q)}</div>`;
+
+  const qp = document.getElementById('question-pane');
+  const letters = ['A','B','C','D'];
+  const choicesHTML = q.choices.map((c, ci) => {
+    let cls = 'answer-option';
+    if (submitted) {
+      if (ci === q.answer) cls += ' correct';
+      else if (ci === sd.answers[i] && ci !== q.answer) cls += ' incorrect';
+    } else {
+      if (sd.answers[i] === ci) cls += ' selected';
+    }
+    return `<div class="${cls}" onclick="selectAnswerEng('${key}',${i},${ci})">
+      <div class="answer-letter">${letters[ci]}</div>
+      <div class="answer-text">${escHtml(c)}</div>
+    </div>`;
+  }).join('');
+
+  const rationaleHTML = submitted && q.rationale ? `
+    <div class="rationale-box">
+      <div class="rationale-label">Explanation</div>
+      ${escHtml(q.rationale)}
+    </div>` : '';
+
+  qp.innerHTML = `
+    <div class="q-number">Question ${i + 1} of ${totalQ}</div>
+    <div class="q-text">${escHtml(q.question)}</div>
+    <div class="answers">${choicesHTML}</div>
+    <label class="flag-row">
+      <input type="checkbox" id="flag-cb" ${sd.flagged[i] ? 'checked' : ''} onchange="toggleFlagEng('${key}',${i})">
+      <span class="flag-label">Flag for review</span>
+    </label>
+    ${rationaleHTML}
+    <div id="notes-panel"></div>`;
+
+  renderNotesPanel(key, i);
+  restoreHighlights(key, i);
+  updateHighlightButtons();
+  attachPassageListener(key, i);
+
+  document.getElementById('eng-btn-next').textContent =
+    i === totalQ - 1 ? (reviewMode ? 'Last Question' : 'Review →') : 'Next →';
+}
+
+function selectAnswerEng(key, qi, ci) {
+  const sd = sectionData[key];
+  if (sd.submitted) return;
+  sd.answers[qi] = ci;
+  updateNavEng(key);
+  renderQuestionEng(key, qi);
+}
+function toggleFlagEng(key, qi) {
+  sectionData[key].flagged[qi] = document.getElementById('flag-cb').checked;
+  updateNavEng(key);
+}
+
+function openReviewEng() {
+  const key = getCurrentSectionKey();
+  const sd = sectionData[key];
+  const unanswered = sd.answers.filter(a => a === null).length;
+  const flagCount = sd.flagged.filter(Boolean).length;
+  document.getElementById('eng-review-sub').textContent = `${unanswered} unanswered · ${flagCount} flagged`;
+  document.getElementById('eng-review-list').innerHTML = sd.questions.map((q, i) => {
+    const status = sd.answers[i] === null
+      ? '<span style="color:var(--gray-mid)">Not answered</span>'
+      : `<span style="color:var(--black)">Answer ${['A','B','C','D'][sd.answers[i]]}</span>`;
+    const flagMark = sd.flagged[i] ? ' <span style="color:#c0392b;font-size:11px;">★ Flagged</span>' : '';
+    return `<div class="review-item" onclick="closeOverlay('eng-review-overlay');goToQuestionEng('${key}',${i})">
+      <div class="review-num">${i+1}</div>
+      <div style="flex:1;font-size:13px;color:var(--black);">${escHtml(q.question.substring(0,60))}…</div>
+      <div>${status}${flagMark}</div>
+    </div>`;
+  }).join('');
+  openOverlay('eng-review-overlay');
+}
+
+function submitEngModule() {
+  const key = getCurrentSectionKey();
+  const sd = sectionData[key];
+  sd.submitted = true;
+  clearInterval(timerInterval);
+
+  closeOverlay('eng-review-overlay');
+
+  if (currentSectionIdx >= SECTIONS.length - 1) {
+    proceedToNextSection();
+    return;
+  }
+
+  document.getElementById('mc-sub').textContent = sd.label;
+  document.getElementById('mc-continue-btn').textContent = 'Continue →';
+  openOverlay('module-complete-overlay');
+}
+
+// ── Highlights & Notes ────────────────────────────────────────
+let activeColor = 'hl-yellow';
+let hlCounter = 0;
+
+function initHighlights(total, key) {
+  sectionData[key].highlights = Array.from({length: total}, () => []);
+}
+function setHighlightColor(color) {
+  activeColor = color;
+  updateHighlightButtons();
+}
+function updateHighlightButtons() {
+  ['hl-yellow','hl-green','hl-blue','hl-pink'].forEach(c => {
+    const btn = document.getElementById(c);
+    if (btn) btn.classList.toggle('active', c === activeColor);
+  });
+}
+function restoreHighlights(key, qi) {
+  const content = document.getElementById('passage-content');
+  if (!content) return;
+  sectionData[key].highlights[qi].forEach(h => applyHighlightSpan(content, h));
+  attachHighlightListeners(key, qi);
+}
+function handlePassageMouseUp(e, key, qi) {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const range = sel.getRangeAt(0);
+  const content = document.getElementById('passage-content');
+  if (!content || !content.contains(range.commonAncestorContainer)) { sel.removeAllRanges(); return; }
+  const selectedText = sel.toString().trim();
+  if (!selectedText) return;
+  const id = 'hl_' + (++hlCounter);
+  const h = { id, color: activeColor, text: selectedText, note: '' };
+  sectionData[key].highlights[qi].push(h);
+  try {
+    const span = document.createElement('span');
+    span.className = activeColor;
+    span.dataset.hlId = id;
+    range.surroundContents(span);
+  } catch(err) {
+    sectionData[key].highlights[qi].pop();
+    sel.removeAllRanges();
+    return;
+  }
+  sel.removeAllRanges();
+  attachHighlightListeners(key, qi);
+  renderNotesPanel(key, qi);
+}
+function attachHighlightListeners(key, qi) {
+  const content = document.getElementById('passage-content');
+  if (!content) return;
+  content.querySelectorAll('[data-hl-id]').forEach(span => {
+    span.onclick = (e) => { e.stopPropagation(); openNotePopup(span.dataset.hlId, key, qi, span); };
+  });
+}
+function applyHighlightSpan(container, h) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const idx = node.textContent.indexOf(h.text);
+    if (idx === -1) continue;
+    if (node.parentElement && node.parentElement.dataset && node.parentElement.dataset.hlId) continue;
+    const range = document.createRange();
+    range.setStart(node, idx);
+    range.setEnd(node, idx + h.text.length);
+    const span = document.createElement('span');
+    span.className = h.color + (h.note ? ' has-note' : '');
+    span.dataset.hlId = h.id;
+    try { range.surroundContents(span); } catch(e) {}
+    break;
+  }
+}
+function clearAllHighlights(key) {
+  sectionData[key].highlights[currentQ] = [];
+  renderQuestionEng(key, currentQ);
+}
+let activePopup = null;
+function openNotePopup(hlId, key, qi, anchorEl) {
+  closeNotePopup();
+  const h = sectionData[key].highlights[qi].find(x => x.id === hlId);
+  if (!h) return;
+  const popup = document.createElement('div');
+  popup.className = 'note-popup';
+  popup.id = 'note-popup';
+  popup.innerHTML = `
+    <div class="note-popup-header">
+      <span class="note-popup-label">Note</span>
+      <button class="note-popup-close" onclick="closeNotePopup()">×</button>
+    </div>
+    <div style="font-size:11px;color:var(--gray-mid);margin-bottom:0.4rem;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"${escHtml(h.text.substring(0,60))}${h.text.length>60?'…':''}"</div>
+    <textarea class="note-textarea" id="note-input" placeholder="Add a note…">${escHtml(h.note)}</textarea>
+    <div class="note-popup-actions">
+      <button class="note-save-btn" onclick="saveNote('${hlId}','${key}',${qi})">Save</button>
+      <button class="note-delete-btn" onclick="deleteHighlight('${hlId}','${key}',${qi})">Remove</button>
+    </div>`;
+  document.body.appendChild(popup);
+  activePopup = popup;
+  const rect = anchorEl.getBoundingClientRect();
+  let top = rect.bottom + 6, left = rect.left;
+  if (left + 260 > window.innerWidth - 10) left = window.innerWidth - 270;
+  if (top + 200 > window.innerHeight - 10) top = rect.top - 206;
+  popup.style.top = top + 'px';
+  popup.style.left = left + 'px';
+  document.getElementById('note-input').focus();
+  setTimeout(() => { document.addEventListener('mousedown', outsidePopupClose); }, 10);
+}
+function outsidePopupClose(e) {
+  if (activePopup && !activePopup.contains(e.target)) closeNotePopup();
+}
+function closeNotePopup() {
+  if (activePopup) { activePopup.remove(); activePopup = null; }
+  document.removeEventListener('mousedown', outsidePopupClose);
+}
+function saveNote(hlId, key, qi) {
+  const h = sectionData[key].highlights[qi].find(x => x.id === hlId);
+  if (h) {
+    h.note = document.getElementById('note-input').value.trim();
+    const span = document.querySelector(`[data-hl-id="${hlId}"]`);
+    if (span) span.className = h.color + (h.note ? ' has-note' : '');
+  }
+  closeNotePopup();
+  renderNotesPanel(key, qi);
+}
+function deleteHighlight(hlId, key, qi) {
+  sectionData[key].highlights[qi] = sectionData[key].highlights[qi].filter(x => x.id !== hlId);
+  closeNotePopup();
+  renderQuestionEng(key, qi);
+}
+function renderNotesPanel(key, qi) {
+  const panel = document.getElementById('notes-panel');
+  if (!panel) return;
+  const qHighlights = sectionData[key].highlights[qi] || [];
+  if (qHighlights.length === 0) { panel.innerHTML = ''; return; }
+  const colorVar = { 'hl-yellow':'#FFE066','hl-green':'#A8E6CF','hl-blue':'#A8D4F5','hl-pink':'#F5A8C8' };
+  const entries = qHighlights.map(h => `
+    <div class="note-entry">
+      <div class="note-entry-quote" style="border-left:3px solid ${colorVar[h.color]||'#000'};padding-left:6px;">
+        "${escHtml(h.text.substring(0,50))}${h.text.length>50?'…':''}"
+      </div>
+      ${h.note ? `<div class="note-entry-text">${escHtml(h.note)}</div>` : '<div style="font-size:12px;color:var(--gray-mid);font-style:italic;">No note yet — click highlight to add.</div>'}
+      <span class="note-entry-edit" onclick="(function(){var s=document.querySelector('[data-hl-id=\\'${h.id}\\']');if(s)openNotePopup('${h.id}','${key}',${qi},s);})()">Edit ↗</span>
+    </div>`).join('');
+  panel.innerHTML = `
+    <div class="notes-panel">
+      <div class="notes-panel-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span class="notes-panel-title">Highlights & Notes</span>
+        <span class="notes-panel-count">${qHighlights.length}</span>
+      </div>
+      <div class="notes-panel-body">${entries}</div>
+    </div>`;
+}
+function attachPassageListener(key, qi) {
+  const pp = document.getElementById('passage-pane');
+  if (!pp) return;
+  pp._hlHandler && pp.removeEventListener('mouseup', pp._hlHandler);
+  pp._hlHandler = (e) => handlePassageMouseUp(e, key, qi);
+  pp.addEventListener('mouseup', pp._hlHandler);
+}
+
+// ── Draggable Divider ─────────────────────────────────────────
+(function() {
+  let isDragging = false, startX = 0, startPassWidth = 0;
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+  function getEls() {
+    return {
+      divider: document.getElementById('divider'),
+      passPane: document.getElementById('passage-pane'),
+      qPane: document.getElementById('question-pane'),
+      container: document.querySelector('#english-ui .test-body')
+    };
+  }
+  document.addEventListener('mousedown', function(e) {
+    const { divider } = getEls();
+    if (!divider || e.target !== divider) return;
+    isDragging = true;
+    startX = e.clientX;
+    const { passPane } = getEls();
+    startPassWidth = passPane.getBoundingClientRect().width;
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    const { divider, passPane, qPane, container } = getEls();
+    if (!container) return;
+    const containerWidth = container.getBoundingClientRect().width;
+    const dividerWidth = divider.getBoundingClientRect().width;
+    const availableWidth = containerWidth - dividerWidth;
+    const delta = e.clientX - startX;
+    const newPassWidth = clamp(startPassWidth + delta, 200, availableWidth - 280);
+    const newQWidth = availableWidth - newPassWidth;
+    passPane.style.flex = 'none';
+    passPane.style.width = newPassWidth + 'px';
+    qPane.style.flex = 'none';
+    qPane.style.width = newQWidth + 'px';
+  });
+  document.addEventListener('mouseup', function() {
+    if (!isDragging) return;
+    isDragging = false;
+    const { divider } = getEls();
+    if (divider) divider.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+  document.addEventListener('touchstart', function(e) {
+    const { divider } = getEls();
+    if (!divider || e.target !== divider) return;
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    const { passPane } = getEls();
+    startPassWidth = passPane.getBoundingClientRect().width;
+    divider.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    const { divider, passPane, qPane, container } = getEls();
+    if (!container) return;
+    const containerWidth = container.getBoundingClientRect().width;
+    const dividerWidth = divider.getBoundingClientRect().width;
+    const availableWidth = containerWidth - dividerWidth;
+    const delta = e.touches[0].clientX - startX;
+    const newPassWidth = clamp(startPassWidth + delta, 200, availableWidth - 280);
+    const newQWidth = availableWidth - newPassWidth;
+    passPane.style.flex = 'none';
+    passPane.style.width = newPassWidth + 'px';
+    qPane.style.flex = 'none';
+    qPane.style.width = newQWidth + 'px';
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchend', function() {
+    isDragging = false;
+    const { divider } = getEls();
+    if (divider) divider.classList.remove('dragging');
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════
+//  MATH MODULE
+// ══════════════════════════════════════════════════════════════
+function startTimerMath(key) {
+  clearInterval(timerInterval);
+  updateTimerDisplayMath(key);
+  timerInterval = setInterval(() => {
+    const sd = sectionData[key];
+    if (sd.submitted) return;
+    sd.timerSecs--;
+    updateTimerDisplayMath(key);
+    if (sd.timerSecs <= 0) { clearInterval(timerInterval); submitMathModule(); }
+  }, 1000);
+}
+function updateTimerDisplayMath(key) {
+  const el = document.getElementById('math-timer');
+  const sd = sectionData[key];
+  if (timerHidden) { el.textContent = 'Hidden'; el.classList.remove('warning'); return; }
+  const m = Math.floor(sd.timerSecs / 60).toString().padStart(2, '0');
+  const s = (sd.timerSecs % 60).toString().padStart(2, '0');
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle('warning', sd.timerSecs <= 300);
+}
+function toggleTimerMath() {
+  timerHidden = !timerHidden;
+  document.getElementById('math-timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  updateTimerDisplayMath(getCurrentSectionKey());
+}
+
+function buildNavMath(key) {
+  const sd = sectionData[key];
+  const nav = document.getElementById('math-q-nav');
+  nav.innerHTML = '';
+  for (let i = 0; i < sd.questions.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot' + (sd.questions[i].is_mc ? '' : ' fr-dot');
+    dot.textContent = i + 1;
+    dot.id = `math-dot-${i}`;
+    dot.onclick = () => goToQuestionMath(key, i);
+    nav.appendChild(dot);
+  }
+  updateNavMath(key);
+}
+function updateNavMath(key) {
+  const sd = sectionData[key];
+  for (let i = 0; i < sd.questions.length; i++) {
+    const dot = document.getElementById(`math-dot-${i}`);
+    if (!dot) continue;
+    dot.className = 'q-dot' + (sd.questions[i].is_mc ? '' : ' fr-dot');
+    if (i === currentQ) dot.classList.add('active');
+    const hasAns = sd.questions[i].is_mc ? sd.answers[i] !== null : (sd.frInputs[i] && sd.frInputs[i].trim() !== '');
+    if (hasAns) dot.classList.add('answered');
+    if (sd.flagged[i]) dot.classList.add('flagged');
+  }
+}
+
+function goToQuestionMath(key, i) {
+  saveFrInput(key);
+  currentQ = i;
+  renderQuestionMath(key, i);
+  updateNavMath(key);
+}
+function prevQuestionMath() {
+  if (currentQ > 0) goToQuestionMath(getCurrentSectionKey(), currentQ - 1);
+}
+function nextQuestionMath() {
+  const key = getCurrentSectionKey();
+  if (currentQ < sectionData[key].questions.length - 1) goToQuestionMath(key, currentQ + 1);
+  else if (!reviewMode) openReviewMath();
+}
+function saveFrInput(key) {
+  const el = document.getElementById('fr-inp');
+  if (el) sectionData[key].frInputs[currentQ] = el.value;
+}
+
+function renderQuestionMath(key, i) {
+  const sd = sectionData[key];
+  const q = sd.questions[i];
+  const submitted = sd.submitted;
+  const imgSrc = (typeof MATH_IMAGES !== 'undefined' && MATH_IMAGES[String(q.page)])
+    ? `data:image/jpeg;base64,${MATH_IMAGES[String(q.page)]}` : '';
+  const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
+
+  let ansHtml = '';
+  if (q.is_mc) {
+    const letters = ['A','B','C','D'];
+    const btns = letters.map((l,li) => {
+      let cls = 'mc-btn';
+      if (submitted) {
+        if (li===q.answer_idx) cls+=' correct';
+        else if (sd.answers[i]===li && li!==q.answer_idx) cls+=' wrong';
+      } else {
+        if (sd.answers[i]===li) cls+=' sel';
+      }
+      return `<button class="${cls}" onclick="selMC('${key}',${i},${li})">${l}</button>`;
+    }).join('');
+    let hint = '';
+    if (submitted) {
+      if (sd.answers[i]===null) hint=`<span class="ans-hint">Unanswered — correct: ${letters[q.answer_idx]}</span>`;
+      else if (sd.answers[i]===q.answer_idx) hint=`<span class="ans-hint ok">✓ Correct</span>`;
+      else hint=`<span class="ans-hint bad">✗ Incorrect — correct: ${letters[q.answer_idx]}</span>`;
+    }
+    ansHtml = `<div class="mc-btns">${btns}${hint}</div>`;
+  } else {
+    const val = sd.frInputs[i] || '';
+    if (submitted) {
+      const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
+      const clsInp = !val ? '' : correct ? ' correct' : ' wrong';
+      const resHtml = !val
+        ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`
+        : correct
+          ? `<div class="fr-result ok">✓ Correct</div>`
+          : `<div class="fr-result bad">✗ Incorrect — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`;
+      ansHtml = `<div class="fr-wrap">
+        <div class="fr-label">Your answer</div>
+        <input class="fr-input${clsInp}" value="${escHtml(val)}" readonly />
+        ${resHtml}
+      </div>`;
+    } else {
+      ansHtml = `<div class="fr-wrap">
+        <div class="fr-label">Enter your answer</div>
+        <input id="fr-inp" class="fr-input" type="text" inputmode="decimal"
+          value="${escHtml(val)}" placeholder="e.g. 3/2"
+          oninput="sectionData['${key}'].frInputs[${i}]=this.value;updateNavMath('${key}')"
+          onkeydown="if(event.key==='Enter'&&${i}<sectionData['${key}'].questions.length-1)goToQuestionMath('${key}',${i}+1)" />
+      </div>`;
+    }
+  }
+
+  document.getElementById('q-pane').innerHTML = `
+    <div class="q-meta">
+      <span>${q.domain}</span>
+      <span class="skill-tag">${q.skill}</span>
+      ${q.difficulty?`<span class="diff-tag ${diffCls}">${q.difficulty}</span>`:''}
+      ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
+    </div>
+    <div class="q-num">Question ${i+1} of ${sd.questions.length}</div>
+    ${imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}).</div>'"/></div>`
+            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}).</div>`}
+    ${ansHtml}
+    <label class="flag-row">
+      <input type="checkbox" ${sd.flagged[i]?'checked':''} onchange="sectionData['${key}'].flagged[${i}]=this.checked;updateNavMath('${key}')">
+      <span class="flag-lbl">Flag for review</span>
+    </label>`;
+
+  document.getElementById('math-btn-next').textContent =
+    i===sd.questions.length-1 ? (reviewMode ? 'Last Question' : 'Review →') : 'Next →';
+
+  if (!submitted && !q.is_mc) {
+    setTimeout(() => { const el=document.getElementById('fr-inp'); if(el) el.focus(); }, 50);
+  }
+}
+
+function selMC(key, qi, li) {
+  if (sectionData[key].submitted) return;
+  sectionData[key].answers[qi]=li;
+  updateNavMath(key);
+  renderQuestionMath(key, qi);
+}
+
+// Check free response — supports decimals, fractions, equivalent forms, multiple answers
+function checkFR(input, correct) {
+  if (!input || !correct) return false;
+  const norm = s => s.trim().toLowerCase().replace(/\s+/g,'');
+  const evalFrac = s => {
+    s = norm(s);
+    if (s.includes('/')) {
+      const parts = s.split('/');
+      if (parts.length === 2) return parseFloat(parts[0]) / parseFloat(parts[1]);
+    }
+    return parseFloat(s);
+  };
+  const a = norm(input);
+  const va = evalFrac(a);
+  const acceptedRaw = String(correct).split(',').map(s => s.trim());
+  for (const acc of acceptedRaw) {
+    const b = norm(acc);
+    if (a === b) return true;
+    try {
+      const vb = evalFrac(b);
+      if (!isNaN(va) && !isNaN(vb) && Math.abs(va - vb) < 0.0001) return true;
+    } catch(e) {}
+  }
+  return false;
+}
+
+function openReviewMath() {
+  const key = getCurrentSectionKey();
+  saveFrInput(key);
+  const sd = sectionData[key];
+  const ua = sd.questions.filter((q,i) => q.is_mc ? sd.answers[i]===null : sd.frInputs[i].trim()==='').length;
+  const fl = sd.flagged.filter(Boolean).length;
+  document.getElementById('math-review-sub').textContent = `${ua} unanswered · ${fl} flagged`;
+  const letters = ['A','B','C','D'];
+  document.getElementById('math-review-list').innerHTML = sd.questions.map((q,i) => {
+    let st;
+    if (q.is_mc) st = sd.answers[i]===null ? 'Not answered' : `Answer ${letters[sd.answers[i]]}`;
+    else st = sd.frInputs[i].trim()==='' ? 'Not answered' : `"${sd.frInputs[i].trim().slice(0,12)}"`;
+    const fl = sd.flagged[i] ? ' <span style="color:#c0392b;font-size:11px">★</span>':'';
+    const frBadge = q.is_mc ? '' : ' <span style="font-size:10px;color:var(--gray-mid)">[FR]</span>';
+    return `<div class="review-item" onclick="closeOverlay('math-review-overlay');goToQuestionMath('${key}',${i})">
+      <div class="review-num">${i+1}</div>
+      <div style="flex:1;color:var(--black)">${q.domain}${frBadge}</div>
+      <div style="font-size:12px;color:var(--gray-mid)">${st}${fl}</div>
+    </div>`;
+  }).join('');
+  openOverlay('math-review-overlay');
+}
+
+function submitMathModule() {
+  const key = getCurrentSectionKey();
+  saveFrInput(key);
+  const sd = sectionData[key];
+  sd.submitted = true;
+  clearInterval(timerInterval);
+
+  closeOverlay('math-review-overlay');
+
+  if (currentSectionIdx >= SECTIONS.length - 1) {
+    proceedToNextSection();
+    return;
+  }
+
+  document.getElementById('mc-sub').textContent = sd.label;
+  document.getElementById('mc-continue-btn').textContent = 'Continue →';
+  openOverlay('module-complete-overlay');
+}
+
+// ── Calculator ──
+let calcExpr = '';
+function cn(d) { calcExpr += d; updateCalcDisplay(); }
+function cf(f) { calcExpr += f; updateCalcDisplay(); }
+function cBk() { calcExpr = calcExpr.slice(0,-1); updateCalcDisplay(); }
+function cClr() { calcExpr = ''; document.getElementById('c-res').textContent = '0'; updateCalcDisplay(); }
+function updateCalcDisplay() { document.getElementById('c-expr').textContent = calcExpr; }
+function cEval() {
+  try {
+    const sanitized = calcExpr.replace(/sqrt\(/g, 'Math.sqrt(').replace(/sin\(/g,'Math.sin(')
+      .replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(')
+      .replace(/ln\(/g,'Math.log(');
+    const result = Function('"use strict";return ('+sanitized+')')();
+    document.getElementById('c-res').textContent = Number.isFinite(result) ? String(Math.round(result*1e10)/1e10) : 'Error';
+    calcExpr = String(result);
+  } catch(e) {
+    document.getElementById('c-res').textContent = 'Error';
+  }
+}
+
+// ── Tool pane (Calculator / Desmos) ──
+let toolOpen = false, activeTab = 'calc', desmosLoaded = false;
+function toggleTool(tool) {
+  const pane = document.getElementById('tool-pane');
+  if (toolOpen && activeTab === tool) {
+    toolOpen = false;
+    pane.classList.add('closed');
+    document.getElementById('btn-calc').classList.remove('on');
+    document.getElementById('btn-desmos').classList.remove('on');
+  } else {
+    toolOpen = true;
+    pane.classList.remove('closed');
+    switchTab(tool);
+  }
+}
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('ttab-calc').classList.toggle('on', tab==='calc');
+  document.getElementById('ttab-desmos').classList.toggle('on', tab==='desmos');
+  document.getElementById('tc-calc').classList.toggle('on', tab==='calc');
+  document.getElementById('tc-desmos').classList.toggle('on', tab==='desmos');
+  document.getElementById('btn-calc').classList.toggle('on', tab==='calc' && toolOpen);
+  document.getElementById('btn-desmos').classList.toggle('on', tab==='desmos' && toolOpen);
+  if (tab === 'desmos' && !desmosLoaded) {
+    desmosLoaded = true;
+    setTimeout(() => {
+      if (typeof Desmos !== 'undefined') {
+        const elt = document.getElementById('desmos-el');
+        Desmos.GraphingCalculator(elt, { keypad: true, expressions: true, settingsMenu: false });
+      }
+    }, 100);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FINAL REPORT / SCORING
+// ══════════════════════════════════════════════════════════════
+function showFinalReport() {
+  document.getElementById('english-ui').style.display = 'none';
+  document.getElementById('math-ui').style.display = 'none';
+  document.getElementById('report-title').textContent = fullTestLabel;
+
+  // ── Reading & Writing scoring ──
+  const eng1 = sectionData.eng1, eng2 = sectionData.eng2;
+  const eng1Correct = eng1.questions.filter((q,i) => eng1.answers[i] === q.answer).length;
+  const eng2Correct = eng2.questions.filter((q,i) => eng2.answers[i] === q.answer).length;
+  const rwRaw = eng1Correct + eng2Correct;
+  const rwMax = eng1.questions.length + eng2.questions.length;
+  const rwScaled = rawToScaled(rwRaw, RW_CURVE, 54);
+
+  // ── Math scoring ──
+  const math1 = sectionData.math1, math2 = sectionData.math2;
+  const math1Correct = math1.questions.filter((q,i) => math1.answers[i] === undefined ? false :
+    (q.is_mc ? math1.answers[i]===q.answer_idx : checkFR(math1.frInputs[i], q.answer_raw))).length;
+  const math2Correct = math2.questions.filter((q,i) =>
+    (q.is_mc ? math2.answers[i]===q.answer_idx : checkFR(math2.frInputs[i], q.answer_raw))).length;
+  const mathRaw = math1Correct + math2Correct;
+  const mathMax = math1.questions.length + math2.questions.length;
+  const mathScaled = rawToScaled(mathRaw, MATH_CURVE, 44);
+
+  const total = rwScaled + mathScaled;
+
+  document.getElementById('total-score').textContent = total;
+  document.getElementById('rw-score').textContent = rwScaled;
+  document.getElementById('math-score').textContent = mathScaled;
+
+  // ── Module result cards ──
+  document.getElementById('rw-module-grid').innerHTML = `
+    <div class="module-result-card">
+      <div class="module-result-name">Reading &amp; Writing — Module 1</div>
+      <div class="module-result-score">${eng1Correct}/${eng1.questions.length}</div>
+      <div class="module-result-detail">${Math.round(eng1Correct/eng1.questions.length*100)}% correct</div>
+      <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('eng1')">Review Questions →</button>
+    </div>
+    <div class="module-result-card">
+      <div class="module-result-name">Reading &amp; Writing — Module 2</div>
+      <div class="module-result-score">${eng2Correct}/${eng2.questions.length}</div>
+      <div class="module-result-detail">${Math.round(eng2Correct/eng2.questions.length*100)}% correct</div>
+      <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('eng2')">Review Questions →</button>
+    </div>`;
+
+  document.getElementById('math-module-grid').innerHTML = `
+    <div class="module-result-card">
+      <div class="module-result-name">Math — Module 1</div>
+      <div class="module-result-score">${math1Correct}/${math1.questions.length}</div>
+      <div class="module-result-detail">${Math.round(math1Correct/math1.questions.length*100)}% correct</div>
+      <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('math1')">Review Questions →</button>
+    </div>
+    <div class="module-result-card">
+      <div class="module-result-name">Math — Module 2</div>
+      <div class="module-result-score">${math2Correct}/${math2.questions.length}</div>
+      <div class="module-result-detail">${Math.round(math2Correct/math2.questions.length*100)}% correct</div>
+      <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('math2')">Review Questions →</button>
+    </div>`;
+
+  // ── Domain breakdowns ──
+  function buildDomainBreakdown(modules, isCorrectFns, domainOrder, shortNames) {
+    let html = '';
+    domainOrder.forEach(d => {
+      let totalCount = 0, correctCount = 0;
+      modules.forEach((sd, mi) => {
+        sd.questions.forEach((q, i) => {
+          const match = typeof q.domain === 'string' && (q.domain === d || q.domain.startsWith(d));
+          if (!match) return;
+          totalCount++;
+          if (isCorrectFns[mi](q, i)) correctCount++;
+        });
+      });
+      if (totalCount === 0) return;
+      const pct = Math.round(correctCount/totalCount*100);
+      html += `<div class="domain-row">
+        <div class="domain-name">${shortNames[d] || d}</div>
+        <div class="domain-bar-wrap"><div class="domain-bar" style="width:${pct}%"></div></div>
+        <div class="domain-score">${correctCount}/${totalCount}</div>
+      </div>`;
+    });
+    return html;
+  }
+
+  const ENG_DOMAINS = ['Craft and Structure', 'Information and Ideas', 'Standard English', 'Expression of Ideas'];
+  const ENG_SHORT = {
+    'Craft and Structure': 'Craft & Structure',
+    'Information and Ideas': 'Information & Ideas',
+    'Standard English': 'Standard English Conventions',
+    'Expression of Ideas': 'Expression of Ideas'
+  };
+  document.getElementById('rw-domain-breakdown').innerHTML = buildDomainBreakdown(
+    [eng1, eng2],
+    [(q,i)=>eng1.answers[i]===q.answer, (q,i)=>eng2.answers[i]===q.answer],
+    ENG_DOMAINS, ENG_SHORT
+  );
+
+  const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
+  const MATH_SHORT = {
+    'Algebra': 'Algebra',
+    'Advanced Math': 'Advanced Math',
+    'Problem-Solving and Data Analysis': 'Problem-Solving & Data Analysis',
+    'Geometry and Trigonometry': 'Geometry & Trigonometry'
+  };
+  document.getElementById('math-domain-breakdown').innerHTML = buildDomainBreakdown(
+    [math1, math2],
+    [(q,i)=> q.is_mc ? math1.answers[i]===q.answer_idx : checkFR(math1.frInputs[i], q.answer_raw),
+     (q,i)=> q.is_mc ? math2.answers[i]===q.answer_idx : checkFR(math2.frInputs[i], q.answer_raw)],
+    MATH_DOMAINS, MATH_SHORT
+  );
+
+  document.getElementById('report-screen').style.display = 'block';
+}
+
+
+
+
+
+</script>
+</body>
+</html>
