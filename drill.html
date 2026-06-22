@@ -396,6 +396,16 @@
     .passage-poem .indent-2 { padding-left: 2.4em; }
     .passage-poem .indent-3 { padding-left: 3.6em; }
     .passage-poem .indent-4 { padding-left: 4.8em; }
+    /* Table rendering */
+    .passage-table { width: 100%; border-collapse: collapse; margin: 0 0 1.2em 0; font-size: 13.5px; font-family: 'DM Mono', monospace; }
+    .passage-table-wrap { overflow-x: auto; margin-bottom: 1.2em; }
+    .passage-table-title { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 0.5em; color: var(--black); font-family: 'DM Sans', sans-serif; line-height: 1.4; }
+    .passage-table th { background: #e8e8e8; font-weight: 600; padding: 6px 10px; border: 1px solid #bbb; text-align: center; font-size: 13px; }
+    .passage-table td { padding: 5px 10px; border: 1px solid #ccc; text-align: center; }
+    .passage-table tr:nth-child(even) td { background: #f7f7f7; }
+    .passage-table td:first-child { text-align: left; }
+    .passage-table th:first-child { text-align: left; }
+    .passage-chart-note { font-size: 13px; color: #888; font-style: italic; border: 1px solid #ddd; padding: 8px 14px; border-radius: 4px; margin-bottom: 1em; }
     .passage-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--gray-mid); margin: 1.25rem 0 0.5rem 0; }
     .passage-label:first-child { margin-top: 0; }
@@ -624,34 +634,65 @@ function renderQuestion(i) {
   function buildPassageHTML(q) {
     const lines = q.passage_lines;
 
+    // Render a single table entry
+    function renderTable(entry) {
+      const titleHtml = entry.title ? `<div class="passage-table-title">${escHtml(entry.title)}</div>` : '';
+      const thead = `<thead><tr>${entry.headers.map(h=>`<th>${escHtml(h)}</th>`).join('')}</tr></thead>`;
+      const tbody = `<tbody>${entry.rows.map(row=>`<tr>${row.map(c=>`<td>${escHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      return `${titleHtml}<div class="passage-table-wrap"><table class="passage-table">${thead}${tbody}</table></div>`;
+    }
+
     // Helper: render a passage_lines array to HTML
     function renderLines(lineArr) {
-      // Detect if this block is poem/structured (any indent > 0 or multiple blank lines)
-      const hasIndent = lineArr.some(l => l.type === 'line' && l.indent > 0);
-      const blankCount = lineArr.filter(l => l.type === 'blank').length;
-      const isPoem = hasIndent || blankCount > 2;
+      // Handle mixed arrays that may contain table/chart/text entries
+      const parts = [];
+      let textBuf = [];
 
-      if (isPoem) {
-        const html = lineArr.map(l => {
-          if (l.type === 'blank') return '<span class="pline-blank"></span>';
-          return `<span class="pline indent-${l.indent}">${escHtml(l.text)}</span>`;
-        }).join('');
-        return `<div class="passage-poem">${html}</div>`;
-      } else {
-        // Prose: group consecutive non-blank lines into paragraphs
-        const paras = [];
-        let cur = [];
-        for (const l of lineArr) {
-          if (l.type === 'blank') {
-            if (cur.length) { paras.push(cur); cur = []; }
-          } else {
-            cur.push(l.text);
+      function flushText() {
+        if (!textBuf.length) return;
+        const hasIndent = textBuf.some(l => l.type === 'line' && l.indent > 0);
+        const blankCount = textBuf.filter(l => l.type === 'blank').length;
+        const isPoem = hasIndent || blankCount > 2;
+        if (isPoem) {
+          const html = textBuf.map(l => {
+            if (l.type === 'blank') return '<span class="pline-blank"></span>';
+            return `<span class="pline indent-${l.indent||0}">${escHtml(l.text||'')}</span>`;
+          }).join('');
+          parts.push(`<div class="passage-poem">${html}</div>`);
+        } else {
+          const paras = [];
+          let cur = [];
+          for (const l of textBuf) {
+            const txt = l.text || l;
+            if (l.type === 'blank') {
+              if (cur.length) { paras.push(cur); cur = []; }
+            } else {
+              cur.push(typeof txt === 'string' ? txt : '');
+            }
           }
+          if (cur.length) paras.push(cur);
+          if (paras.length)
+            parts.push(`<div class="passage-text">${paras.map(p=>`<p>${escHtml(p.join(' '))}</p>`).join('')}</div>`);
         }
-        if (cur.length) paras.push(cur);
-        if (!paras.length) return '';
-        return `<div class="passage-text">${paras.map(p => `<p>${escHtml(p.join(' '))}</p>`).join('')}</div>`;
+        textBuf = [];
       }
+
+      for (const l of lineArr) {
+        if (l.type === 'table') {
+          flushText();
+          parts.push(renderTable(l));
+        } else if (l.type === 'chart') {
+          flushText();
+          parts.push(`<div class="passage-chart-note">${escHtml(l.note || '[Graph — see original source]')}</div>`);
+        } else if (l.type === 'text') {
+          flushText();
+          parts.push(`<div class="passage-text"><p>${escHtml(l.text)}</p></div>`);
+        } else {
+          textBuf.push(l);
+        }
+      }
+      flushText();
+      return parts.join('');
     }
 
     if (lines && lines.length) {
@@ -680,7 +721,6 @@ function renderQuestion(i) {
     }
     return `<div class="passage-text">${raw.split('\n\n').map(p=>`<p>${escHtml(p)}</p>`).join('')}</div>`;
   }
-
   let passageHTML = buildPassageHTML(q);
 
   // Apply underline formatting using precise PDF-extracted segments
