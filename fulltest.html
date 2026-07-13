@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
   <script>
@@ -22,7 +23,13 @@
       --white: #f2f2f2; --answer-hover: #F0F0F0; --answer-selected: #111111;
       --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
     }
-    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    :root[data-theme="dark"] {
+      --black: #EDEDED; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
+      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B;
+      --white: #121212; --answer-hover: #232323; --answer-selected: #EDEDED;
+      --answer-selected-text: #121212;
+    }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background .2s ease, color .2s ease; }
 
     /* ── TOP BAR ── */
     .top-bar {
@@ -1965,6 +1972,19 @@ function switchTab(tab) {
 // ══════════════════════════════════════════════════════════════
 //  FINAL REPORT / SCORING
 // ══════════════════════════════════════════════════════════════
+// ── Score history (localStorage) ─────────────────────────────
+function saveScoreHistory(record) {
+  try {
+    const key = 'sat-history';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    record.date = new Date().toISOString();
+    list.unshift(record);
+    if (list.length > 300) list.length = 300;
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) { console.warn('Could not save score history', e); }
+}
+
 function showFinalReport() {
   document.getElementById('english-ui').style.display = 'none';
   document.getElementById('math-ui').style.display = 'none';
@@ -2026,6 +2046,7 @@ function showFinalReport() {
   // ── Domain breakdowns ──
   function buildDomainBreakdown(modules, isCorrectFns, domainOrder, shortNames) {
     let html = '';
+    const data = [];
     domainOrder.forEach(d => {
       let totalCount = 0, correctCount = 0;
       modules.forEach((sd, mi) => {
@@ -2043,8 +2064,9 @@ function showFinalReport() {
         <div class="domain-bar-wrap"><div class="domain-bar" style="width:${pct}%"></div></div>
         <div class="domain-score">${correctCount}/${totalCount}</div>
       </div>`;
+      data.push({ name: shortNames[d] || d, correct: correctCount, total: totalCount, pct });
     });
-    return html;
+    return { html, data };
   }
 
   const ENG_DOMAINS = ['Craft and Structure', 'Information and Ideas', 'Standard English', 'Expression of Ideas'];
@@ -2054,11 +2076,13 @@ function showFinalReport() {
     'Standard English': 'Standard English Conventions',
     'Expression of Ideas': 'Expression of Ideas'
   };
-  document.getElementById('rw-domain-breakdown').innerHTML = buildDomainBreakdown(
+  const rwBreakdownResult = buildDomainBreakdown(
     [eng1, eng2],
     [(q,i)=>eng1.answers[i]===q.answer, (q,i)=>eng2.answers[i]===q.answer],
     ENG_DOMAINS, ENG_SHORT
   );
+  document.getElementById('rw-domain-breakdown').innerHTML = rwBreakdownResult.html;
+  const rwBreakdown = rwBreakdownResult.data;
 
   const MATH_DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
   const MATH_SHORT = {
@@ -2067,12 +2091,29 @@ function showFinalReport() {
     'Problem-Solving and Data Analysis': 'Problem-Solving & Data Analysis',
     'Geometry and Trigonometry': 'Geometry & Trigonometry'
   };
-  document.getElementById('math-domain-breakdown').innerHTML = buildDomainBreakdown(
+  const mathBreakdownResult = buildDomainBreakdown(
     [math1, math2],
     [(q,i)=> q.is_mc ? math1.answers[i]===q.answer_idx : checkFR(math1.frInputs[i], q.answer_raw),
      (q,i)=> q.is_mc ? math2.answers[i]===q.answer_idx : checkFR(math2.frInputs[i], q.answer_raw)],
     MATH_DOMAINS, MATH_SHORT
   );
+  document.getElementById('math-domain-breakdown').innerHTML = mathBreakdownResult.html;
+
+  saveScoreHistory({
+    type: 'fulltest', typeLabel: 'Full Test',
+    title: fullTestLabel,
+    correct: total, total: 1600, pct: Math.round(total/1600*100),
+    fulltest: {
+      total, rw: rwScaled, math: mathScaled,
+      modules: [
+        { name: 'Reading & Writing — Module 1', correct: eng1Correct, total: eng1.questions.length },
+        { name: 'Reading & Writing — Module 2', correct: eng2Correct, total: eng2.questions.length },
+        { name: 'Math — Module 1', correct: math1Correct, total: math1.questions.length },
+        { name: 'Math — Module 2', correct: math2Correct, total: math2.questions.length },
+      ],
+      rwBreakdown, mathBreakdown: mathBreakdownResult.data
+    }
+  });
 
   document.getElementById('report-screen').style.display = 'block';
 }

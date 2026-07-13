@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TMX8HFTQVZ');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Previous Scores — SAT Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; --correct:#1a7a3c; --incorrect:#c0392b; }
+    :root[data-theme="dark"] { --black:#EDEDED; --gray-dark:#C7C7C7; --gray-mid:#9A9A9A; --gray-light:#5A5A5A; --gray-border:#333333; --gray-bg:#1B1B1B; --white:#121212; }
+    html, body { font-family:'DM Sans',sans-serif; background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; transition:background .2s ease,color .2s ease; }
+    .page { display:none; min-height:100vh; flex-direction:column; }
+    .page.active { display:flex; animation:fadeIn .22s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+
+    .site-header { display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:56px; border-bottom:1px solid var(--gray-border); background:var(--white); position:sticky; top:0; z-index:100; }
+    .logo { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; letter-spacing:.06em; color:var(--black); text-transform:uppercase; cursor:pointer; }
+    .hdr-right { display:flex; align-items:center; gap:1.5rem; }
+    .breadcrumb { font-size:13px; color:var(--gray-mid); display:flex; align-items:center; gap:8px; }
+    .breadcrumb .sep { color:var(--gray-light); }
+    .breadcrumb .crumb { cursor:pointer; transition:color .15s; }
+    .breadcrumb .crumb:hover { color:var(--black); }
+    .breadcrumb .cur { color:var(--black); font-weight:500; }
+    .back-btn { font-size:13px; color:var(--gray-mid); background:none; border:1px solid var(--gray-border); border-radius:6px; padding:6px 14px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color .15s,border-color .15s; }
+    .back-btn:hover { color:var(--black); border-color:var(--black); }
+
+    .hero { padding:4rem 2.5rem 2.5rem; max-width:860px; margin:0 auto; width:100%; }
+    .hero-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1.25rem; }
+    .hero-title { font-family:'Source Serif 4',serif; font-size:clamp(32px,5vw,44px); font-weight:300; line-height:1.12; color:var(--black); margin-bottom:.75rem; }
+    .hero-sub { font-size:14px; color:var(--gray-mid); max-width:480px; line-height:1.7; font-weight:300; }
+    .divider { border:none; border-top:1px solid var(--gray-border); margin:0 2.5rem; }
+
+    .list-section { max-width:860px; margin:0 auto; width:100%; padding:1.75rem 2.5rem 4rem; flex:1; }
+    .actions-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; gap:1rem; flex-wrap:wrap; }
+    .select-all-row { display:flex; align-items:center; gap:.6rem; font-size:13px; color:var(--gray-mid); }
+    .select-all-row input { width:16px; height:16px; accent-color:var(--black); cursor:pointer; }
+    .count-lbl { font-family:'DM Mono',monospace; font-size:11px; color:var(--gray-mid); text-transform:uppercase; letter-spacing:.06em; }
+    .delete-btn { font-size:13px; color:var(--incorrect); background:none; border:1px solid var(--incorrect); border-radius:6px; padding:6px 14px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:opacity .15s,background .15s; opacity:.4; pointer-events:none; }
+    .delete-btn.enabled { opacity:1; pointer-events:auto; }
+    .delete-btn.enabled:hover { background:var(--incorrect); color:#fff; }
+
+    .history-list { display:flex; flex-direction:column; }
+    .hist-row { display:flex; align-items:center; gap:1rem; padding:1rem 0; border-bottom:1px solid var(--gray-border); transition:background .15s; }
+    .hist-row:first-child { border-top:1px solid var(--gray-border); }
+    .hist-row:hover { background:var(--gray-bg); }
+    .hist-check { width:16px; height:16px; accent-color:var(--black); cursor:pointer; flex-shrink:0; }
+    .hist-main { flex:1; display:flex; flex-direction:column; gap:3px; cursor:pointer; min-width:0; }
+    .hist-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .hist-type { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:2px 8px; border-radius:2px; border:1px solid var(--gray-border); color:var(--gray-mid); flex-shrink:0; }
+    .hist-title { font-size:14px; font-weight:500; color:var(--black); }
+    .hist-date { font-size:12px; color:var(--gray-mid); font-family:'DM Mono',monospace; }
+    .hist-right { display:flex; align-items:center; gap:1.5rem; flex-shrink:0; }
+    .hist-score { text-align:right; }
+    .hist-score-num { font-family:'Source Serif 4',serif; font-size:18px; font-weight:400; color:var(--black); }
+    .hist-score-pct { font-size:11px; color:var(--gray-mid); font-family:'DM Mono',monospace; }
+    .hist-arrow { color:var(--gray-light); font-size:16px; cursor:pointer; }
+    .hist-row:hover .hist-arrow { color:var(--black); }
+
+    .empty-state { padding:4rem 0; text-align:center; color:var(--gray-mid); font-size:14px; }
+    .empty-state .big { font-family:'Source Serif 4',serif; font-size:22px; font-weight:300; color:var(--black); margin-bottom:.5rem; }
+
+    .site-footer { border-top:1px solid var(--gray-border); padding:1.25rem 2.5rem; display:flex; align-items:center; justify-content:space-between; margin-top:auto; }
+    .footer-copy { font-size:12px; color:var(--gray-light); font-family:'DM Mono',monospace; }
+    .footer-note { font-size:12px; color:var(--gray-mid); }
+
+    /* ── Detail view (mirrors the in-test results screen) ── */
+    .detail-section { max-width:640px; margin:0 auto; width:100%; padding:2.5rem; flex:1; }
+    .d-title { font-family:'Source Serif 4',serif; font-size:26px; font-weight:400; color:var(--black); margin-bottom:.3rem; text-align:center; }
+    .d-sub { font-size:13px; color:var(--gray-mid); margin-bottom:1.75rem; text-align:center; }
+    .score-big { font-family:'Source Serif 4',serif; font-size:52px; font-weight:300; color:var(--black); text-align:center; line-height:1; }
+    .score-pct { font-size:13px; color:var(--gray-mid); margin-bottom:1.5rem; text-align:center; }
+    .score-row { display:flex; justify-content:center; gap:2.5rem; margin-bottom:2rem; padding-bottom:2rem; border-bottom:1px solid var(--gray-border); }
+    .sstat { text-align:center; }
+    .sstat .n { font-family:'Source Serif 4',serif; font-size:22px; font-weight:400; color:var(--black); }
+    .sstat .l { font-size:11px; color:var(--gray-mid); text-transform:uppercase; letter-spacing:.06em; font-family:'DM Mono',monospace; margin-top:2px; }
+    .dom-break { margin-bottom:2rem; }
+    .dom-break-title, .rev-list-title { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:.9rem; }
+    .dom-row { display:flex; align-items:center; gap:12px; margin-bottom:.7rem; }
+    .dom-name { font-size:12px; color:var(--gray-dark); width:170px; flex-shrink:0; }
+    .bar-wrap { flex:1; height:6px; background:var(--gray-border); border-radius:3px; overflow:hidden; }
+    .bar-fill { height:100%; background:var(--black); border-radius:3px; }
+    .dom-sc { font-size:12px; color:var(--gray-mid); width:44px; text-align:right; font-family:'DM Mono',monospace; flex-shrink:0; }
+    .rev-list { border-top:1px solid var(--gray-border); }
+    .rev-item { display:flex; align-items:center; gap:12px; padding:.65rem 0; border-bottom:1px solid var(--gray-border); font-size:13px; }
+    .rev-num { font-family:'DM Mono',monospace; font-size:11px; color:var(--gray-light); width:24px; flex-shrink:0; }
+    .rev-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .rd-ok { background:var(--correct); }
+    .rd-bad { background:var(--incorrect); }
+    .rd-skip { background:var(--gray-light); }
+
+    /* Full-test detail */
+    .total-score-card { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; border:1px solid var(--gray-border); border-radius:6px; padding:2rem; margin-bottom:2.5rem; }
+    .total-score-num { font-family:'Source Serif 4',serif; font-size:64px; font-weight:300; line-height:1; }
+    .total-score-max { font-size:13px; color:var(--gray-mid); margin-top:.4rem; }
+    .section-scores { display:flex; gap:2.5rem; }
+    .section-score-item { text-align:center; }
+    .section-score-num { font-family:'Source Serif 4',serif; font-size:26px; font-weight:400; }
+    .section-score-lbl { font-size:11px; color:var(--gray-mid); text-transform:uppercase; letter-spacing:.06em; font-family:'DM Mono',monospace; margin-top:2px; }
+    .report-section-title { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray-mid); margin:2rem 0 1rem; display:flex; align-items:center; gap:12px; }
+    .report-section-title::after { content:''; flex:1; height:1px; background:var(--gray-border); }
+    .module-result-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; }
+    .module-result-card { border:1px solid var(--gray-border); border-radius:4px; padding:1.25rem; }
+    .module-result-name { font-size:13px; font-weight:500; color:var(--black); margin-bottom:.5rem; }
+    .module-result-score { font-family:'Source Serif 4',serif; font-size:22px; font-weight:400; }
+    .module-result-detail { font-size:11px; color:var(--gray-mid); margin-top:2px; }
+
+    .detail-actions { display:flex; justify-content:center; gap:1rem; margin-top:2.5rem; }
+    .del-one-btn { font-size:13px; color:var(--incorrect); background:none; border:1px solid var(--incorrect); border-radius:6px; padding:8px 18px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background .15s; }
+    .del-one-btn:hover { background:var(--incorrect); color:#fff; }
+
+    @media (max-width:600px) {
+      .site-header,.hero,.list-section,.detail-section { padding-left:1.25rem; padding-right:1.25rem; }
+      .divider { margin:0 1.25rem; }
+      .breadcrumb { display:none; }
+      .hist-date { display:none; }
+      .module-result-grid { grid-template-columns:1fr; }
+      .total-score-card { flex-direction:column; align-items:flex-start; }
+      .dom-name { width:110px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LIST -->
+<div id="list-page" class="page active">
+  <header class="site-header">
+    <div class="logo" onclick="window.location.href='index.html'">SAT Practice</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="window.location.href='index.html'">Home</span><span class="sep">/</span><span class="cur">Previous Scores</span></div>
+      <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    </div>
+  </header>
+  <div class="hero">
+    <div class="hero-label">Score History</div>
+    <h1 class="hero-title">Previous Scores</h1>
+    <p class="hero-sub">Every module, drill, and full-length test you've completed on this device, most recent first.</p>
+  </div>
+  <hr class="divider" />
+  <div class="list-section">
+    <div class="actions-bar">
+      <label class="select-all-row"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this.checked)" /> Select all</label>
+      <span class="count-lbl" id="count-lbl">0 results</span>
+      <button class="delete-btn" id="delete-btn" onclick="deleteSelected()">Delete Selected</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <div class="big">No test scores yet</div>
+      <div>Finish a module, drill, or full-length test and it'll show up here.</div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<!-- DETAIL — module/drill style (matches in-test results screen) -->
+<div id="detail-page" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="window.location.href='index.html'">SAT Practice</div>
+    <div class="hdr-right">
+      <div class="breadcrumb">
+        <span class="crumb" onclick="window.location.href='index.html'">Home</span><span class="sep">/</span>
+        <span class="crumb" onclick="showList()">Previous Scores</span><span class="sep">/</span>
+        <span class="cur" id="d-crumb">Result</span>
+      </div>
+      <button class="back-btn" onclick="showList()">← Back</button>
+    </div>
+  </header>
+
+  <!-- module-style detail -->
+  <div class="detail-section" id="module-detail" style="display:none">
+    <div class="d-title" id="m-title">—</div>
+    <div class="d-sub" id="m-sub">—</div>
+    <div class="score-big" id="m-score-num">—</div>
+    <div class="score-pct" id="m-score-pct">—</div>
+    <div class="score-row">
+      <div class="sstat"><div class="n" id="m-ok">—</div><div class="l">Correct</div></div>
+      <div class="sstat"><div class="n" id="m-bad">—</div><div class="l">Incorrect</div></div>
+      <div class="sstat"><div class="n" id="m-skip">—</div><div class="l">Unanswered</div></div>
+    </div>
+    <div class="dom-break">
+      <div class="dom-break-title" id="m-break-title">Domain Breakdown</div>
+      <div id="m-break-list"></div>
+    </div>
+    <div class="rev-list-title">Question Review</div>
+    <div class="rev-list" id="m-rev-list"></div>
+    <div class="detail-actions">
+      <button class="del-one-btn" id="m-del-btn" onclick="deleteOne()">Delete This Result</button>
+    </div>
+  </div>
+
+  <!-- full-test-style detail -->
+  <div class="detail-section" id="full-detail" style="display:none">
+    <div class="d-title" id="f-title">—</div>
+    <div class="d-sub" id="f-sub">—</div>
+    <div class="total-score-card">
+      <div>
+        <div class="total-score-num" id="f-total">—</div>
+        <div class="total-score-max">out of 1600</div>
+      </div>
+      <div class="section-scores">
+        <div class="section-score-item"><div class="section-score-num" id="f-rw">—</div><div class="section-score-lbl">Reading &amp; Writing</div></div>
+        <div class="section-score-item"><div class="section-score-num" id="f-math">—</div><div class="section-score-lbl">Math</div></div>
+      </div>
+    </div>
+    <div class="report-section-title">Reading &amp; Writing</div>
+    <div class="module-result-grid" id="f-rw-grid"></div>
+    <div class="dom-break"><div id="f-rw-break"></div></div>
+    <div class="report-section-title">Math</div>
+    <div class="module-result-grid" id="f-math-grid"></div>
+    <div class="dom-break"><div id="f-math-break"></div></div>
+    <div class="detail-actions">
+      <button class="del-one-btn" id="f-del-btn" onclick="deleteOne()">Delete This Result</button>
+    </div>
+  </div>
+
+  <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<script>
+  const HKEY = 'sat-history';
+  let history = [];
+  let curId = null;
+
+  function loadHistory() {
+    try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); }
+    catch (e) { history = []; }
+    history.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+  function saveHistory() {
+    try { localStorage.setItem(HKEY, JSON.stringify(history)); } catch (e) {}
+  }
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return '—';
+    const datePart = d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    const timePart = d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+    return `${datePart} · ${timePart}`;
+  }
+
+  function render() {
+    const list = document.getElementById('history-list');
+    const empty = document.getElementById('empty-state');
+    document.getElementById('count-lbl').textContent = `${history.length} result${history.length===1?'':'s'}`;
+    if (!history.length) {
+      list.innerHTML = ''; empty.style.display = 'block';
+      document.getElementById('select-all').checked = false;
+      updateDeleteBtn();
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = history.map(r => {
+      const scoreLabel = r.type === 'fulltest' ? `${r.fulltest.total}` : `${r.correct}/${r.total}`;
+      const pctLabel = r.type === 'fulltest' ? `RW ${r.fulltest.rw} · Math ${r.fulltest.math}` : `${r.pct}% correct`;
+      return `<div class="hist-row">
+        <input type="checkbox" class="hist-check" data-id="${r.id}" onchange="updateDeleteBtn()" />
+        <div class="hist-main" onclick="openDetail('${r.id}')">
+          <div class="hist-top">
+            <span class="hist-type">${r.typeLabel}</span>
+            <span class="hist-title">${escH(r.title)}</span>
+          </div>
+          <span class="hist-date">${fmtDate(r.date)}</span>
+        </div>
+        <div class="hist-right" onclick="openDetail('${r.id}')" style="cursor:pointer">
+          <div class="hist-score"><div class="hist-score-num">${scoreLabel}</div><div class="hist-score-pct">${pctLabel}</div></div>
+          <div class="hist-arrow">→</div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('select-all').checked = false;
+    updateDeleteBtn();
+  }
+
+  function escH(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function toggleSelectAll(checked) {
+    document.querySelectorAll('.hist-check').forEach(c => c.checked = checked);
+    updateDeleteBtn();
+  }
+  function updateDeleteBtn() {
+    const n = document.querySelectorAll('.hist-check:checked').length;
+    const btn = document.getElementById('delete-btn');
+    btn.classList.toggle('enabled', n > 0);
+    btn.textContent = n > 0 ? `Delete Selected (${n})` : 'Delete Selected';
+  }
+  function deleteSelected() {
+    const ids = Array.from(document.querySelectorAll('.hist-check:checked')).map(c => c.dataset.id);
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} result${ids.length===1?'':'s'}? This can't be undone.`)) return;
+    history = history.filter(r => !ids.includes(r.id));
+    saveHistory();
+    render();
+  }
+
+  function showList() {
+    document.getElementById('detail-page').classList.remove('active');
+    document.getElementById('list-page').classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function openDetail(id) {
+    const r = history.find(h => h.id === id);
+    if (!r) return;
+    curId = id;
+    document.getElementById('d-crumb').textContent = r.title;
+    document.getElementById('list-page').classList.remove('active');
+    document.getElementById('detail-page').classList.add('active');
+    window.scrollTo(0,0);
+
+    if (r.type === 'fulltest') {
+      document.getElementById('module-detail').style.display = 'none';
+      document.getElementById('full-detail').style.display = 'block';
+      document.getElementById('f-title').textContent = r.title;
+      document.getElementById('f-sub').textContent = `Full-Length Practice Test · ${fmtDate(r.date)}`;
+      document.getElementById('f-total').textContent = r.fulltest.total;
+      document.getElementById('f-rw').textContent = r.fulltest.rw;
+      document.getElementById('f-math').textContent = r.fulltest.math;
+      document.getElementById('f-rw-grid').innerHTML = r.fulltest.modules.slice(0,2).map(m => moduleCard(m)).join('');
+      document.getElementById('f-math-grid').innerHTML = r.fulltest.modules.slice(2,4).map(m => moduleCard(m)).join('');
+      document.getElementById('f-rw-break').innerHTML = breakdownRows(r.fulltest.rwBreakdown);
+      document.getElementById('f-math-break').innerHTML = breakdownRows(r.fulltest.mathBreakdown);
+    } else {
+      document.getElementById('full-detail').style.display = 'none';
+      document.getElementById('module-detail').style.display = 'block';
+      document.getElementById('m-title').textContent = r.title;
+      document.getElementById('m-sub').textContent = `${r.typeLabel} · ${fmtDate(r.date)}`;
+      document.getElementById('m-score-num').textContent = `${r.correct}/${r.total}`;
+      document.getElementById('m-score-pct').textContent = `${r.pct}% correct`;
+      document.getElementById('m-ok').textContent = r.stats.correct;
+      document.getElementById('m-bad').textContent = r.stats.incorrect;
+      document.getElementById('m-skip').textContent = r.stats.unanswered;
+      document.getElementById('m-break-title').textContent = `${r.breakdownLabel || 'Domain'} Breakdown`;
+      document.getElementById('m-break-list').innerHTML = breakdownRows(r.breakdown);
+      document.getElementById('m-rev-list').innerHTML = (r.review||[]).map(q => {
+        const cls = q.status === 'correct' ? 'rd-ok' : q.status === 'incorrect' ? 'rd-bad' : 'rd-skip';
+        const lbl = q.status === 'correct' ? 'Correct' : q.status === 'incorrect' ? 'Incorrect' : 'Unanswered';
+        return `<div class="rev-item">
+          <div class="rev-num">${q.num}</div>
+          <div class="rev-dot ${cls}"></div>
+          <div style="flex:1;color:var(--black)">${escH(q.domain||'')}</div>
+          <div style="font-size:12px;color:var(--gray-mid)">${lbl}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  function moduleCard(m) {
+    const pct = m.total ? Math.round(m.correct/m.total*100) : 0;
+    return `<div class="module-result-card">
+      <div class="module-result-name">${escH(m.name)}</div>
+      <div class="module-result-score">${m.correct}/${m.total}</div>
+      <div class="module-result-detail">${pct}% correct</div>
+    </div>`;
+  }
+  function breakdownRows(arr) {
+    return (arr||[]).map(d => `<div class="dom-row">
+      <div class="dom-name">${escH(d.name)}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${d.pct}%"></div></div>
+      <div class="dom-sc">${d.correct}/${d.total}</div>
+    </div>`).join('');
+  }
+
+  function deleteOne() {
+    if (!curId) return;
+    if (!confirm("Delete this result? This can't be undone.")) return;
+    history = history.filter(r => r.id !== curId);
+    saveHistory();
+    showList();
+    render();
+  }
+
+  loadHistory();
+  render();
+</script>
+</body>
+</html>

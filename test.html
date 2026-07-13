@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
   <script>
@@ -22,7 +23,13 @@
       --white: #f2f2f2; --answer-hover: #F0F0F0; --answer-selected: #111111;
       --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
     }
-    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    :root[data-theme="dark"] {
+      --black: #EDEDED; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
+      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B;
+      --white: #121212; --answer-hover: #232323; --answer-selected: #EDEDED;
+      --answer-selected-text: #121212;
+    }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background .2s ease, color .2s ease; }
 
     /* ── TOP BAR ── */
     .top-bar {
@@ -899,6 +906,19 @@ function closeOverlay(id) {
 }
 
 // ── Submit ────────────────────────────────────────────────────
+// ── Score history (localStorage) ─────────────────────────────
+function saveScoreHistory(record) {
+  try {
+    const key = 'sat-history';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    record.date = new Date().toISOString();
+    list.unshift(record);
+    if (list.length > 300) list.length = 300;
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) { console.warn('Could not save score history', e); }
+}
+
 function submitTest() {
   submitted = true;
   clearInterval(timerInterval);
@@ -924,6 +944,7 @@ function submitTest() {
     'Standard English': 'Standard English',
   };
   let domHtml = '';
+  const domainData = [];
   for (const d of domains) {
     const dQs = QUESTIONS.map((q,i) => ({q,i})).filter(({q}) => q.domain === d);
     if (dQs.length === 0) continue;
@@ -935,16 +956,20 @@ function submitTest() {
       <div class="domain-bar-wrap"><div class="domain-bar" style="width:${pct}%"></div></div>
       <div class="domain-score">${dCorrect}/${dTotal}</div>
     </div>`;
+    domainData.push({ name: domainShort[d], correct: dCorrect, total: dTotal, pct });
   }
   document.getElementById('domain-breakdown').innerHTML = domHtml;
 
   // Score review list
+  const reviewData = [];
   document.getElementById('score-review-list').innerHTML = QUESTIONS.map((q, i) => {
-    let statusClass = 'status-unanswered', statusLabel = 'Unanswered';
+    let statusClass = 'status-unanswered', statusLabel = 'Unanswered', status = 'unanswered';
     if (answers[i] !== null) {
       statusClass = answers[i] === q.answer ? 'status-correct' : 'status-incorrect';
       statusLabel = answers[i] === q.answer ? 'Correct' : 'Incorrect';
+      status = answers[i] === q.answer ? 'correct' : 'incorrect';
     }
+    reviewData.push({ num: i+1, domain: q.domain, status });
     return `<div class="review-item" onclick="closeOverlay('score-overlay');goToQuestion(${i})">
       <div class="review-num">${i+1}</div>
       <div class="review-status ${statusClass}"></div>
@@ -952,6 +977,15 @@ function submitTest() {
       <div style="font-size:12px;color:var(--gray-mid);">${statusLabel}</div>
     </div>`;
   }).join('');
+
+  saveScoreHistory({
+    type: 'english', typeLabel: 'English',
+    title: `${label} · Module ${moduleId}`,
+    correct, total: totalQ, pct,
+    stats: { correct, incorrect, unanswered },
+    breakdownLabel: 'Domain', breakdown: domainData,
+    review: reviewData
+  });
 
   closeOverlay('review-overlay');
   document.getElementById('score-overlay').classList.add('active');

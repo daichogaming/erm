@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
   <script>
@@ -21,7 +22,12 @@
       --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
       --white: #f2f2f2; --correct: #1a7a3c; --incorrect: #c0392b;
     }
-    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    :root[data-theme="dark"] {
+      --black: #EDEDED; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
+      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B;
+      --white: #121212;
+    }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background .2s ease, color .2s ease; }
 
     /* TOP BAR */
     .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid var(--gray-border); background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
@@ -577,6 +583,19 @@ function openReview() {
   openO('rev-o');
 }
 
+// ── Score history (localStorage) ─────────────────────────────
+function saveScoreHistory(record) {
+  try {
+    const key = 'sat-history';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    record.date = new Date().toISOString();
+    list.unshift(record);
+    if (list.length > 300) list.length = 300;
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) { console.warn('Could not save score history', e); }
+}
+
 // ── Submit ─────────────────────────────────────────────────────
 function submitTest() {
   saveFrInput();
@@ -606,20 +625,24 @@ function submitTest() {
   const domains = ['Algebra','Advanced Math','Problem-Solving and Data Analysis','Geometry and Trigonometry'];
   const shortD  = {'Algebra':'Algebra','Advanced Math':'Advanced Math','Problem-Solving and Data Analysis':'PS & Data Analysis','Geometry and Trigonometry':'Geometry & Trig'};
   let dHtml = '';
+  const domainData = [];
   for (const d of domains) {
     const dqs = QS.map((q,i)=>({q,i})).filter(({q})=>q.domain===d);
     if (!dqs.length) continue;
     const dc = dqs.filter(({q,i})=>isCorrect[i]).length;
     const bp = Math.round(dc/dqs.length*100);
     dHtml += `<div class="dom-row"><div class="dom-name">${shortD[d]}</div><div class="bar-wrap"><div class="bar-fill" style="width:${bp}%"></div></div><div class="dom-sc">${dc}/${dqs.length}</div></div>`;
+    domainData.push({ name: shortD[d], correct: dc, total: dqs.length, pct: bp });
   }
   document.getElementById('dom-break').innerHTML = dHtml;
 
   const letters=['A','B','C','D'];
+  const reviewData = [];
   document.getElementById('score-rev-list').innerHTML = QS.map((q,i) => {
     let cls='rd-skip', lbl='Unanswered';
     const hasAns = q.is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
     if (hasAns) { cls=isCorrect[i]?'rd-ok':'rd-bad'; lbl=isCorrect[i]?'Correct':'Incorrect'; }
+    reviewData.push({ num:i+1, domain:q.domain, status: !hasAns?'unanswered':(isCorrect[i]?'correct':'incorrect') });
     const frB = q.is_mc ? '' : ' [FR]';
     return `<div class="rev-item" onclick="closeO('score-o');goTo(${i})">
       <div class="rev-num">${i+1}</div>
@@ -628,6 +651,15 @@ function submitTest() {
       <div style="font-size:12px;color:var(--gray-mid)">${lbl}</div>
     </div>`;
   }).join('');
+
+  saveScoreHistory({
+    type: 'math', typeLabel: 'Math',
+    title: `${testLabel} · Module ${modId}`,
+    correct, total, pct,
+    stats: { correct, incorrect, unanswered },
+    breakdownLabel: 'Domain', breakdown: domainData,
+    review: reviewData
+  });
 
   closeO('rev-o'); openO('score-o');
   renderQ(cur);

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
   <script>
@@ -17,7 +18,8 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; }
-    html, body { font-family:'DM Sans',sans-serif; background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; }
+    :root[data-theme="dark"] { --black:#EDEDED; --gray-dark:#C7C7C7; --gray-mid:#9A9A9A; --gray-light:#5A5A5A; --gray-border:#333333; --gray-bg:#1B1B1B; --white:#121212; }
+    html, body { font-family:'DM Sans',sans-serif; background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; transition:background .2s ease,color .2s ease; }
     .page { display:none; min-height:100vh; flex-direction:column; }
     .page.active { display:flex; animation:fadeIn .22s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
@@ -32,6 +34,9 @@
     .breadcrumb .cur { color:var(--black); font-weight:500; }
     .back-btn { font-size:13px; color:var(--gray-mid); background:none; border:1px solid var(--gray-border); border-radius:6px; padding:6px 14px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color .15s,border-color .15s; }
     .back-btn:hover { color:var(--black); border-color:var(--black); }
+    .settings-btn { width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:none; border:1px solid var(--gray-border); border-radius:6px; cursor:pointer; color:var(--gray-mid); transition:color .15s,border-color .15s; padding:0; }
+    .settings-btn:hover { color:var(--black); border-color:var(--black); }
+    .settings-btn svg { width:16px; height:16px; display:block; }
 
     .home-hero { padding:5rem 2.5rem 4rem; max-width:860px; margin:0 auto; width:100%; }
     .hero-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1.5rem; }
@@ -119,7 +124,13 @@
 <div id="home" class="page active">
   <header class="site-header">
     <div class="logo" onclick="show('home')">SAT Practice</div>
-    <div class="hdr-right"><span style="font-size:12px;color:var(--gray-mid);font-family:'DM Mono',monospace">Digital SAT · 2025–2026</span></div>
+    <div class="hdr-right">
+      <span style="font-size:12px;color:var(--gray-mid);font-family:'DM Mono',monospace">Digital SAT · 2025–2026</span>
+      <button class="back-btn" onclick="window.location.href='previous-scores.html'">Previous Scores</button>
+      <button class="settings-btn" onclick="window.location.href='settings.html'" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
   </header>
   <div class="home-hero">
     <div class="hero-label">College Board · Official Practice</div>
