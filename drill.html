@@ -512,6 +512,9 @@ const skillLabel = params.get('label')  || 'Topical Drill';
 const moduleKey = `${topicSlug}_${moduleNum}`;
 let QUESTIONS = [];
 
+// ── Your Cloudflare Worker API ──────────────────────────────────
+const API_BASE = 'https://sat.mrnoobyesyes.workers.dev';
+
 let totalSecs     = 18 * 60; // recalculated once question count is known
 let currentQ      = 0;
 let answers       = [];
@@ -520,17 +523,21 @@ let timerSecs     = totalSecs;
 let timerHidden   = false;
 let timerInterval = null;
 let submitted     = false;
+let submittedResults = {}; // filled in after grading: { [questionId]: {status, rationale, correctAnswer} }
 
-// ── Load questions ────────────────────────────────────────────
-function initTest() {
-  // DRILL_BANK is loaded from drillbank.js
-  if (typeof DRILL_BANK === 'undefined') {
+// ── Load questions from the API (no answers included) ───────────
+async function initTest() {
+  let rawQuestions;
+  try {
+    const res = await fetch(`${API_BASE}/api/module?bank=${encodeURIComponent(moduleKey)}`);
+    if (!res.ok) throw new Error('Bad response');
+    rawQuestions = await res.json();
+  } catch (e) {
     document.getElementById('loading-screen').innerHTML =
-      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:#c0392b;">Error: drillbank.js not found.<br>Make sure all files are in the same folder.</div>';
+      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:#c0392b;">Couldn\'t reach the question server. Check your internet connection and try again.</div>';
     return;
   }
 
-  const rawQuestions = DRILL_BANK[moduleKey];
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
       `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for module: ${moduleKey}</div>`;
@@ -818,12 +825,13 @@ function renderQuestion(i) {
   // Question pane
   const qp = document.getElementById('question-pane');
   const letters = ['A','B','C','D'];
+  const result = submittedResults[q.id]; // only populated after grading (from the server)
   const choicesHTML = q.choices.map((c, ci) => {
     let cls = 'answer-option';
-    if (submitted) {
-      if (ci === q.answer) cls += ' correct';
-      else if (ci === answers[i] && ci !== q.answer) cls += ' incorrect';
-    } else {
+    if (submitted && result) {
+      if (ci === result.correctAnswer) cls += ' correct';
+      else if (ci === answers[i] && ci !== result.correctAnswer) cls += ' incorrect';
+    } else if (!submitted) {
       if (answers[i] === ci) cls += ' selected';
     }
     return `<div class="${cls}" onclick="selectAnswer(${i},${ci})">
@@ -832,10 +840,10 @@ function renderQuestion(i) {
     </div>`;
   }).join('');
 
-  const rationaleHTML = submitted && q.rationale ? `
+  const rationaleHTML = submitted && result && result.rationale ? `
     <div class="rationale-box">
       <div class="rationale-label">Explanation</div>
-      ${escHtml(q.rationale)}
+      ${escHtml(result.rationale)}
     </div>` : '';
 
   qp.innerHTML = `
@@ -915,51 +923,66 @@ function saveScoreHistory(record) {
   } catch (e) { console.warn('Could not save score history', e); }
 }
 
-function submitTest() {
+async function submitTest() {
   submitted = true;
   clearInterval(timerInterval);
 
-  const totalQ     = QUESTIONS.length;
-  const correct    = QUESTIONS.filter((q, i) => answers[i] === q.answer).length;
-  const incorrect  = QUESTIONS.filter((q, i) => answers[i] !== null && answers[i] !== q.answer).length;
-  const unanswered = answers.filter(a => a === null).length;
-  const pct        = Math.round((correct / totalQ) * 100);
+  // Build { questionId: selectedIndex } for every question that was answered
+  const answerMap = {};
+  QUESTIONS.forEach((q, i) => { if (answers[i] !== null) answerMap[q.id] = answers[i]; });
+
+  let result;
+  try {
+    const res = await fetch(`${API_BASE}/api/submit-module`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bank: moduleKey, answers: answerMap })
+    });
+    result = await res.json();
+  } catch (e) {
+    alert("Couldn't reach the grading server. Check your internet connection and try Submit again.");
+    submitted = false;
+    return;
+  }
+
+  const { correct, total: totalQ, pct, stats, review: serverReview } = result;
 
   document.getElementById('score-num').textContent = `${correct}/${totalQ}`;
   document.getElementById('score-pct').textContent = `${pct}% correct`;
-  document.getElementById('sc-correct').textContent   = correct;
-  document.getElementById('sc-incorrect').textContent = incorrect;
-  document.getElementById('sc-unanswered').textContent = unanswered;
+  document.getElementById('sc-correct').textContent   = stats.correct;
+  document.getElementById('sc-incorrect').textContent = stats.incorrect;
+  document.getElementById('sc-unanswered').textContent = stats.unanswered;
+
+  const reviewById = {};
+  serverReview.forEach(r => { reviewById[r.id] = r; });
+  submittedResults = reviewById; // so renderQuestion can show correct answers + rationale below
 
   // Difficulty breakdown (drills are single-skill, so difficulty is the useful split)
   const diffs = ['Easy', 'Medium', 'Hard'];
   let domHtml = '';
   const domainData = [];
   for (const d of diffs) {
-    const dQs = QUESTIONS.map((q,i) => ({q,i})).filter(({q}) => q.difficulty === d);
+    const dQs = QUESTIONS.filter(q => q.difficulty === d);
     if (dQs.length === 0) continue;
-    const dCorrect = dQs.filter(({q,i}) => answers[i] === q.answer).length;
+    const dCorrect = dQs.filter(q => (reviewById[q.id] || {}).status === 'correct').length;
     const dTotal = dQs.length;
-    const pct = Math.round((dCorrect / dTotal) * 100);
+    const dPct = Math.round((dCorrect / dTotal) * 100);
     domHtml += `<div class="domain-row">
       <div class="domain-name">${d}</div>
-      <div class="domain-bar-wrap"><div class="domain-bar" style="width:${pct}%"></div></div>
+      <div class="domain-bar-wrap"><div class="domain-bar" style="width:${dPct}%"></div></div>
       <div class="domain-score">${dCorrect}/${dTotal}</div>
     </div>`;
-    domainData.push({ name: d, correct: dCorrect, total: dTotal, pct });
+    domainData.push({ name: d, correct: dCorrect, total: dTotal, pct: dPct });
   }
   document.getElementById('domain-breakdown').innerHTML = domHtml;
 
   // Score review list
   const reviewData = [];
   document.getElementById('score-review-list').innerHTML = QUESTIONS.map((q, i) => {
-    let statusClass = 'status-unanswered', statusLabel = 'Unanswered', status = 'unanswered';
-    if (answers[i] !== null) {
-      statusClass = answers[i] === q.answer ? 'status-correct' : 'status-incorrect';
-      statusLabel = answers[i] === q.answer ? 'Correct' : 'Incorrect';
-      status = answers[i] === q.answer ? 'correct' : 'incorrect';
-    }
-    reviewData.push({ num: i+1, domain: q.difficulty || skillLabel, status });
+    const r = reviewById[q.id] || { status: 'unanswered' };
+    const statusClass = r.status === 'correct' ? 'status-correct' : r.status === 'incorrect' ? 'status-incorrect' : 'status-unanswered';
+    const statusLabel = r.status === 'correct' ? 'Correct' : r.status === 'incorrect' ? 'Incorrect' : 'Unanswered';
+    reviewData.push({ num: i+1, domain: q.difficulty || skillLabel, status: r.status });
     return `<div class="review-item" onclick="closeOverlay('score-overlay');goToQuestion(${i})">
       <div class="review-num">${i+1}</div>
       <div class="review-status ${statusClass}"></div>
@@ -972,7 +995,7 @@ function submitTest() {
     type: 'drill', typeLabel: 'Topical Drill',
     title: `${skillLabel} · Module ${moduleNum}`,
     correct, total: totalQ, pct,
-    stats: { correct, incorrect, unanswered },
+    stats,
     breakdownLabel: 'Difficulty', breakdown: domainData,
     review: reviewData
   });
