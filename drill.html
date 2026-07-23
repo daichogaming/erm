@@ -910,18 +910,9 @@ function closeOverlay(id) {
 }
 
 // ── Submit ────────────────────────────────────────────────────
-// ── Score history (localStorage) ─────────────────────────────
-function saveScoreHistory(record) {
-  try {
-    const key = 'sat-history';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    record.date = new Date().toISOString();
-    list.unshift(record);
-    if (list.length > 300) list.length = 300;
-    localStorage.setItem(key, JSON.stringify(list));
-  } catch (e) { console.warn('Could not save score history', e); }
-}
+// Score saving is now handled by saveScoreHistory() in auth.js —
+// it saves to your account if you're logged in, or to this device
+// only if you're not (same as before).
 
 async function submitTest() {
   submitted = true;
@@ -991,7 +982,7 @@ async function submitTest() {
     </div>`;
   }).join('');
 
-  saveScoreHistory({
+  await saveScoreHistory({
     type: 'drill', typeLabel: 'Topical Drill',
     title: `${skillLabel} · Module ${moduleNum}`,
     correct, total: totalQ, pct,
@@ -1317,5 +1308,6 @@ function confirmExit() {
   });
 })();
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

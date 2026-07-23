@@ -583,21 +583,12 @@ function openReview() {
   openO('rev-o');
 }
 
-// ── Score history (localStorage) ─────────────────────────────
-function saveScoreHistory(record) {
-  try {
-    const key = 'sat-history';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    record.date = new Date().toISOString();
-    list.unshift(record);
-    if (list.length > 300) list.length = 300;
-    localStorage.setItem(key, JSON.stringify(list));
-  } catch (e) { console.warn('Could not save score history', e); }
-}
+// Score saving is now handled by saveScoreHistory() in auth.js —
+// it saves to your account if you're logged in, or to this device
+// only if you're not (same as before).
 
 // ── Submit ─────────────────────────────────────────────────────
-function submitTest() {
+async function submitTest() {
   saveFrInput();
   submitted = true; clearInterval(timerTick);
   const total = QS.length;
@@ -652,7 +643,7 @@ function submitTest() {
     </div>`;
   }).join('');
 
-  saveScoreHistory({
+  await saveScoreHistory({
     type: 'math', typeLabel: 'Math',
     title: `${testLabel} · Module ${modId}`,
     correct, total, pct,
@@ -669,5 +660,6 @@ function openO(id)  { document.getElementById(id).classList.add('open'); }
 function closeO(id) { document.getElementById(id).classList.remove('open'); }
 function confirmExit() { if(confirm('Exit? Progress will not be saved.')) location.href='index.html'; }
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

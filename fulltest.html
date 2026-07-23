@@ -1972,20 +1972,11 @@ function switchTab(tab) {
 // ══════════════════════════════════════════════════════════════
 //  FINAL REPORT / SCORING
 // ══════════════════════════════════════════════════════════════
-// ── Score history (localStorage) ─────────────────────────────
-function saveScoreHistory(record) {
-  try {
-    const key = 'sat-history';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    record.date = new Date().toISOString();
-    list.unshift(record);
-    if (list.length > 300) list.length = 300;
-    localStorage.setItem(key, JSON.stringify(list));
-  } catch (e) { console.warn('Could not save score history', e); }
-}
+// Score saving is now handled by saveScoreHistory() in auth.js —
+// it saves to your account if you're logged in, or to this device
+// only if you're not (same as before).
 
-function showFinalReport() {
+async function showFinalReport() {
   document.getElementById('english-ui').style.display = 'none';
   document.getElementById('math-ui').style.display = 'none';
   document.getElementById('report-title').textContent = fullTestLabel;
@@ -2099,7 +2090,7 @@ function showFinalReport() {
   );
   document.getElementById('math-domain-breakdown').innerHTML = mathBreakdownResult.html;
 
-  saveScoreHistory({
+  await saveScoreHistory({
     type: 'fulltest', typeLabel: 'Full Test',
     title: fullTestLabel,
     correct: total, total: 1600, pct: Math.round(total/1600*100),
@@ -2123,5 +2114,6 @@ function showFinalReport() {
 
 
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

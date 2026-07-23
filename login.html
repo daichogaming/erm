@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — SAT Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; --correct:#1a7a3c; --incorrect:#c0392b; }
+    :root[data-theme="dark"] { --black:#EDEDED; --gray-dark:#C7C7C7; --gray-mid:#9A9A9A; --gray-light:#5A5A5A; --gray-border:#333333; --gray-bg:#1B1B1B; --white:#121212; }
+    html, body { font-family:'DM Sans',sans-serif; background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; transition:background .2s ease,color .2s ease; }
+    .page { display:flex; min-height:100vh; flex-direction:column; }
+
+    .site-header { display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:56px; border-bottom:1px solid var(--gray-border); background:var(--white); position:sticky; top:0; z-index:100; }
+    .logo { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; letter-spacing:.06em; color:var(--black); text-transform:uppercase; cursor:pointer; }
+    .back-btn { font-size:13px; color:var(--gray-mid); background:none; border:1px solid var(--gray-border); border-radius:6px; padding:6px 14px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color .15s,border-color .15s; }
+    .back-btn:hover { color:var(--black); border-color:var(--black); }
+
+    .auth-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:2.5rem; }
+    .auth-box { width:100%; max-width:380px; }
+    .auth-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1rem; text-align:center; }
+    .auth-title { font-family:'Source Serif 4',serif; font-size:30px; font-weight:300; color:var(--black); margin-bottom:.5rem; text-align:center; }
+    .auth-sub { font-size:13px; color:var(--gray-mid); margin-bottom:2rem; text-align:center; line-height:1.6; }
+
+    .tabs { display:flex; border:1px solid var(--gray-border); border-radius:6px; overflow:hidden; margin-bottom:1.75rem; }
+    .tab { flex:1; text-align:center; padding:9px 0; font-size:13px; cursor:pointer; color:var(--gray-mid); transition:background .15s,color .15s; user-select:none; }
+    .tab.active { background:var(--black); color:var(--white); }
+
+    .field { margin-bottom:1.1rem; }
+    .field label { display:block; font-size:12px; color:var(--gray-mid); margin-bottom:.4rem; }
+    .field input { width:100%; padding:10px 12px; border:1px solid var(--gray-border); border-radius:6px; background:var(--white); color:var(--black); font-family:'DM Sans',sans-serif; font-size:14px; }
+    .field input:focus { outline:none; border-color:var(--black); }
+
+    .submit-btn { width:100%; padding:11px 0; background:var(--black); color:var(--white); border:none; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; margin-top:.5rem; transition:opacity .15s; }
+    .submit-btn:hover { opacity:.85; }
+    .submit-btn:disabled { opacity:.5; cursor:default; }
+
+    .msg { font-size:13px; margin-top:1rem; padding:10px 12px; border-radius:6px; display:none; }
+    .msg.error { display:block; background:rgba(192,57,43,0.1); color:var(--incorrect); }
+    .msg.success { display:block; background:rgba(26,122,60,0.1); color:var(--correct); }
+
+    .guest-note { font-size:12px; color:var(--gray-mid); text-align:center; margin-top:2rem; line-height:1.6; }
+    .guest-note a { color:var(--black); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <header class="site-header">
+    <div class="logo" onclick="window.location.href='index.html'">SAT Practice</div>
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+  </header>
+
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div class="auth-label">Account</div>
+      <h1 class="auth-title" id="auth-title">Log In</h1>
+      <p class="auth-sub">Save your scores to your account so they sync across every device.</p>
+
+      <div class="tabs">
+        <div class="tab active" id="tab-login" onclick="switchTab('login')">Log In</div>
+        <div class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</div>
+      </div>
+
+      <form id="auth-form" onsubmit="handleSubmit(event)">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" autocomplete="current-password" required minlength="8" />
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Log In</button>
+      </form>
+
+      <div class="msg" id="msg"></div>
+
+      <p class="guest-note">You don't need an account to use SAT Practice — scores just save to this device only. <a href="index.html">Continue as guest →</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  let mode = 'login';
+
+  function switchTab(m) {
+    mode = m;
+    document.getElementById('tab-login').classList.toggle('active', m === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', m === 'signup');
+    document.getElementById('auth-title').textContent = m === 'login' ? 'Log In' : 'Sign Up';
+    document.getElementById('submit-btn').textContent = m === 'login' ? 'Log In' : 'Create Account';
+    document.getElementById('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+    hideMsg();
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = `msg ${type}`;
+  }
+  function hideMsg() {
+    const el = document.getElementById('msg');
+    el.className = 'msg';
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    hideMsg();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = mode === 'login' ? 'Logging in…' : 'Creating account…';
+
+    try {
+      if (mode === 'login') await authLogin(email, password);
+      else await authSignup(email, password);
+      showMsg("You're in! Redirecting…", 'success');
+      setTimeout(() => { window.location.href = 'index.html'; }, 700);
+    } catch (err) {
+      showMsg(err.message || 'Something went wrong.', 'error');
+      btn.disabled = false;
+      btn.textContent = mode === 'login' ? 'Log In' : 'Create Account';
+    }
+  }
+
+  // If already logged in, just bounce back home
+  (async () => {
+    if (authIsLoggedIn()) {
+      const email = await authVerifySession();
+      if (email) window.location.href = 'index.html';
+    }
+  })();
+</script>
+</body>
+</html>

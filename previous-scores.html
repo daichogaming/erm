@@ -148,6 +148,7 @@
   </div>
   <hr class="divider" />
   <div class="list-section">
+    <div id="sync-status" style="font-size:13px;color:var(--gray-mid);margin-bottom:1.5rem;line-height:1.6;"></div>
     <div class="actions-bar">
       <label class="select-all-row"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this.checked)" /> Select all</label>
       <span class="count-lbl" id="count-lbl">0 results</span>
@@ -226,17 +227,50 @@
   <footer class="site-footer"><div class="footer-copy">SAT Practice · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
+<script src="auth.js"></script>
 <script>
   const HKEY = 'sat-history';
   let history = [];
   let curId = null;
+  let isAccountMode = false;
 
-  function loadHistory() {
+  async function loadHistory() {
+    const token = authGetToken();
+    if (token) {
+      const email = await authVerifySession();
+      if (email) {
+        isAccountMode = true;
+        try {
+          const res = await fetch(`${AUTH_API_BASE}/api/my-results`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          history = res.ok ? await res.json() : [];
+        } catch (e) { history = []; }
+        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+        showSyncStatus(email);
+        return;
+      }
+    }
+    // Guest / not logged in — same as before
+    isAccountMode = false;
     try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); }
     catch (e) { history = []; }
     history.sort((a, b) => new Date(b.date) - new Date(a.date));
+    showSyncStatus(null);
   }
+
+  function showSyncStatus(email) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    if (email) {
+      el.innerHTML = `Signed in as <strong>${escH(email)}</strong> — results sync across every device you log into.`;
+    } else {
+      el.innerHTML = `Browsing as guest — results are saved to this device only. <a href="login.html">Log in</a> to sync across devices.`;
+    }
+  }
+
   function saveHistory() {
+    // Only used in guest mode — account mode deletes go through the API directly.
     try { localStorage.setItem(HKEY, JSON.stringify(history)); } catch (e) {}
   }
   function fmtDate(iso) {
@@ -294,12 +328,21 @@
     btn.classList.toggle('enabled', n > 0);
     btn.textContent = n > 0 ? `Delete Selected (${n})` : 'Delete Selected';
   }
-  function deleteSelected() {
+  async function deleteSelected() {
     const ids = Array.from(document.querySelectorAll('.hist-check:checked')).map(c => c.dataset.id);
     if (!ids.length) return;
     if (!confirm(`Delete ${ids.length} result${ids.length===1?'':'s'}? This can't be undone.`)) return;
+    if (isAccountMode) {
+      try {
+        await fetch(`${AUTH_API_BASE}/api/delete-result`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
+          body: JSON.stringify({ ids })
+        });
+      } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
+    }
     history = history.filter(r => !ids.includes(r.id));
-    saveHistory();
+    if (!isAccountMode) saveHistory();
     render();
   }
 
@@ -371,17 +414,28 @@
     </div>`).join('');
   }
 
-  function deleteOne() {
+  async function deleteOne() {
     if (!curId) return;
     if (!confirm("Delete this result? This can't be undone.")) return;
+    if (isAccountMode) {
+      try {
+        await fetch(`${AUTH_API_BASE}/api/delete-result`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
+          body: JSON.stringify({ ids: [curId] })
+        });
+      } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
+    }
     history = history.filter(r => r.id !== curId);
-    saveHistory();
+    if (!isAccountMode) saveHistory();
     showList();
     render();
   }
 
-  loadHistory();
-  render();
+  (async () => {
+    await loadHistory();
+    render();
+  })();
 </script>
 </body>
 </html>
