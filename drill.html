@@ -413,6 +413,8 @@
     .passage-table td:first-child { text-align: left; }
     .passage-table th:first-child { text-align: left; }
     .passage-chart-note { font-size: 13px; color: #888; font-style: italic; border: 1px solid #ddd; padding: 8px 14px; border-radius: 4px; margin-bottom: 1em; }
+    .passage-chart-wrap { margin-bottom: 1em; text-align: center; }
+    .passage-chart-img { max-width: 100%; height: auto; border: 1px solid var(--gray-border); border-radius: 4px; }
     .passage-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--gray-mid); margin: 1.25rem 0 0.5rem 0; }
     .passage-label:first-child { margin-top: 0; }
@@ -697,7 +699,11 @@ function renderQuestion(i) {
           parts.push(renderTable(l));
         } else if (l.type === 'chart') {
           flushText();
-          parts.push(`<div class="passage-chart-note">${escHtml(l.note || '[Graph — see original source]')}</div>`);
+          if (l.image) {
+            parts.push(`<div class="passage-chart-wrap"><img class="passage-chart-img" src="${l.image}" alt="Chart or graph for this question" /></div>`);
+          } else {
+            parts.push(`<div class="passage-chart-note">${escHtml(l.note || '[Graph — see original source]')}</div>`);
+          }
         } else if (l.type === 'text') {
           flushText();
           parts.push(`<div class="passage-text"><p>${escHtml(l.text)}</p></div>`);
