@@ -38,6 +38,7 @@
     .tb-center { display: flex; align-items: center; gap: 0.5rem; }
     .timer { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center; }
     .timer.warn { color: var(--incorrect); }
+    .timer.paused { color: var(--gray-mid); }
     .timer-tog { font-size: 11px; color: var(--gray-mid); cursor: pointer; border: 1px solid var(--gray-border); border-radius: 4px; padding: 3px 8px; font-family: 'DM Mono', monospace; }
     .timer-tog:hover { color: var(--black); border-color: var(--black); }
     .tb-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
@@ -188,6 +189,7 @@
   </div>
   <div class="tb-center">
     <div class="timer" id="timer">35:00</div>
+    <button class="timer-tog" id="tpause" onclick="togglePause()">Pause</button>
     <div class="timer-tog" id="ttog" onclick="toggleTimer()">Hide</div>
   </div>
   <div class="tb-right">
@@ -359,13 +361,21 @@ window.addEventListener('load', () => {
 });
 
 // ── Timer ──────────────────────────────────────────────────────
+let timerPaused = false;
+
 function startTimer() {
   timerTick = setInterval(() => {
-    if (submitted) return;
+    if (submitted || timerPaused) return;
     timerSecs--;
     drawTimer();
     if (timerSecs <= 0) { clearInterval(timerTick); submitTest(); }
   }, 1000);
+}
+function togglePause() {
+  if (submitted) return;
+  timerPaused = !timerPaused;
+  document.getElementById('tpause').textContent = timerPaused ? 'Resume' : 'Pause';
+  document.getElementById('timer').classList.toggle('paused', timerPaused);
 }
 function drawTimer() {
   const el = document.getElementById('timer');

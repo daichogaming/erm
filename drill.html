@@ -48,6 +48,7 @@
       color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center;
     }
     .timer.warning { color: #c0392b; }
+    .timer.paused { color: var(--gray-mid); }
     .timer-toggle {
       font-size: 11px; color: var(--gray-mid); cursor: pointer;
       border: 1px solid var(--gray-border); border-radius: 4px;
@@ -443,6 +444,7 @@
   </div>
   <div class="top-bar-center">
     <div class="timer" id="timer">32:00</div>
+    <button class="timer-toggle" id="timer-pause-btn" onclick="togglePause()">Pause</button>
     <div class="timer-toggle" id="timer-toggle" onclick="toggleTimer()">Hide</div>
   </div>
   <div class="top-bar-right">
@@ -572,13 +574,22 @@ async function initTest() {
 window.addEventListener('load', initTest);
 
 // ── Timer ─────────────────────────────────────────────────────
+let timerPaused = false;
+
 function startTimer() {
   timerInterval = setInterval(() => {
-    if (submitted) return;
+    if (submitted || timerPaused) return;
     timerSecs--;
     updateTimerDisplay();
     if (timerSecs <= 0) { clearInterval(timerInterval); submitTest(); }
   }, 1000);
+}
+
+function togglePause() {
+  if (submitted) return;
+  timerPaused = !timerPaused;
+  document.getElementById('timer-pause-btn').textContent = timerPaused ? 'Resume' : 'Pause';
+  document.getElementById('timer').classList.toggle('paused', timerPaused);
 }
 
 function updateTimerDisplay() {

@@ -48,6 +48,7 @@
       color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center;
     }
     .timer.warning { color: #c0392b; }
+    .timer.paused { color: var(--gray-mid); }
     .timer-toggle {
       font-size: 11px; color: var(--gray-mid); cursor: pointer;
       border: 1px solid var(--gray-border); border-radius: 4px;
@@ -543,6 +544,7 @@
     </div>
     <div class="top-bar-center">
       <div class="timer" id="eng-timer">32:00</div>
+      <button class="timer-toggle" id="eng-timer-pause-btn" onclick="togglePause()">Pause</button>
       <div class="timer-toggle" id="eng-timer-toggle" onclick="toggleTimerEng()">Hide</div>
     </div>
     <div class="top-bar-right" id="eng-top-bar-right">
@@ -574,6 +576,7 @@
     </div>
     <div class="top-bar-center">
       <div class="timer" id="math-timer">35:00</div>
+      <button class="timer-toggle" id="math-timer-pause-btn" onclick="togglePause()">Pause</button>
       <div class="timer-toggle" id="math-timer-toggle" onclick="toggleTimerMath()">Hide</div>
     </div>
     <div class="top-bar-right" id="math-top-bar-right">
@@ -803,6 +806,7 @@ const sectionData = {
 let currentQ = 0;
 let timerInterval = null;
 let timerHidden = false;
+let timerPaused = false;
 let reviewMode = false;
 let reviewKey = null;
 
@@ -1044,6 +1048,18 @@ function getCurrentSectionKey() {
   return reviewMode ? reviewKey : SECTIONS[currentSectionIdx];
 }
 
+function togglePause() {
+  const key = getCurrentSectionKey();
+  const sd = sectionData[key];
+  if (!sd || sd.submitted) return;
+  timerPaused = !timerPaused;
+  const isEng = key.startsWith('eng');
+  const btn = document.getElementById(isEng ? 'eng-timer-pause-btn' : 'math-timer-pause-btn');
+  const timerEl = document.getElementById(isEng ? 'eng-timer' : 'math-timer');
+  btn.textContent = timerPaused ? 'Resume' : 'Pause';
+  timerEl.classList.toggle('paused', timerPaused);
+}
+
 // ── Review mode: inspect a completed module after the final report ──
 function reviewModule(key) {
   reviewMode = true;
@@ -1060,6 +1076,7 @@ function reviewModule(key) {
       `<button class="btn-exit" onclick="backToReport()">← Back to Results</button>`;
     document.getElementById('eng-timer').textContent = 'Review';
     document.getElementById('eng-timer-toggle').style.display = 'none';
+    document.getElementById('eng-timer-pause-btn').style.display = 'none';
     buildNavEng(key);
     renderQuestionEng(key, 0);
   } else {
@@ -1073,6 +1090,7 @@ function reviewModule(key) {
        <button class="btn-exit" onclick="backToReport()">← Back to Results</button>`;
     document.getElementById('math-timer').textContent = 'Review';
     document.getElementById('math-timer-toggle').style.display = 'none';
+    document.getElementById('math-timer-pause-btn').style.display = 'none';
     buildNavMath(key);
     renderQuestionMath(key, 0);
   }
@@ -1131,10 +1149,15 @@ function endBreak() {
 // ══════════════════════════════════════════════════════════════
 function startTimerEng(key) {
   clearInterval(timerInterval);
+  timerPaused = false;
+  const pauseBtn = document.getElementById('eng-timer-pause-btn');
+  if (pauseBtn) pauseBtn.textContent = 'Pause';
+  const engTimerEl = document.getElementById('eng-timer');
+  if (engTimerEl) engTimerEl.classList.remove('paused');
   updateTimerDisplayEng(key);
   timerInterval = setInterval(() => {
     const sd = sectionData[key];
-    if (sd.submitted) return;
+    if (sd.submitted || timerPaused) return;
     sd.timerSecs--;
     updateTimerDisplayEng(key);
     if (sd.timerSecs <= 0) { clearInterval(timerInterval); submitEngModule(); }
@@ -1698,10 +1721,15 @@ function attachPassageListener(key, qi) {
 // ══════════════════════════════════════════════════════════════
 function startTimerMath(key) {
   clearInterval(timerInterval);
+  timerPaused = false;
+  const pauseBtn = document.getElementById('math-timer-pause-btn');
+  if (pauseBtn) pauseBtn.textContent = 'Pause';
+  const mathTimerEl = document.getElementById('math-timer');
+  if (mathTimerEl) mathTimerEl.classList.remove('paused');
   updateTimerDisplayMath(key);
   timerInterval = setInterval(() => {
     const sd = sectionData[key];
-    if (sd.submitted) return;
+    if (sd.submitted || timerPaused) return;
     sd.timerSecs--;
     updateTimerDisplayMath(key);
     if (sd.timerSecs <= 0) { clearInterval(timerInterval); submitMathModule(); }
