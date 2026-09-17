@@ -18,13 +18,13 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --black: #111111; --accent-blue: #0A5FA8; --accent-blue-dark: #084A82; --gray-dark: #3A3A3A; --gray-mid: #767676;
+      --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
       --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
       --white: #f2f2f2; --answer-hover: #F0F0F0; --answer-selected: #111111;
       --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
     }
     :root[data-theme="dark"] {
-      --black: #EDEDED; --accent-blue: #4A9FE0; --accent-blue-dark: #6FB4E8; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
+      --black: #EDEDED; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
       --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B;
       --white: #121212; --answer-hover: #232323; --answer-selected: #EDEDED;
       --answer-selected-text: #121212;
@@ -219,8 +219,8 @@
       color: var(--gray-mid); transition: color 0.15s, border-color 0.15s, background 0.15s;
     }
     .btn-nav:hover { color: var(--black); border-color: var(--black); }
-    .btn-nav.primary { background: var(--accent-blue); color: var(--white); border-color: var(--accent-blue); }
-    .btn-nav.primary:hover { background: var(--accent-blue-dark); border-color: var(--accent-blue-dark); }
+    .btn-nav.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-nav.primary:hover { background: var(--gray-dark); border-color: var(--gray-dark); }
 
     /* ── REVIEW / SCORE OVERLAY ── */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
@@ -254,8 +254,8 @@
     .overlay-btn-row { display: flex; gap: 0.75rem; }
     .overlay-btn { flex: 1; font-size: 13px; font-family: 'Roboto', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s; }
     .overlay-btn:hover { color: var(--black); border-color: var(--black); }
-    .overlay-btn.primary { background: var(--accent-blue); color: var(--white); border-color: var(--accent-blue); }
-    .overlay-btn.primary:hover { background: var(--accent-blue-dark); }
+    .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .overlay-btn.primary:hover { background: var(--gray-dark); }
 
     /* ── HIGHLIGHT & NOTES TOOLBAR ── */
     .passage-toolbar {
