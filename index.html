@@ -42,6 +42,18 @@
     .hero-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1.5rem; }
     .hero-title { font-family:'Source Serif 4',serif; font-size:clamp(38px,5vw,58px); font-weight:300; line-height:1.12; color:var(--black); margin-bottom:1.25rem; }
     .hero-sub { font-size:15px; color:var(--gray-mid); max-width:420px; line-height:1.7; font-weight:300; }
+    .countdown-widget { display:inline-flex; align-items:center; gap:1.5rem; margin-top:1.5rem; padding:.9rem 1.5rem; border:1px solid var(--gray-border); border-radius:8px; background:var(--gray-bg); flex-wrap:wrap; }
+    .countdown-label { font-size:13px; color:var(--gray-mid); }
+    .countdown-label strong { color:var(--black); font-weight:500; }
+    .countdown-nums { display:flex; gap:1.1rem; font-family:'DM Mono',monospace; }
+    .countdown-unit { text-align:center; min-width:34px; }
+    .countdown-unit .val { font-size:22px; font-weight:500; color:var(--black); line-height:1; }
+    .countdown-unit .lbl { font-size:9px; color:var(--gray-mid); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+    @media (max-width:600px) {
+      .countdown-widget { gap:1rem; padding:.75rem 1rem; }
+      .countdown-nums { gap:.7rem; }
+      .countdown-unit .val { font-size:18px; }
+    }
     .divider { border:none; border-top:1px solid var(--gray-border); margin:0 2.5rem; }
     .subject-row { max-width:860px; margin:0 auto; width:100%; padding:3rem 2.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
     .subject-card { border:1px solid var(--gray-border); border-radius:4px; padding:2rem 1.75rem; cursor:pointer; transition:border-color .2s,background .2s,transform .2s; }
@@ -127,6 +139,7 @@
     <div class="hdr-right">
       <span style="font-size:12px;color:var(--gray-mid);font-family:'DM Mono',monospace">Digital SAT · 2025–2026</span>
       <span id="account-status"></span>
+      <button class="back-btn" onclick="window.location.href='weakness.html'">Weakness Profile</button>
       <button class="back-btn" onclick="window.location.href='previous-scores.html'">Previous Scores</button>
       <button class="settings-btn" onclick="window.location.href='settings.html'" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -137,6 +150,15 @@
     <div class="hero-label">College Board · Official Practice</div>
     <h1 class="hero-title">Practice tests,<br>section by section.</h1>
     <p class="hero-sub">Work through real SAT practice questions organized by subject. Select Math or English to begin.</p>
+    <div class="countdown-widget" id="countdown-widget">
+      <div class="countdown-label">Time 'til SAT <strong id="cd-month">—</strong> test</div>
+      <div class="countdown-nums">
+        <div class="countdown-unit"><div class="val" id="cd-days">--</div><div class="lbl">Days</div></div>
+        <div class="countdown-unit"><div class="val" id="cd-hours">--</div><div class="lbl">Hours</div></div>
+        <div class="countdown-unit"><div class="val" id="cd-mins">--</div><div class="lbl">Min</div></div>
+        <div class="countdown-unit"><div class="val" id="cd-secs">--</div><div class="lbl">Sec</div></div>
+      </div>
+    </div>
   </div>
   <hr class="divider" />
   <div class="subject-row">
@@ -306,7 +328,7 @@
     <div class="mod-group-label">Modules</div>
     <div class="mod-grid" id="dm-grid"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab· 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- MODULE SELECTION -->
@@ -498,6 +520,39 @@
     const p = new URLSearchParams({ topic: curDrillTopic.slug, label: curDrillTopic.skill, module: mod });
     window.location.href = 'drill.html?' + p.toString();
   }
+
+  // ── SAT test date countdown ──────────────────────────────────
+  // Official 2026–2027 weekend SAT dates (College Board). Update this
+  // list once the following school year's dates are published.
+  const SAT_TEST_DATES = [
+    '2026-08-22', '2026-09-12', '2026-10-03', '2026-11-07', '2026-12-05',
+    '2027-03-06', '2027-05-01', '2027-06-05'
+  ];
+  function getNextSATDate() {
+    const now = new Date();
+    for (const d of SAT_TEST_DATES) {
+      const testDate = new Date(d + 'T08:00:00'); // approx test-center check-in time, in the visitor's local time
+      if (testDate > now) return testDate;
+    }
+    return null;
+  }
+  function updateCountdown() {
+    const widget = document.getElementById('countdown-widget');
+    const target = getNextSATDate();
+    if (!target) { widget.style.display = 'none'; return; }
+    const diff = Math.max(0, target - new Date());
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff / 3600000) % 24);
+    const mins = Math.floor((diff / 60000) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+    document.getElementById('cd-month').textContent = target.toLocaleDateString(undefined, { month: 'long' });
+    document.getElementById('cd-days').textContent = String(days);
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
+    document.getElementById('cd-secs').textContent = String(secs).padStart(2, '0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 </script>
 <script src="auth.js"></script>
 </body>
