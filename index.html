@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; }
-    :root[data-theme="dark"] { --black:#EDEDED; --gray-dark:#C7C7C7; --gray-mid:#9A9A9A; --gray-light:#5A5A5A; --gray-border:#333333; --gray-bg:#1B1B1B; --white:#121212; }
+    :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; --accent-blue:#0A5FA8; --accent-blue-dark:#084A82; }
+    :root[data-theme="dark"] { --black:#EDEDED; --gray-dark:#C7C7C7; --gray-mid:#9A9A9A; --gray-light:#5A5A5A; --gray-border:#333333; --gray-bg:#1B1B1B; --white:#121212; --accent-blue:#4A9FE0; --accent-blue-dark:#6FB4E8; }
     html, body { font-family:'DM Sans',sans-serif; background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; transition:background .2s ease,color .2s ease; }
     .page { display:none; min-height:100vh; flex-direction:column; }
     .page.active { display:flex; animation:fadeIn .22s ease; }
@@ -53,6 +53,27 @@
       .countdown-widget { gap:1rem; padding:.75rem 1rem; }
       .countdown-nums { gap:.7rem; }
       .countdown-unit .val { font-size:18px; }
+    }
+
+    /* ── Practice recommendation pop-up ── */
+    .reco-popup {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; max-width: 320px;
+      background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.14); padding: 1.1rem 1.2rem 1.15rem;
+      z-index: 500; opacity: 0; transform: translateY(16px); pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .reco-popup.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .reco-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
+    .reco-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-blue); font-weight: 500; }
+    .reco-close { background: none; border: none; color: var(--gray-mid); font-size: 16px; cursor: pointer; line-height: 1; padding: 2px; margin: -2px -2px 0 0; }
+    .reco-close:hover { color: var(--black); }
+    .reco-skill { font-size: 15px; font-weight: 500; color: var(--black); margin-bottom: .3rem; }
+    .reco-reason { font-size: 12.5px; color: var(--gray-mid); line-height: 1.55; margin-bottom: .9rem; }
+    .reco-cta { display: inline-block; width: 100%; text-align: center; background: var(--accent-blue); color: #fff; text-decoration: none; font-size: 13px; font-weight: 500; padding: 8px 0; border-radius: 6px; transition: background .15s; }
+    .reco-cta:hover { background: var(--accent-blue-dark); }
+    @media (max-width: 600px) {
+      .reco-popup { left: 1rem; right: 1rem; bottom: 1rem; max-width: none; }
     }
     .divider { border:none; border-top:1px solid var(--gray-border); margin:0 2.5rem; }
     .subject-row { max-width:860px; margin:0 auto; width:100%; padding:3rem 2.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
@@ -554,6 +575,140 @@
   updateCountdown();
   setInterval(updateCountdown, 1000);
 </script>
+
+<div class="reco-popup" id="reco-popup">
+  <div class="reco-top">
+    <span class="reco-eyebrow">Recommended Practice</span>
+    <button class="reco-close" onclick="dismissReco()" aria-label="Dismiss">✕</button>
+  </div>
+  <div class="reco-skill" id="reco-skill">—</div>
+  <div class="reco-reason" id="reco-reason">—</div>
+  <a class="reco-cta" id="reco-cta" href="#">Practice Now →</a>
+</div>
+
 <script src="auth.js"></script>
+<script>
+  // ── Practice recommendation engine ───────────────────────────
+  // Basic algorithm, no AI: looks at domain-level accuracy across every
+  // saved result (account history if logged in, this-device history if
+  // not), finds the weakest domain that actually has drills available,
+  // and recommends the specific drill topic for it.
+
+  const RECO_DISMISS_KEY = 'sat-reco-dismissed-until';
+
+  // Same domain-label variants used elsewhere on the site for the
+  // same underlying category, mapped onto DRILL_TOPICS' domain names.
+  const RECO_DOMAIN_ALIAS = { 'Standard English': 'Standard English Conventions' };
+
+  function recoIsDismissed() {
+    try {
+      const until = localStorage.getItem(RECO_DISMISS_KEY);
+      return until && new Date(until) > new Date();
+    } catch (e) { return false; }
+  }
+  function dismissReco() {
+    document.getElementById('reco-popup').classList.remove('show');
+    try {
+      const until = new Date(Date.now() + 24 * 60 * 60 * 1000); // reappears after 1 day
+      localStorage.setItem(RECO_DISMISS_KEY, until.toISOString());
+    } catch (e) {}
+  }
+
+  // Aggregate a guest's local history the same way the server aggregates
+  // account history for /api/weakness-profile, so behavior matches either way.
+  function aggregateGuestWeakness() {
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('sat-history') || '[]'); } catch (e) {}
+
+    const domainAgg = {};
+    const drillAgg = {};
+    function addDomain(arr) {
+      if (!Array.isArray(arr)) return;
+      for (const d of arr) {
+        if (!d || !d.name) continue;
+        if (!domainAgg[d.name]) domainAgg[d.name] = { name: d.name, correct: 0, total: 0 };
+        domainAgg[d.name].correct += d.correct || 0;
+        domainAgg[d.name].total += d.total || 0;
+      }
+    }
+    for (const rec of history) {
+      if (rec.type === 'fulltest' && rec.fulltest) {
+        addDomain(rec.fulltest.rwBreakdown);
+        addDomain(rec.fulltest.mathBreakdown);
+      } else if (rec.breakdownLabel === 'Domain') {
+        addDomain(rec.breakdown);
+      }
+      if (rec.type === 'drill' && rec.title) {
+        const skill = String(rec.title).replace(/\s*·\s*Module\s*\d+\s*$/i, '').trim();
+        if (!drillAgg[skill]) drillAgg[skill] = { name: skill, correct: 0, total: 0 };
+        drillAgg[skill].correct += rec.correct || 0;
+        drillAgg[skill].total += rec.total || 0;
+      }
+    }
+    const domains = Object.values(domainAgg)
+      .map(d => ({ ...d, pct: d.total ? Math.round(d.correct / d.total * 100) : 0 }))
+      .sort((a, b) => a.pct - b.pct);
+    const drillSkills = Object.values(drillAgg)
+      .map(d => ({ ...d, pct: d.total ? Math.round(d.correct / d.total * 100) : 0 }))
+      .sort((a, b) => a.pct - b.pct);
+    return { attempts: history.length, domains, drillSkills };
+  }
+
+  // Pick the weakest domain that has real drill topics, then the weakest
+  // (or least-practiced) topic within it.
+  function pickRecommendation(domains, drillSkills) {
+    for (const d of domains) {
+      const drillDomainName = RECO_DOMAIN_ALIAS[d.name] || d.name;
+      const candidates = DRILL_TOPICS.filter(t => t.domain === drillDomainName);
+      if (!candidates.length) continue; // no drills for this domain (e.g. Math) — try the next weakest
+
+      const bySkillPct = {};
+      drillSkills.forEach(s => { bySkillPct[s.name] = s.pct; });
+      let topic = candidates[0];
+      let lowest = bySkillPct[topic.skill] ?? 101;
+      for (const c of candidates) {
+        const pct = bySkillPct[c.skill] ?? 101; // never-practiced topics rank as "unknown", tried first
+        if (pct < lowest) { lowest = pct; topic = c; }
+      }
+      return { domain: d, topic };
+    }
+    return null;
+  }
+
+  function showRecoPopup(rec) {
+    document.getElementById('reco-skill').textContent = rec.topic.skill;
+    document.getElementById('reco-reason').textContent =
+      `You're missing the most questions in ${rec.domain.name} (${rec.domain.pct}% correct so far). This drill targets it directly.`;
+    const p = new URLSearchParams({ topic: rec.topic.slug, label: rec.topic.skill, module: 1 });
+    document.getElementById('reco-cta').href = 'drill.html?' + p.toString();
+    setTimeout(() => document.getElementById('reco-popup').classList.add('show'), 900);
+  }
+
+  async function initRecoPopup() {
+    if (recoIsDismissed()) return;
+
+    const token = authGetToken();
+    let data;
+    if (token) {
+      const email = await authVerifySession();
+      if (!email) { data = aggregateGuestWeakness(); }
+      else {
+        try {
+          const res = await fetch(`${AUTH_API_BASE}/api/weakness-profile`, { headers: { 'Authorization': `Bearer ${token}` } });
+          data = res.ok ? await res.json() : aggregateGuestWeakness();
+        } catch (e) { data = aggregateGuestWeakness(); }
+      }
+    } else {
+      data = aggregateGuestWeakness();
+    }
+
+    if (!data || !data.attempts || !data.domains || !data.domains.length) return; // needs at least 1 completed test
+
+    const rec = pickRecommendation(data.domains, data.drillSkills || []);
+    if (rec) showRecoPopup(rec);
+  }
+
+  initRecoPopup();
+</script>
 </body>
 </html>
