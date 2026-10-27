@@ -52,7 +52,7 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css" />
-  <script src="sidebar.js"></script>
+  <script src="sidebar.js?v=2"></script>
 </head>
 <body>
 
@@ -77,10 +77,17 @@
   <footer class="site-footer"><div>SATLab · 2025–2026</div><div>Not affiliated with College Board</div></footer>
 </div>
 
-<script src="questionbank.js"></script>
-<script src="math_modules.js"></script>
-<script src="hardbank.js"></script>
 <script>
+  // The banks are big (questionbank.js is ~4 MB), so load them after the page
+  // has drawn, then fill in the list. A failed file just leaves that section out.
+  function loadScript(src) {
+    return new Promise(resolve => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = s.onerror = () => resolve();
+      document.body.appendChild(s);
+    });
+  }
+
   function domainMix(set) {
     const c = {};
     set.forEach(q => { const d = String(q.domain || 'Other').replace(/ Conventions$/, ''); c[d] = (c[d] || 0) + 1; });
@@ -120,7 +127,7 @@
     return `<div class="sec-label">${SECTIONS[key].title}</div>${chips(key)}<div id="rows-${key}">${rows(key)}</div>`;
   }
 
-  (function render() {
+  function render() {
     const haveRW = typeof QUESTION_BANK !== 'undefined', haveMath = typeof MATH_MODULES !== 'undefined';
     const el = document.getElementById('sets');
     if (!haveRW && !haveMath) {
@@ -137,7 +144,10 @@
       b.parentElement.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b));
       document.getElementById('rows-' + key).innerHTML = rows(key);
     });
-  })();
+  }
+  Promise.all([loadScript('questionbank.js'), loadScript('math_modules.js')])
+    .then(() => loadScript('hardbank.js'))
+    .then(render);
 </script>
 </body>
 </html>
