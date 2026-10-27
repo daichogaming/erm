@@ -149,6 +149,23 @@
       .divider { margin:0 1.25rem; }
       .breadcrumb { display:none; }
     }
+    /* Hard Question Bank section */
+    .hb-stats { display:flex; gap:10px; flex-wrap:wrap; margin-top:1.25rem; }
+    .hb-stats span { font-size:13px; padding:7px 14px; border-radius:999px; background:var(--card); border:1px solid var(--gray-border); }
+    .hb-stats b { color:#e5383b; }
+    #hard a.test-row { text-decoration:none; color:inherit; }
+    #hard .sec-label { margin-top:1.75rem; }
+    #hard .sec-label:first-child { margin-top:0; }
+    .hb-fade { animation:fadeIn .22s ease; }
+    .badge-hard { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 10px; border-radius:999px; background:rgba(229,56,59,.12); color:#c1272d; white-space:nowrap; }
+    .hb-chips { display:flex; flex-wrap:wrap; gap:8px; margin:-.25rem 0 1rem; }
+    .hb-chip { font:500 13px 'Plus Jakarta Sans',sans-serif; padding:7px 14px; border-radius:999px; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); cursor:pointer; transition:all .15s; }
+    .hb-chip span { font-family:'DM Mono',monospace; font-size:11px; color:var(--gray-mid); margin-left:4px; }
+    .hb-chip:hover { border-color:var(--gold-2); }
+    .hb-chip.on { background:var(--gold-grad); border-color:transparent; color:#fff; }
+    .hb-chip.on span { color:rgba(255,255,255,.8); }
+    .hb-notice { padding:1.25rem 1.5rem; border-radius:16px; background:var(--card); border:1px dashed var(--gray-border); color:var(--gray-mid); font-size:14px; line-height:1.6; }
+    @media (max-width:600px) { .badge-hard { display:none; } }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css" />
@@ -166,7 +183,7 @@
     <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
     <button class="sb-link" data-nav="adaptive" onclick="show('adaptive')"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Adaptive Test</button>
     <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
-    <button class="sb-link" onclick="window.location.href='hard.html'"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
+    <button class="sb-link" data-nav="hard" onclick="show('hard')"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
     <div class="sb-label">You</div>
     <button class="sb-link" onclick="window.location.href='weakness.html'"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Weakness Profile</button>
     <button class="sb-link" onclick="window.location.href='previous-scores.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Previous Scores</button>
@@ -281,7 +298,7 @@
         </div>
       </div>
     </div>
-    <div class="subject-card c-hard" onclick="window.location.href='hard.html'">
+    <div class="subject-card c-hard" onclick="show('hard')">
       <div class="card-top"><div class="card-tag">Math + Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Hard Question Bank</div>
       <div class="card-desc">Every question tagged Hard across all practice tests, in sets of 20 — the questions that decide a top score.</div>
@@ -363,6 +380,25 @@
     <div class="sec-label">Available adaptive tests</div>
     <div class="tests-list" id="adaptive-list"></div>
   </div>
+  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<!-- HARD QUESTION BANK -->
+<div id="hard" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Hard Question Bank</span></div>
+      <button class="back-btn" onclick="show('home')">← Back</button>
+    </div>
+  </header>
+  <div class="subj-hero">
+    <div class="subj-label">SAT · Math &amp; Reading and Writing</div>
+    <div class="subj-title">Hard Question Bank</div>
+    <div class="subj-meta">Every question tagged <b>Hard</b> across all practice tests, gathered into sets of 20. These are the questions that separate a 1400 from a 1550 — work through them to maximize your score.</div>
+    <div class="hb-stats" id="hb-stats"></div>
+  </div>
+  <div class="tests-section" id="hb-sets"><div class="hb-notice">Loading the question banks…</div></div>
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
@@ -543,8 +579,83 @@
     const navId = ({modules:curSubj, drillmods:'drills'})[id] || id;
     document.querySelectorAll('.sb-link[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === navId));
     window.scrollTo(0,0);
+    if (id === 'hard') HardSection.open();
   }
   function backToSubj() { show(curSubj); }
+
+  // ── Hard Question Bank ──
+  // The banks are big (questionbank.js is ~4 MB), so they load only the first
+  // time this section is opened; the rest of the site stays fast.
+  const HardSection = (function () {
+    let started = false;
+    function loadScript(src) {
+      return new Promise(resolve => {
+        const sc = document.createElement('script');
+        sc.src = src; sc.onload = sc.onerror = () => resolve();
+        document.body.appendChild(sc);
+      });
+    }
+    const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    function domainMix(set) {
+      const c = {};
+      set.forEach(q => { const d = String(q.domain || 'Other').replace(/ Conventions$/, ''); c[d] = (c[d] || 0) + 1; });
+      return Object.entries(c).sort((a, b) => b[1] - a[1]).map(([d, n]) => `${d} ${n}`).join(' · ');
+    }
+    const SECTIONS = {
+      rw:   { title: 'Reading &amp; Writing', subject: 'Reading & Writing', file: 'test.html', mins: 32 / 27, sets: k => HardBank.rwSets(k),   skills: () => HardBank.rwSkills() },
+      math: { title: 'Math',                  subject: 'Math',              file: 'math.html', mins: 35 / 22, sets: k => HardBank.mathSets(k), skills: () => HardBank.mathSkills() },
+    };
+    const chosen = { rw: '', math: '' };
+    function rows(key) {
+      const S = SECTIONS[key], skill = chosen[key], sets = S.sets(skill);
+      if (!sets.length) return `<div class="hb-notice">No hard ${S.title} questions found.</div>`;
+      return '<div class="tests-list">' + sets.map((set, i) => {
+        const q = new URLSearchParams({ test: 'hard', label: skill ? `Hard · ${skill}` : 'Hard Question Bank', module: String(i + 1) });
+        if (skill) q.set('skill', skill);
+        return `<a class="test-row" href="${S.file}?${q}">
+          <div class="test-idx">${String(i + 1).padStart(2, '0')}</div>
+          <div class="test-info"><div class="test-name">Hard ${skill ? esc(skill) : S.subject} · Set ${i + 1}</div>
+            <div class="test-detail">${set.length} questions · ~${Math.round(set.length * S.mins)} min · ${skill ? S.subject : domainMix(set)}</div></div>
+          <div class="test-right"><span class="badge-hard">Hard</span><div class="test-arrow">→</div></div>
+        </a>`;
+      }).join('') + '</div>';
+    }
+    function chips(key) {
+      const S = SECTIONS[key], total = S.sets('').reduce((n, x) => n + x.length, 0);
+      const all = [{ skill: '', count: total, label: 'All skills' }].concat(S.skills().map(x => ({ ...x, label: x.skill })));
+      return '<div class="hb-chips">' + all.map(x =>
+        `<button class="hb-chip${chosen[key] === x.skill ? ' on' : ''}" data-key="${key}" data-skill="${esc(x.skill)}">${esc(x.label)} <span>${x.count}</span></button>`
+      ).join('') + '</div>';
+    }
+    function render() {
+      const el = document.getElementById('hb-sets');
+      if (typeof HardBank === 'undefined' || (typeof QUESTION_BANK === 'undefined' && typeof MATH_MODULES === 'undefined')) {
+        started = false; // let a later visit try again
+        el.innerHTML = '<div class="hb-notice">Couldn’t load the question banks. Check your connection and open this page again.</div>';
+        return;
+      }
+      const nRW = HardBank.rwSets('').reduce((n, x) => n + x.length, 0), nMath = HardBank.mathSets('').reduce((n, x) => n + x.length, 0);
+      document.getElementById('hb-stats').innerHTML =
+        `<span><b>${nRW + nMath}</b> hard questions</span><span>${nRW} Reading &amp; Writing</span><span>${nMath} Math</span>`;
+      el.classList.add('hb-fade'); // the list arrives after the page: fade it in like a section
+      el.innerHTML = ['rw', 'math'].map(k => `<div class="sec-label">${SECTIONS[k].title}</div>${chips(k)}<div id="hb-rows-${k}">${rows(k)}</div>`).join('');
+    }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.hb-chip'); if (!b) return;
+      const key = b.dataset.key; chosen[key] = b.dataset.skill;
+      b.parentElement.querySelectorAll('.hb-chip').forEach(c => c.classList.toggle('on', c === b));
+      document.getElementById('hb-rows-' + key).innerHTML = rows(key);
+    });
+    return {
+      open() {
+        if (started) return;
+        started = true;
+        Promise.all([loadScript('questionbank.js'), loadScript('math_modules.js')])
+          .then(() => typeof HardBank === 'undefined' ? loadScript('hardbank.js') : null)
+          .then(render);
+      }
+    };
+  })();
 
   function showMods(subj, testId, label) {
     curSubj=subj; curTestId=testId; curLabel=label;
@@ -671,7 +782,7 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills'].includes(h)) show(h); }
+  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','hard'].includes(h)) show(h); }
 </script>
 
 <div class="reco-popup" id="reco-popup">

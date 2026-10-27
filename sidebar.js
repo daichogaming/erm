@@ -22,7 +22,7 @@
     a('index.html', 'home', 'Home') + '<div class="sb-label">Practice</div>' +
     a('index.html#math', 'math', 'Math') + a('index.html#english', 'eng', 'Writing') +
     a('index.html#fulltests', 'full', 'Full Test') + a('index.html#adaptive', 'adapt', 'Adaptive Test') + a('index.html#drills', 'drill', 'Topical Drills') +
-    a('hard.html', 'hard', 'Hard Question Bank', 'hard.html') +
+    a('index.html#hard', 'hard', 'Hard Question Bank') +
     '<div class="sb-label">You</div>' +
     a('weakness.html', 'weak', 'Weakness Profile', 'weakness.html') +
     a('previous-scores.html', 'hist', 'Previous Scores', 'previous-scores.html') +
