@@ -791,7 +791,18 @@ function rawToScaled(raw, curve, maxRaw) {
 // ══════════════════════════════════════════════════════════════
 const params = new URLSearchParams(window.location.search);
 const fullTestNum = params.get('test') || '1';
-const fullTestLabel = `Full-Length Test ${fullTestNum}`;
+// Adaptive mode (fulltest.html?mode=adaptive&test=N): Module 2 of each section is
+// harder or easier depending on Module 1, like the real Digital SAT. No pause button.
+const ADAPTIVE = params.get('mode') === 'adaptive';
+const fullTestLabel = ADAPTIVE ? `Adaptive Test ${fullTestNum}` : `Full-Length Test ${fullTestNum}`;
+const ROUTE_CUTOFF = 0.6; // share of Module 1 correct needed for the harder Module 2
+const DIFFICULTY_MIX = {
+  routing: { Easy: 0.33, Medium: 0.34, Hard: 0.33 },
+  harder:  { Easy: 0.10, Medium: 0.40, Hard: 0.50 },
+  easier:  { Easy: 0.50, Medium: 0.40, Hard: 0.10 },
+};
+const adaptiveRoute = { eng: null, math: null };   // 'harder' | 'easier' once Module 1 is done
+const module2Options = { eng: null, math: null };  // both Module 2 versions, built up front
 
 // Section sequence: eng1, eng2, math1, math2
 const SECTIONS = ['eng1', 'eng2', 'math1', 'math2'];
@@ -829,8 +840,45 @@ function shuffleArray(arr, rng) {
   return a;
 }
 
+// How many Easy / Medium / Hard questions a whole module should get.
+function makeQuota(mix, size) {
+  if (!mix) return null;
+  const levels = Object.keys(mix);
+  const exact = levels.map(l => size * mix[l]);
+  const counts = exact.map(Math.floor);
+  let left = size - counts.reduce((a, b) => a + b, 0);
+  exact.map((x, i) => [x - Math.floor(x), i]).sort((a, b) => b[0] - a[0])
+    .forEach(([, i]) => { if (left > 0) { counts[i]++; left--; } });
+  const quota = {};
+  levels.forEach((l, i) => quota[l] = counts[i]);
+  return quota;
+}
+// Take `need` questions from a shuffled pool. With a quota (shared by the whole
+// module), each pick takes the difficulty the module is most short of.
+function pickByMix(pool, need, quota, excludeIds) {
+  if (!quota) {
+    const out = pool.slice(0, need);
+    out.forEach(q => excludeIds.add(q.id));
+    return out;
+  }
+  const out = [];
+  for (let k = 0; k < need; k++) {
+    let got = null;
+    for (const lvl of Object.keys(quota).sort((a, b) => quota[b] - quota[a])) {
+      got = pool.find(q => q.difficulty === lvl && !excludeIds.has(q.id));
+      if (got) { quota[lvl]--; break; }
+    }
+    if (!got) got = pool.find(q => !excludeIds.has(q.id));
+    if (!got) break;
+    out.push(got); excludeIds.add(got.id);
+  }
+  return out;
+}
+const DIFF_RANK = { Easy: 0, Medium: 1, Hard: 2 };
+const byDifficulty = (a, b) => (DIFF_RANK[a.difficulty] ?? 1) - (DIFF_RANK[b.difficulty] ?? 1);
+
 // ── Build random English module (27 questions, domain-balanced) ──
-function buildEnglishModule(rng, excludeIds) {
+function buildEnglishModule(rng, excludeIds, mix) {
   // Pool: all questions from all test modules in QUESTION_BANK
   const DOMAIN_ORDER = ['Craft and Structure', 'Information and Ideas', 'Standard English', 'Expression of Ideas'];
   // Target distribution for 27 questions (approximates real SAT R&W module)
@@ -853,13 +901,9 @@ function buildEnglishModule(rng, excludeIds) {
   DOMAIN_ORDER.forEach(d => pools[d] = shuffleArray(pools[d], rng));
 
   const selected = [];
+  const quota = makeQuota(mix, 27);
   DOMAIN_ORDER.forEach(d => {
-    const need = TARGET[d];
-    const avail = pools[d];
-    for (let i = 0; i < need && i < avail.length; i++) {
-      selected.push(avail[i]);
-      excludeIds.add(avail[i].id);
-    }
+    pickByMix(pools[d], TARGET[d], quota, excludeIds).forEach(q => selected.push(q));
   });
 
   // Fill any shortfall from remaining pool
@@ -884,11 +928,12 @@ function buildEnglishModule(rng, excludeIds) {
     const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
     if (match) grouped[match].push(q);
   });
-  return DOMAIN_ORDER.flatMap(d => grouped[d]);
+  // Adaptive modules run easy → hard within each domain, like the real test.
+  return DOMAIN_ORDER.flatMap(d => mix ? grouped[d].slice().sort(byDifficulty) : grouped[d]);
 }
 
 // ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──
-function buildMathModule(rng, excludeIds) {
+function buildMathModule(rng, excludeIds, mix) {
   const DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
   const MC_PER = {'Algebra': 5, 'Advanced Math': 5, 'Problem-Solving and Data Analysis': 4, 'Geometry and Trigonometry': 3};
   const FR_PER = {'Algebra': 1, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 2, 'Geometry and Trigonometry': 1};
@@ -910,13 +955,10 @@ function buildMathModule(rng, excludeIds) {
   });
 
   const selected = [];
+  const quota = makeQuota(mix, 22);
   DOMAINS.forEach(d => {
-    for (let i = 0; i < MC_PER[d] && i < mcPools[d].length; i++) {
-      selected.push(mcPools[d][i]); excludeIds.add(mcPools[d][i].id);
-    }
-    for (let i = 0; i < FR_PER[d] && i < frPools[d].length; i++) {
-      selected.push(frPools[d][i]); excludeIds.add(frPools[d][i].id);
-    }
+    pickByMix(mcPools[d], MC_PER[d], quota, excludeIds).forEach(q => selected.push(q));
+    pickByMix(frPools[d], FR_PER[d], quota, excludeIds).forEach(q => selected.push(q));
   });
 
   // Fill shortfall from any remaining pool
@@ -936,7 +978,9 @@ function buildMathModule(rng, excludeIds) {
     if (!added) break;
   }
 
-  return shuffleArray(selected, rng);
+  const shuffled = shuffleArray(selected, rng);
+  // Adaptive modules run easy → hard, like the real test.
+  return mix ? shuffled.sort(byDifficulty) : shuffled;
 }
 
 // ── Initialize all sections ──
@@ -946,16 +990,36 @@ function initFullTest() {
     return;
   }
 
-  const seed = parseInt(fullTestNum) * 7919 + 1009; // deterministic per test number
+  // deterministic per test number (adaptive tests use their own question sets)
+  const seed = parseInt(fullTestNum) * 7919 + 1009 + (ADAPTIVE ? 104729 : 0);
   const rng = seededRandom(seed);
   const usedIds = new Set();
-
-  sectionData.eng1.questions = buildEnglishModule(rng, usedIds);
-  sectionData.eng2.questions = buildEnglishModule(rng, usedIds);
-
   const usedMathIds = new Set();
-  sectionData.math1.questions = buildMathModule(rng, usedMathIds);
-  sectionData.math2.questions = buildMathModule(rng, usedMathIds);
+
+  if (ADAPTIVE) {
+    // Build Module 1 plus both possible Module 2s now; Module 1's result picks one.
+    sectionData.eng1.questions = buildEnglishModule(rng, usedIds, DIFFICULTY_MIX.routing);
+    module2Options.eng = {
+      harder: buildEnglishModule(rng, new Set(usedIds), DIFFICULTY_MIX.harder),
+      easier: buildEnglishModule(rng, new Set(usedIds), DIFFICULTY_MIX.easier),
+    };
+    sectionData.eng2.questions = module2Options.eng.harder; // replaced once routed
+    sectionData.math1.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
+    module2Options.math = {
+      harder: buildMathModule(rng, new Set(usedMathIds), DIFFICULTY_MIX.harder),
+      easier: buildMathModule(rng, new Set(usedMathIds), DIFFICULTY_MIX.easier),
+    };
+    sectionData.math2.questions = module2Options.math.harder; // replaced once routed
+    document.title = `SAT Practice — ${fullTestLabel}`;
+    ['eng-timer-pause-btn', 'math-timer-pause-btn'].forEach(id => {
+      const b = document.getElementById(id); if (b) b.style.display = 'none';
+    });
+  } else {
+    sectionData.eng1.questions = buildEnglishModule(rng, usedIds);
+    sectionData.eng2.questions = buildEnglishModule(rng, usedIds);
+    sectionData.math1.questions = buildMathModule(rng, usedMathIds);
+    sectionData.math2.questions = buildMathModule(rng, usedMathIds);
+  }
 
   // ── Diagnostic: check every math question's page key exists in MATH_IMAGES ──
   if (typeof MATH_IMAGES !== 'undefined') {
@@ -990,11 +1054,23 @@ function initFullTest() {
 
 function showStartScreen() {
   document.getElementById('start-title').textContent = fullTestLabel;
+  if (ADAPTIVE) {
+    document.querySelectorAll('[onclick="window.location.href=\'index.html\'"]').forEach(b =>
+      b.setAttribute('onclick', "window.location.href='index.html#adaptive'"));
+    document.querySelector('#start-screen .start-label').textContent = 'Adaptive Practice Test';
+    document.querySelector('#start-screen .start-desc').textContent =
+      'Works like the real Digital SAT: each section has two modules, and how you do on Module 1 decides ' +
+      'whether Module 2 is harder or easier. Only the harder Module 2 can reach the top scores. ' +
+      'The timer cannot be paused. At the end you get a scaled score out of 1600.';
+    document.querySelector('#start-screen .btn-start').textContent = 'Start Adaptive Test';
+  }
+  const m1 = ADAPTIVE ? ' · Mixed difficulty' : ' · All domains';
+  const m2 = ADAPTIVE ? ' · Harder or easier, based on Module 1' : ' · All domains';
   const flowHtml = `
-    <div class="flow-item"><div class="flow-num">1</div><div class="flow-info"><div class="flow-name">Reading &amp; Writing — Module 1</div><div class="flow-detail">27 questions · All domains</div></div><div class="flow-time">32 min</div></div>
-    <div class="flow-item"><div class="flow-num">2</div><div class="flow-info"><div class="flow-name">Reading &amp; Writing — Module 2</div><div class="flow-detail">27 questions · All domains</div></div><div class="flow-time">32 min</div></div>
-    <div class="flow-item"><div class="flow-num">3</div><div class="flow-info"><div class="flow-name">Math — Module 1</div><div class="flow-detail">22 questions · MC + Free Response</div></div><div class="flow-time">35 min</div></div>
-    <div class="flow-item"><div class="flow-num">4</div><div class="flow-info"><div class="flow-name">Math — Module 2</div><div class="flow-detail">22 questions · MC + Free Response</div></div><div class="flow-time">35 min</div></div>
+    <div class="flow-item"><div class="flow-num">1</div><div class="flow-info"><div class="flow-name">Reading &amp; Writing — Module 1</div><div class="flow-detail">27 questions${m1}</div></div><div class="flow-time">32 min</div></div>
+    <div class="flow-item"><div class="flow-num">2</div><div class="flow-info"><div class="flow-name">Reading &amp; Writing — Module 2</div><div class="flow-detail">27 questions${m2}</div></div><div class="flow-time">32 min</div></div>
+    <div class="flow-item"><div class="flow-num">3</div><div class="flow-info"><div class="flow-name">Math — Module 1</div><div class="flow-detail">22 questions · MC + Free Response${ADAPTIVE ? m1 : ''}</div></div><div class="flow-time">35 min</div></div>
+    <div class="flow-item"><div class="flow-num">4</div><div class="flow-info"><div class="flow-name">Math — Module 2</div><div class="flow-detail">22 questions · MC + Free Response${ADAPTIVE ? m2 : ''}</div></div><div class="flow-time">35 min</div></div>
   `;
   document.getElementById('section-flow').innerHTML = flowHtml;
   document.getElementById('start-screen').style.display = 'flex';
@@ -1051,6 +1127,7 @@ function getCurrentSectionKey() {
 }
 
 function togglePause() {
+  if (ADAPTIVE) return; // like the real test, the adaptive test has no pause
   const key = getCurrentSectionKey();
   const sd = sectionData[key];
   if (!sd || sd.submitted) return;
@@ -1060,6 +1137,33 @@ function togglePause() {
   const timerEl = document.getElementById(isEng ? 'eng-timer' : 'math-timer');
   btn.textContent = timerPaused ? 'Resume' : 'Pause';
   timerEl.classList.toggle('paused', timerPaused);
+}
+
+// ── Adaptive routing ──
+function moduleCorrect(key) {
+  const sd = sectionData[key];
+  return sd.questions.filter((q, i) => key.startsWith('eng')
+    ? sd.answers[i] === q.answer
+    : (q.is_mc ? sd.answers[i] === q.answer_idx : checkFR(sd.frInputs[i], q.answer_raw))).length;
+}
+// After Module 1: pick the harder or easier Module 2 and reset its answer slots.
+function routeModule2(kind) {
+  const m1 = sectionData[kind + '1'], m2 = sectionData[kind + '2'];
+  const share = moduleCorrect(kind + '1') / m1.questions.length;
+  const route = share >= ROUTE_CUTOFF ? 'harder' : 'easier';
+  adaptiveRoute[kind] = route;
+  m2.questions = module2Options[kind][route];
+  const n = m2.questions.length;
+  m2.answers = new Array(n).fill(null);
+  m2.flagged = new Array(n).fill(false);
+  if (kind === 'eng') m2.highlights = Array.from({ length: n }, () => []);
+  else m2.frInputs = new Array(n).fill('');
+}
+const routeTag = kind => (ADAPTIVE && adaptiveRoute[kind]) ? ` · ${adaptiveRoute[kind] === 'harder' ? 'Harder' : 'Easier'}` : '';
+// Easier Module 2 caps the section at 650, as the real test limits the lower route.
+function scaleSection(raw, curve, maxRaw, route) {
+  const s = rawToScaled(raw, curve, maxRaw);
+  return route === 'easier' ? Math.round((200 + (s - 200) * 0.75) / 10) * 10 : s;
 }
 
 // ── Review mode: inspect a completed module after the final report ──
@@ -1241,7 +1345,8 @@ function renderQuestionEng(key, i) {
 
   const pp = document.getElementById('passage-pane');
   const diffClass = { Easy: 'diff-easy', Medium: 'diff-medium', Hard: 'diff-hard' }[q.difficulty] || '';
-  const diffLabel = q.difficulty || '';
+  // Adaptive tests hide difficulty until review: it would give away the Module 2 route.
+  const diffLabel = (ADAPTIVE && !reviewMode) ? '' : (q.difficulty || '');
 
   function buildPassageHTML(q) {
     const lines = q.passage_lines;
@@ -1478,6 +1583,7 @@ function submitEngModule() {
   const sd = sectionData[key];
   sd.submitted = true;
   clearInterval(timerInterval);
+  if (ADAPTIVE && key === 'eng1') routeModule2('eng');
 
   closeOverlay('eng-review-overlay');
 
@@ -1869,7 +1975,7 @@ function renderQuestionMath(key, i) {
     <div class="q-meta">
       <span>${q.domain}</span>
       <span class="skill-tag">${q.skill}</span>
-      ${q.difficulty?`<span class="diff-tag ${diffCls}">${q.difficulty}</span>`:''}
+      ${q.difficulty && !(ADAPTIVE && !reviewMode)?`<span class="diff-tag ${diffCls}">${q.difficulty}</span>`:''}
       ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
     </div>
     <div class="q-num">Question ${i+1} of ${sd.questions.length}</div>
@@ -1948,6 +2054,7 @@ function submitMathModule() {
   const sd = sectionData[key];
   sd.submitted = true;
   clearInterval(timerInterval);
+  if (ADAPTIVE && key === 'math1') routeModule2('math');
 
   closeOverlay('math-review-overlay');
 
@@ -2026,6 +2133,12 @@ async function showFinalReport() {
   document.getElementById('english-ui').style.display = 'none';
   document.getElementById('math-ui').style.display = 'none';
   document.getElementById('report-title').textContent = fullTestLabel;
+  if (ADAPTIVE) {
+    document.querySelector('#report-screen .report-label').textContent = 'Adaptive Practice Test · Results';
+    const again = document.querySelector('#report-screen .report-actions .btn-start');
+    again.textContent = 'Take Another Adaptive Test';
+    again.onclick = () => { window.location.href = `fulltest.html?mode=adaptive&test=${parseInt(fullTestNum) % 10 + 1}`; };
+  }
 
   // ── Reading & Writing scoring ──
   const eng1 = sectionData.eng1, eng2 = sectionData.eng2;
@@ -2033,7 +2146,7 @@ async function showFinalReport() {
   const eng2Correct = eng2.questions.filter((q,i) => eng2.answers[i] === q.answer).length;
   const rwRaw = eng1Correct + eng2Correct;
   const rwMax = eng1.questions.length + eng2.questions.length;
-  const rwScaled = rawToScaled(rwRaw, RW_CURVE, 54);
+  const rwScaled = scaleSection(rwRaw, RW_CURVE, 54, adaptiveRoute.eng);
 
   // ── Math scoring ──
   const math1 = sectionData.math1, math2 = sectionData.math2;
@@ -2043,7 +2156,7 @@ async function showFinalReport() {
     (q.is_mc ? math2.answers[i]===q.answer_idx : checkFR(math2.frInputs[i], q.answer_raw))).length;
   const mathRaw = math1Correct + math2Correct;
   const mathMax = math1.questions.length + math2.questions.length;
-  const mathScaled = rawToScaled(mathRaw, MATH_CURVE, 44);
+  const mathScaled = scaleSection(mathRaw, MATH_CURVE, 44, adaptiveRoute.math);
 
   const total = rwScaled + mathScaled;
 
@@ -2060,7 +2173,7 @@ async function showFinalReport() {
       <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('eng1')">Review Questions →</button>
     </div>
     <div class="module-result-card">
-      <div class="module-result-name">Reading &amp; Writing — Module 2</div>
+      <div class="module-result-name">Reading &amp; Writing — Module 2${routeTag('eng')}</div>
       <div class="module-result-score">${eng2Correct}/${eng2.questions.length}</div>
       <div class="module-result-detail">${Math.round(eng2Correct/eng2.questions.length*100)}% correct</div>
       <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('eng2')">Review Questions →</button>
@@ -2074,7 +2187,7 @@ async function showFinalReport() {
       <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('math1')">Review Questions →</button>
     </div>
     <div class="module-result-card">
-      <div class="module-result-name">Math — Module 2</div>
+      <div class="module-result-name">Math — Module 2${routeTag('math')}</div>
       <div class="module-result-score">${math2Correct}/${math2.questions.length}</div>
       <div class="module-result-detail">${Math.round(math2Correct/math2.questions.length*100)}% correct</div>
       <button class="overlay-btn" style="margin-top:0.85rem;" onclick="reviewModule('math2')">Review Questions →</button>
@@ -2137,16 +2250,16 @@ async function showFinalReport() {
   document.getElementById('math-domain-breakdown').innerHTML = mathBreakdownResult.html;
 
   await saveScoreHistory({
-    type: 'fulltest', typeLabel: 'Full Test',
+    type: 'fulltest', typeLabel: ADAPTIVE ? 'Adaptive Test' : 'Full Test',
     title: fullTestLabel,
     correct: total, total: 1600, pct: Math.round(total/1600*100),
     fulltest: {
       total, rw: rwScaled, math: mathScaled,
       modules: [
         { name: 'Reading & Writing — Module 1', correct: eng1Correct, total: eng1.questions.length },
-        { name: 'Reading & Writing — Module 2', correct: eng2Correct, total: eng2.questions.length },
+        { name: 'Reading & Writing — Module 2' + routeTag('eng'), correct: eng2Correct, total: eng2.questions.length },
         { name: 'Math — Module 1', correct: math1Correct, total: math1.questions.length },
-        { name: 'Math — Module 2', correct: math2Correct, total: math2.questions.length },
+        { name: 'Math — Module 2' + routeTag('math'), correct: math2Correct, total: math2.questions.length },
       ],
       rwBreakdown, mathBreakdown: mathBreakdownResult.data
     }

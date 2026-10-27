@@ -81,11 +81,13 @@
 .c-full  { background:linear-gradient(145deg,#f4566b 0%,#c01f45 100%); }
 .c-drill { background:linear-gradient(145deg,#f2a516 0%,#b86a0c 100%); }
 .c-hard  { background:linear-gradient(145deg,#3b4a6b 0%,#141c2f 100%); }
+.c-adapt { background:linear-gradient(145deg,#22b07d 0%,#0f6b4c 100%); }
 .c-math:hover  { background:linear-gradient(145deg,#8b5cf6 0%,#5b21b6 100%); }
 .c-eng:hover   { background:linear-gradient(145deg,#14b8c4 0%,#0b7a95 100%); }
 .c-full:hover  { background:linear-gradient(145deg,#f4566b 0%,#c01f45 100%); }
 .c-drill:hover { background:linear-gradient(145deg,#f2a516 0%,#b86a0c 100%); }
 .c-hard:hover  { background:linear-gradient(145deg,#3b4a6b 0%,#141c2f 100%); }
+.c-adapt:hover { background:linear-gradient(145deg,#22b07d 0%,#0f6b4c 100%); }
 .subject-card .card-tag { background:rgba(255,255,255,.2); color:#fff; border:none; }
 .subject-card .card-arrow { color:rgba(255,255,255,.85); width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.2); display:grid; place-items:center; font-size:16px; }
 .subject-card:hover .card-arrow { color:#fff; background:rgba(255,255,255,.32); }

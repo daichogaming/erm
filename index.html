@@ -164,6 +164,7 @@
     <button class="sb-link" data-nav="math" onclick="show('math')"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Math</button>
     <button class="sb-link" data-nav="english" onclick="show('english')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h16"/></svg>Writing</button>
     <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
+    <button class="sb-link" data-nav="adaptive" onclick="show('adaptive')"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Adaptive Test</button>
     <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
     <button class="sb-link" onclick="window.location.href='hard.html'"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
     <div class="sb-label">You</div>
@@ -254,6 +255,19 @@
         </div>
       </div>
     </div>
+    <div class="subject-card c-adapt" onclick="show('adaptive')">
+      <div class="card-top"><div class="card-tag">Like the Real Test</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Adaptive Test</div>
+      <div class="card-desc">Full SAT that adapts to you: how you do on Module 1 decides whether Module 2 is harder or easier.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">4 modules · ~2h 14m total</div>
+          <div class="card-test-item">Timer cannot be paused</div>
+          <div class="card-test-item">Only the harder route reaches 800</div>
+        </div>
+      </div>
+    </div>
     <div class="subject-card c-drill" onclick="show('drills')">
       <div class="card-top"><div class="card-tag">By Skill</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Topical Drills</div>
@@ -327,6 +341,27 @@
   <div class="tests-section">
     <div class="sec-label">Available full-length tests</div>
     <div class="tests-list" id="full-list"></div>
+  </div>
+  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<!-- ADAPTIVE -->
+<div id="adaptive" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Adaptive Test</span></div>
+      <button class="back-btn" onclick="show('home')">← Back</button>
+    </div>
+  </header>
+  <div class="subj-hero">
+    <div class="subj-label">SAT · Adaptive Practice</div>
+    <div class="subj-title">Adaptive Test</div>
+    <div class="subj-meta">Works like the real Digital SAT: your Module 1 result decides whether Module 2 is harder or easier · Timer cannot be paused · Scored out of 1600</div>
+  </div>
+  <div class="tests-section">
+    <div class="sec-label">Available adaptive tests</div>
+    <div class="tests-list" id="adaptive-list"></div>
   </div>
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
@@ -492,6 +527,16 @@
     </div>`;
   }).join('');
 
+  // Build adaptive test list (10 tests)
+  document.getElementById('adaptive-list').innerHTML = Array.from({length:10},(_,i)=>{
+    const n=i+1, name=`Adaptive Test ${n}`;
+    return `<div class="test-row" onclick="window.location.href='fulltest.html?mode=adaptive&test=${n}'">
+      <div class="test-idx">${String(n).padStart(2,'0')}</div>
+      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">R&amp;W Module 1 &amp; 2 (27 questions each) · Math Module 1 &amp; 2 (22 questions each) · Module 2 adapts to Module 1 · ~2h 14m total</div></div>
+      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+    </div>`;
+  }).join('');
+
   function show(id) {
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -626,7 +671,7 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  { const h = location.hash.slice(1); if (['math','english','fulltests','drills'].includes(h)) show(h); }
+  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills'].includes(h)) show(h); }
 </script>
 
 <div class="reco-popup" id="reco-popup">
