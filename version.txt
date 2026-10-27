@@ -1,2 +1,0 @@
-SAT Laboratory build: 2026-10-27
-Includes: full math bank restored (+ mathhard01), multi-answer free response, Report button on all tests, phone top bar fix.
