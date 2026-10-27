@@ -1,0 +1,63 @@
+# Keeps daichogaming/erm (the live site) in step with L3oDevMan/erm.
+# Every 10 minutes it merges L3oDevMan's 11tin1 into this repo's 11tin1,
+# then asks GitHub Pages to rebuild. Nothing is ever force-pushed:
+# commits made directly here are kept, and a merge conflict stops the sync.
+# Run it by hand from the Actions tab ("Run workflow") to sync right away.
+# To turn it off: Actions tab → this workflow → "..." → Disable workflow.
+name: Sync from L3oDevMan
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: sync-from-l3odevman
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # The file also lives in L3oDevMan/erm; only run it in the live repo.
+    if: github.repository == 'daichogaming/erm'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 11tin1
+          fetch-depth: 0
+
+      - name: Merge L3oDevMan/erm 11tin1
+        id: merge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch https://github.com/L3oDevMan/erm.git 11tin1
+
+          if git merge-base --is-ancestor FETCH_HEAD HEAD; then
+            echo "Already up to date."
+            exit 0
+          fi
+
+          # The built-in token is not allowed to push workflow-file changes.
+          if git diff --name-only HEAD...FETCH_HEAD | grep -q '^\.github/workflows/'; then
+            echo "::error::L3oDevMan changed a workflow file. Merge it with a pull request by hand once; the sync resumes after that."
+            exit 1
+          fi
+
+          if ! git merge --no-edit -m "Sync from L3oDevMan/erm 11tin1" FETCH_HEAD; then
+            echo "::error::Merge conflict between the two repos. Fix it with a pull request by hand; the sync resumes after that."
+            exit 1
+          fi
+
+          git push origin HEAD:11tin1
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild GitHub Pages
+        if: steps.merge.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages rebuild request skipped; the push alone usually triggers it."
