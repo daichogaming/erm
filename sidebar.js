@@ -1,7 +1,7 @@
 /* Injects the shared sidebar on secondary pages (weakness, settings, previous scores). */
 (function () {
   var cur = location.pathname.split('/').pop();
-  var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'home.css'; document.head.appendChild(l);
+  var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'home.css?v=2'; document.head.appendChild(l);
   var I = {
     home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
     math:'<path d="M5 12h14M12 5v14"/>', eng:'<path d="M4 5h16M4 12h10M4 19h16"/>',
@@ -21,9 +21,9 @@
   el.className = 'sidebar'; el.setAttribute('aria-label', 'Main navigation');
   el.innerHTML =
     '<div class="sb-brand" onclick="location.href=\'index.html\'"><i>S</i>SATLab</div><nav class="sb-nav">' +
-    a('index.html', 'home', 'Home') + '<div class="sb-label">Practice</div>' +
+    a('index.html', 'home', 'Home') + '<div class="sb-label">Practice</div>' + a('index.html#adaptive', 'adapt', 'Adaptive Test') +
     a('index.html#math', 'math', 'Math') + a('index.html#english', 'eng', 'Writing') +
-    a('index.html#fulltests', 'full', 'Full Test') + a('index.html#adaptive', 'adapt', 'Adaptive Test') + a('index.html#drills', 'drill', 'Topical Drills') + a('index.html#recall', 'recall', 'Active Recall') +
+    a('index.html#fulltests', 'full', 'Full Test') + a('index.html#drills', 'drill', 'Topical Drills') + a('index.html#recall', 'recall', 'Active Recall') +
     a('index.html#hard', 'hard', 'Hard Question Bank') +
     a('index.html#recycles', 'recycle', 'Recycles') +
     '<div class="sb-label">You</div>' +

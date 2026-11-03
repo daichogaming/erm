@@ -157,7 +157,6 @@
     #hard .sec-label, #recall .sec-label, #recycles .sec-label { margin-top:1.75rem; }
     #recycles .sec-label:first-child { margin-top:0; }
     .rc-count { font-family:'DM Mono',monospace; font-size:11px; padding:3px 10px; border-radius:999px; background:var(--gold-soft); color:var(--gold-deep); white-space:nowrap; }
-    .rc-list .test-row { cursor:default; }
     #recall .sec-label:first-child { margin-top:0; }
     #hard .sec-label:first-child { margin-top:0; }
     .hb-fade { animation:fadeIn .22s ease; }
@@ -172,8 +171,8 @@
     @media (max-width:600px) { .badge-hard { display:none; } }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css" />
-  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="theme.css?v=3" />
+  <link rel="stylesheet" href="home.css?v=2" />
 </head>
 <body>
 
@@ -182,10 +181,10 @@
   <nav class="sb-nav">
     <button class="sb-link active" data-nav="home" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <div class="sb-label">Practice</div>
+    <button class="sb-link" data-nav="adaptive" onclick="show('adaptive')"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Adaptive Test</button>
     <button class="sb-link" data-nav="math" onclick="show('math')"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Math</button>
     <button class="sb-link" data-nav="english" onclick="show('english')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h16"/></svg>Writing</button>
     <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
-    <button class="sb-link" data-nav="adaptive" onclick="show('adaptive')"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Adaptive Test</button>
     <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
     <button class="sb-link" data-nav="recall" onclick="show('recall')"><svg viewBox="0 0 24 24"><path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/></svg>Active Recall</button>
     <button class="sb-link" data-nav="hard" onclick="show('hard')"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
@@ -219,7 +218,7 @@
         <h1 class="hero-title">Practice with real test,<br><mark>maximize your SAT score</mark></h1>
         <p class="hero-sub">Work through official SAT questions by subject, skill, or full-length simulation — scored out of 1600.</p>
         <div class="hero-cta">
-          <button class="btn-primary hero-btn" onclick="show('fulltests')">Start a full test →</button>
+          <button class="btn-primary hero-btn" onclick="show('adaptive')">Take an adaptive test →</button>
           <button class="hero-btn ghost" onclick="show('drills')">Drill a skill</button>
         </div>
         <div class="hero-pills">
@@ -237,8 +236,21 @@
       </div>
     </div>
   </div>
-  <div class="section-head"><h2>What do you want to practice?</h2><p>Four ways in — pick one and go.</p></div>
+  <div class="section-head"><h2>What do you want to practice?</h2><p>Start with an adaptive test, or pick any section and go.</p></div>
   <div class="subject-row">
+    <div class="subject-card c-adapt" onclick="show('adaptive')">
+      <div class="card-top"><div class="card-tag">Like the Real Test</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Adaptive Test</div>
+      <div class="card-desc">Full SAT that adapts to you: how you do on Module 1 decides whether Module 2 is harder or easier.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">4 modules · ~2h 14m total</div>
+          <div class="card-test-item">Timer cannot be paused</div>
+          <div class="card-test-item">Only the harder route reaches 800</div>
+        </div>
+      </div>
+    </div>
     <div class="subject-card c-math" onclick="show('math')">
       <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Math</div>
@@ -275,19 +287,6 @@
           <div class="card-test-item">4 modules · ~2h 14m total</div>
           <div class="card-test-item">Randomized from question bank</div>
           <div class="card-test-item">Official scoring curve · /1600</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-adapt" onclick="show('adaptive')">
-      <div class="card-top"><div class="card-tag">Like the Real Test</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Adaptive Test</div>
-      <div class="card-desc">Full SAT that adapts to you: how you do on Module 1 decides whether Module 2 is harder or easier.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Format</div>
-        <div class="card-test-list">
-          <div class="card-test-item">4 modules · ~2h 14m total</div>
-          <div class="card-test-item">Timer cannot be paused</div>
-          <div class="card-test-item">Only the harder route reaches 800</div>
         </div>
       </div>
     </div>
@@ -792,11 +791,11 @@
       `<div class="sec-label">Practice</div><div class="tests-list">` +
         row('all', 'All recycled questions', all, 1) +
         RecycleBank.groups.map((g, i) => row(g.key, g.name, RecycleBank.set(g.key), i + 2)).join('') +
-      `</div><div class="sec-label">Every recycled question</div><div class="tests-list rc-list">` +
-        all.map(q => `<div class="test-row">
+      `</div><div class="sec-label">Every recycled question · tap one to practice it</div><div class="tests-list rc-list">` +
+        all.map(q => `<div class="test-row" title="Practice this question" onclick="window.location.href='test.html?test=recycles&module=${q.recycle.code.toLowerCase()}&label=Recycles'">
           <div class="test-idx">${q.recycle.code}</div>
           <div class="test-info"><div class="test-name">${esc(q.recycle.title)}</div><div class="test-detail">${esc(q.skill)} · ${esc(q.recycle.sources.join(' · '))}</div></div>
-          <div class="test-right"><span class="rc-count">${q.recycle.count} tests</span></div>
+          <div class="test-right"><span class="rc-count">${q.recycle.count} tests</span><div class="test-arrow">→</div></div>
         </div>`).join('') +
       `</div><div class="hb-notice" style="margin-top:1.25rem">BMV = Bluebook Mini Verbal Test · FMT = Final Mock Test · V1 / V2 = Verbal Module 1 / 2. Choice order is shuffled between tests, so the letters here may differ from the ones you saw.</div>`;
   })();

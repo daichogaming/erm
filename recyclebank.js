@@ -4,7 +4,7 @@
    end of their text matches, so lightly edited copies are grouped together. No Math question appeared
    more than 3 times. Answers come from correct attempts; RS6 and SE1 are worked out (see their notes).
    Abbreviations: BMV = Bluebook Mini Verbal Test, FMT = Final Mock Test, V1/V2 = Verbal Module 1/2.
-   Records use the same shape as questionbank.js, so test.html can run them (test=recycles&module=<group key|all>). */
+   Records use the same shape as questionbank.js, so test.html can run them (test=recycles&module=<group key|all|question code>). */
 const RECYCLE_BANK = [
  {
   "id": "rc_rs1",
@@ -1957,9 +1957,16 @@ const RECYCLE_BANK = [
 const RECYCLE_GROUPS = [{"key": "rs", "name": "Rhetorical Synthesis", "ids": ["rc_rs1", "rc_rs2", "rc_rs3", "rc_rs4", "rc_rs5", "rc_rs6", "rc_rs7", "rc_rs8", "rc_rs9", "rc_rs10", "rc_rs11", "rc_rs12", "rc_rs13"]}, {"key": "ev", "name": "Command of Evidence & Inferences", "ids": ["rc_ev1", "rc_ev2", "rc_ev3", "rc_ev4", "rc_ev5", "rc_ev6", "rc_ev7", "rc_ev8"]}, {"key": "sp", "name": "Text Structure & Purpose", "ids": ["rc_sp1", "rc_sp2", "rc_sp3", "rc_sp4", "rc_sp5", "rc_sp6", "rc_sp7"]}, {"key": "tr", "name": "Transitions", "ids": ["rc_tr1", "rc_tr2", "rc_tr3", "rc_tr4", "rc_tr5", "rc_tr6"]}, {"key": "se", "name": "Standard English Conventions", "ids": ["rc_se1", "rc_se2", "rc_se3"]}, {"key": "wc", "name": "Words in Context", "ids": ["rc_wc1", "rc_wc2"]}];
 window.RecycleBank = {
   groups: RECYCLE_GROUPS,
-  name: function (key) { if (key === 'all') return 'All recycled questions'; var g = RECYCLE_GROUPS.filter(function (x) { return x.key === key; })[0]; return g ? g.name : key; },
-  // key is a group key, or 'all'; most-repeated questions first
+  // a single question, by its code (e.g. 'rs10')
+  question: function (code) { code = String(code || '').toLowerCase(); return RECYCLE_BANK.filter(function (q) { return q.recycle.code.toLowerCase() === code; })[0] || null; },
+  name: function (key) {
+    if (key === 'all') return 'All recycled questions';
+    var g = RECYCLE_GROUPS.filter(function (x) { return x.key === key; })[0]; if (g) return g.name;
+    var q = this.question(key); return q ? q.recycle.code + ' \u00b7 ' + q.recycle.title : key;
+  },
+  // key is a group key, 'all', or one question's code; most-repeated questions first
   set: function (key) {
+    var one = this.question(key); if (one) return [one];
     var qs = key === 'all' ? RECYCLE_BANK.slice() : RECYCLE_BANK.filter(function (q) { return q.recycle.group === key; });
     return qs.sort(function (a, b) { return b.recycle.count - a.recycle.count; });
   }

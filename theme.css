@@ -209,3 +209,7 @@ body {
   .top-bar-right, .tb-right { flex:0 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
   .top-bar-right > *, .tb-right > * { flex-shrink:0; }
 }
+
+/* Long test titles stay on one line in the top bar instead of wrapping out of it. */
+.top-bar-module, .tb-module { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.top-bar-left { min-width:0; }

@@ -483,9 +483,11 @@
     .report-actions { display: flex; gap: 1rem; margin-top: 2.5rem; }
 
     @media (max-width: 720px) {
-      .passage-pane { display: none; }
+      /* Phones: passage on top, question below, one scrolling page (the passage used to be hidden). */
+      #english-ui .test-body { flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      .passage-pane { flex: none; overflow: visible; min-width: 0; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--gray-border); }
       .divider { display: none; }
-      .question-pane { width: 100% !important; padding: 1.5rem; }
+      .question-pane { flex: none; overflow: visible; min-width: 0; width: 100% !important; padding: 1.25rem; }
       .tool-pane { display: none; }
       .module-result-grid { grid-template-columns: 1fr; }
       .total-score-card { flex-direction: column; align-items: flex-start; }
@@ -493,7 +495,7 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="theme.css?v=3" />
 </head>
 <body>
 
