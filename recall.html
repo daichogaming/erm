@@ -79,6 +79,9 @@
     .passage-chart-wrap { margin:.75rem 0; } .passage-chart-img { max-width:100%; }
     .passage-chart-note { font-size:13px; color:var(--gray-mid); font-style:italic; margin:.5rem 0; }
     mark.rc-hit { background:rgba(31,138,76,.18); color:inherit; border-radius:4px; padding:0 2px; }
+    mark.rc-miss { background:none; color:inherit; text-decoration:underline wavy rgba(209,73,59,.75); text-underline-offset:3px; }
+    .got { display:flex; flex-wrap:wrap; gap:6px; margin-top:.5rem; }
+    .got span { font-size:12px; padding:3px 9px; border-radius:999px; background:rgba(31,138,76,.12); color:var(--correct); }
 
     .hidden-card { border:1.5px dashed var(--gray-border); border-radius:var(--r-lg); padding:2rem; text-align:center; color:var(--gray-mid); font-size:14px; }
     .hidden-card b { display:block; color:var(--black); font-size:16px; margin-bottom:.3rem; }
@@ -296,19 +299,20 @@ function showCompare() {
   let recallCol = '';
   if (writes()) {
     const kw = keywordsOf(passageText(q));
-    const said = new Set(wordsOf(r.recall).map(norm));
-    const hit = kw.filter(k => said.has(k.n));
-    const missed = kw.filter(k => !said.has(k.n)).sort((a, b) => (b.cap - a.cap) || (b.w.length - a.w.length)).slice(0, 12);
+    const said = wordsOf(r.recall).map(norm);
+    const hit = kw.filter(k => said.some(w => sameWord(w, k.n)));
+    const missed = kw.filter(k => !hit.includes(k));
     r.keyPct = kw.length ? Math.round(hit.length / kw.length * 100) : null;
     recallCol = `<div class="card">
       <div class="col-title">What you remembered</div>
       <div class="your-recall${r.recall ? '' : ' empty'}">${r.recall ? esc(r.recall) : 'You didn’t write anything.'}</div>
       <div class="stat"><b>${hit.length}/${kw.length}</b><span>key words from the passage</span></div>
-      ${missed.length ? `<div class="hint" style="margin:0">Key words you didn’t use:</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
+      ${hit.length ? `<div class="hint" style="margin:0">You remembered:</div><div class="got">${hit.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
+      ${missed.length ? `<div class="hint" style="margin:.6rem 0 0">You missed (underlined in the passage):</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
       <div class="rate"><div class="opt-label" style="margin-top:0">How much did you remember?</div>
         <div class="pills" id="rate">${['Most of it', 'Some of it', 'Very little'].map((l, i) => `<button class="pill${r.rating === i ? ' on' : ''}" data-r="${i}">${l}</button>`).join('')}</div></div>
     </div>`;
-    window.__hits = new Set(hit.map(h => h.n));
+    window.__marks = { hit: new Set(hit.map(h => h.n)), miss: new Set(missed.map(m => m.n)) };
   }
   let answerBlock = '';
   if (answers()) {
@@ -330,7 +334,7 @@ function showCompare() {
     ${answerBlock}
     <div class="actions"><button class="btn primary" onclick="${last ? 'showDone()' : `startQuestion(${currentQ + 1})`}">${last ? 'See results →' : 'Next passage →'}</button></div>`);
   if (writes()) {
-    markHits($('passage'), window.__hits);
+    markKeywords($('passage'), window.__marks);
     $('rate').onclick = e => { const b = e.target.closest('.pill'); if (!b) return; r.rating = +b.dataset.r; document.querySelectorAll('#rate .pill').forEach(x => x.classList.toggle('on', x === b)); };
   }
 }
@@ -370,8 +374,11 @@ function exitRecall(noConfirm) {
   location.href = BACK_URL;
 }
 
-// ── Key words: the content words of the passage, used to compare
-//    what the student wrote against the original. ──────────────
+// ── Key words: the few words that carry a passage (names, topic terms),
+//    used to compare what the student wrote against the original.
+//    A word is "key" when it shows up in this passage but is rare across
+//    the whole question bank, so everyday words (found, group, possible…)
+//    never count. ─────────────────────────────────────────────────────
 const STOP = new Set(('about above after again against also although among another because been before being below between both but could did does doing down during each even every from further have having here however into itself just like made make many more most much must never only other over same should since some such than that their them themselves then there these they this those through thus under until upon very were what when where which while whom whose will with within without would your yours text texts author authors following adapted the and for are was not one two its has had who how all any can may way often still yet less least among new old ever being').split(' '));
 function wordsOf(s) { return String(s || '').match(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*/g) || []; }
 function norm(w) {
@@ -379,26 +386,55 @@ function norm(w) {
   if (w.length > 5) w = w.replace(/(ing|ed|es|s|ly)$/, '');
   return w;
 }
+const GENERIC = new Set(('produce produced producing examined examine found finding findings possible possibly answer group groups depending suggest suggests suggested study studies studied research researcher researchers result results data evidence show shows showed shown used using use based known called include includes including likely important different several various certain example particular process increase increased decrease effect effects larger smaller higher lower common typically usually generally actually rather instead whether either fact case cases part parts point form forms type types kind kinds number numbers amount level levels people person time times year years work works making came come comes become became given take taken took argue argued claim claims explain explains noted notes note observed observe report reported described describe describes developed develop considered consider thought think believe believed related relationship').split(' ').map(norm));
+let DOC_FREQ = null, DOC_COUNT = 0;
+function docFreq() {   // how many passages in the bank use each word (built once)
+  if (DOC_FREQ) return DOC_FREQ;
+  DOC_FREQ = new Map();
+  const seen = new Set();
+  Object.values(typeof DRILL_BANK !== 'undefined' ? DRILL_BANK : {}).forEach(list => list.forEach(q => {
+    if (seen.has(q.id)) return; seen.add(q.id); DOC_COUNT++;
+    new Set(wordsOf(passageText(q)).map(norm)).forEach(n => DOC_FREQ.set(n, (DOC_FREQ.get(n) || 0) + 1));
+  }));
+  return DOC_FREQ;
+}
 function keywordsOf(text) {
-  const seen = new Map();
+  const df = docFreq(), N = Math.max(DOC_COUNT, 1);
+  const tf = new Map(), first = new Map();
   for (const w of wordsOf(text)) {
     const lw = w.toLowerCase();
     if (lw.length < 4 || STOP.has(lw)) continue;
     const n = norm(w);
-    if (!seen.has(n)) seen.set(n, { w, n, cap: /^[A-ZÀ-Þ]/.test(w) ? 1 : 0 });
+    if (GENERIC.has(n)) continue;
+    tf.set(n, (tf.get(n) || 0) + 1);
+    if (!first.has(n)) first.set(n, w.replace(/['’]s$/, ''));
   }
-  return [...seen.values()];
+  const ranked = [...tf].map(([n, f]) => ({ n, w: first.get(n), df: df.get(n) || 1 }))
+    .filter(k => k.df / N <= 0.03)
+    .map(k => ({ ...k, score: tf.get(k.n) * Math.log(N / k.df) }))
+    .sort((a, b) => b.score - a.score);
+  return ranked.slice(0, Math.max(6, Math.min(10, Math.round(tf.size * 0.22))));
 }
-function markHits(root, hits) {
-  if (!root || !hits || !hits.size) return;
+// Same word, allowing other forms of it (fossil / fossilized, pigment / pigments).
+function sameWord(a, b) { return a === b || (a.length >= 5 && b.length >= 5 && a.slice(0, 5) === b.slice(0, 5)); }
+function markKeywords(root, marks) {
+  if (!root || !marks) return;
+  const kind = p => {
+    if (p.length < 4) return '';
+    const n = norm(p);
+    if ([...marks.hit].some(k => k === n)) return 'rc-hit';
+    if ([...marks.miss].some(k => k === n)) return 'rc-miss';
+    return '';
+  };
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
   nodes.forEach(node => {
     const parts = node.nodeValue.split(/([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*)/);
-    if (!parts.some((p, i) => i % 2 && p.length >= 4 && hits.has(norm(p)))) return;
+    if (!parts.some((p, i) => i % 2 && kind(p))) return;
     const frag = document.createDocumentFragment();
     parts.forEach((p, i) => {
-      if (i % 2 && p.length >= 4 && hits.has(norm(p))) { const m = document.createElement('mark'); m.className = 'rc-hit'; m.textContent = p; frag.appendChild(m); }
+      const k = i % 2 ? kind(p) : '';
+      if (k) { const m = document.createElement('mark'); m.className = k; m.textContent = p; frag.appendChild(m); }
       else if (p) frag.appendChild(document.createTextNode(p));
     });
     node.parentNode.replaceChild(frag, node);
