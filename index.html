@@ -154,7 +154,11 @@
     .hb-stats span { font-size:13px; padding:7px 14px; border-radius:999px; background:var(--card); border:1px solid var(--gray-border); }
     .hb-stats b { color:#e5383b; }
     #hard a.test-row { text-decoration:none; color:inherit; }
-    #hard .sec-label { margin-top:1.75rem; }
+    #hard .sec-label, #recall .sec-label, #recycles .sec-label { margin-top:1.75rem; }
+    #recycles .sec-label:first-child { margin-top:0; }
+    .rc-count { font-family:'DM Mono',monospace; font-size:11px; padding:3px 10px; border-radius:999px; background:var(--gold-soft); color:var(--gold-deep); white-space:nowrap; }
+    .rc-list .test-row { cursor:default; }
+    #recall .sec-label:first-child { margin-top:0; }
     #hard .sec-label:first-child { margin-top:0; }
     .hb-fade { animation:fadeIn .22s ease; }
     .badge-hard { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 10px; border-radius:999px; background:rgba(229,56,59,.12); color:#c1272d; white-space:nowrap; }
@@ -183,7 +187,9 @@
     <button class="sb-link" data-nav="fulltests" onclick="show('fulltests')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Full Test</button>
     <button class="sb-link" data-nav="adaptive" onclick="show('adaptive')"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Adaptive Test</button>
     <button class="sb-link" data-nav="drills" onclick="show('drills')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Topical Drills</button>
+    <button class="sb-link" data-nav="recall" onclick="show('recall')"><svg viewBox="0 0 24 24"><path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/></svg>Active Recall</button>
     <button class="sb-link" data-nav="hard" onclick="show('hard')"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Hard Question Bank</button>
+    <button class="sb-link" data-nav="recycles" onclick="show('recycles')"><svg viewBox="0 0 24 24"><path d="M7 19H4.5a1.5 1.5 0 0 1-1.3-2.25L5.6 12.6"/><path d="M11 19h8.5a1.5 1.5 0 0 0 1.3-2.25l-1.7-2.95"/><path d="M14 16l-3 3 3 3"/><path d="M8.6 7.5 10.7 4a1.5 1.5 0 0 1 2.6 0l2.6 4.5"/><path d="M15 4.6l.9 4-4 .9"/><path d="M3 9.5l2.6 3.1 3.1-2.6"/></svg>Recycles</button>
     <div class="sb-label">You</div>
     <button class="sb-link" onclick="window.location.href='weakness.html'"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Weakness Profile</button>
     <button class="sb-link" onclick="window.location.href='previous-scores.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Previous Scores</button>
@@ -298,6 +304,19 @@
         </div>
       </div>
     </div>
+    <div class="subject-card c-recall" onclick="show('recall')">
+      <div class="card-top"><div class="card-tag">Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Active Recall</div>
+      <div class="card-desc">Read a passage, watch it disappear, then write what you remember and answer from memory — like TOEFL iBT reading.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">60 seconds to read, then the passage hides</div>
+          <div class="card-test-item">Write what you remember and/or answer the question</div>
+          <div class="card-test-item">Compare with the passage and the answer key</div>
+        </div>
+      </div>
+    </div>
     <div class="subject-card c-hard" onclick="show('hard')">
       <div class="card-top"><div class="card-tag">Math + Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
       <div class="card-title">Hard Question Bank</div>
@@ -307,6 +326,19 @@
         <div class="card-test-list">
           <div class="card-test-item">Hard-only sets for both sections</div>
           <div class="card-test-item">Same test screen, timer and tools as the real practice tests</div>
+        </div>
+      </div>
+    </div>
+    <div class="subject-card c-recycle" onclick="show('recycles')">
+      <div class="card-top"><div class="card-tag">Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
+      <div class="card-title">Recycles</div>
+      <div class="card-desc">The questions that keep coming back: 39 questions that appeared in 4 or more different tests.</div>
+      <div class="card-tests">
+        <div class="card-tests-lbl">Format</div>
+        <div class="card-test-list">
+          <div class="card-test-item">From 407 completed tests · 7,515 questions</div>
+          <div class="card-test-item">Each question seen in 4–7 different tests</div>
+          <div class="card-test-item">Same test screen, timer and tools as the practice tests</div>
         </div>
       </div>
     </div>
@@ -383,6 +415,24 @@
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
+<!-- ACTIVE RECALL -->
+<div id="recall" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Active Recall</span></div>
+      <button class="back-btn" onclick="show('home')">← Back</button>
+    </div>
+  </header>
+  <div class="subj-hero">
+    <div class="subj-label">SAT · Reading &amp; Writing Memory Training</div>
+    <div class="subj-title">Active Recall</div>
+    <div class="subj-meta">Read each passage for 60 seconds. Then it disappears: write what you remember and answer the question from memory, then compare with the original. Builds the habit of really taking in what you read.</div>
+  </div>
+  <div class="tests-section" id="recall-sets"></div>
+  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
 <!-- HARD QUESTION BANK -->
 <div id="hard" class="page">
   <header class="site-header">
@@ -399,6 +449,25 @@
     <div class="hb-stats" id="hb-stats"></div>
   </div>
   <div class="tests-section" id="hb-sets"><div class="hb-notice">Loading the question banks…</div></div>
+  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+</div>
+
+<!-- RECYCLES -->
+<div id="recycles" class="page">
+  <header class="site-header">
+    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="hdr-right">
+      <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Recycles</span></div>
+      <button class="back-btn" onclick="show('home')">← Back</button>
+    </div>
+  </header>
+  <div class="subj-hero">
+    <div class="subj-label">SAT · Reading &amp; Writing</div>
+    <div class="subj-title">Recycles</div>
+    <div class="subj-meta">Questions that came up again and again. Out of 407 completed tests (7,515 questions), these 39 appeared in 4 or more different tests — all of them Reading &amp; Writing; no Math question appeared more than 3 times.</div>
+    <div class="hb-stats" id="rc-stats"></div>
+  </div>
+  <div class="tests-section" id="rc-sets"></div>
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
@@ -519,6 +588,7 @@
   <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
+<script src="recyclebank.js"></script>
 <script>
   let curSubj = 'math', curTestId = 'mathtest01', curLabel = 'Practice Test 1';
   const cfg = {
@@ -704,6 +774,48 @@
   ];
   const DOMAIN_ORDER_RW = ['Information and Ideas','Craft and Structure','Expression of Ideas','Standard English Conventions'];
 
+  // Recycles: questions from recyclebank.js that appeared in 4+ different tests.
+  (function renderRecycles(){
+    const el = document.getElementById('rc-sets');
+    if (!window.RecycleBank) { el.innerHTML = '<div class="hb-notice">Couldn’t load the recycled questions. Reload the page to try again.</div>'; return; }
+    const all = RecycleBank.set('all');
+    const span = qs => { const c = qs.map(q => q.recycle.count); return Math.min(...c) === Math.max(...c) ? `${Math.max(...c)}` : `${Math.min(...c)}–${Math.max(...c)}`; };
+    const row = (key, name, qs, i) => `<div class="test-row" onclick="window.location.href='test.html?test=recycles&module=${key}&label=Recycles'">
+        <div class="test-idx">${String(i).padStart(2,'0')}</div>
+        <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">${qs.length} questions · ~${Math.round(qs.length*32/27)} min · each seen in ${span(qs)} tests · most repeated first</div></div>
+        <div class="test-right"><div class="badge badge-avail">Practice</div><div class="test-arrow">→</div></div>
+      </div>`;
+    document.getElementById('rc-stats').innerHTML =
+      `<span><b>${all.length}</b> recycled questions</span><span>seen in ${span(all)} tests each</span><span>${RecycleBank.groups.length} skill groups</span>`;
+    const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    el.innerHTML =
+      `<div class="sec-label">Practice</div><div class="tests-list">` +
+        row('all', 'All recycled questions', all, 1) +
+        RecycleBank.groups.map((g, i) => row(g.key, g.name, RecycleBank.set(g.key), i + 2)).join('') +
+      `</div><div class="sec-label">Every recycled question</div><div class="tests-list rc-list">` +
+        all.map(q => `<div class="test-row">
+          <div class="test-idx">${q.recycle.code}</div>
+          <div class="test-info"><div class="test-name">${esc(q.recycle.title)}</div><div class="test-detail">${esc(q.skill)} · ${esc(q.recycle.sources.join(' · '))}</div></div>
+          <div class="test-right"><span class="rc-count">${q.recycle.count} tests</span></div>
+        </div>`).join('') +
+      `</div><div class="hb-notice" style="margin-top:1.25rem">BMV = Bluebook Mini Verbal Test · FMT = Final Mock Test · V1 / V2 = Verbal Module 1 / 2. Choice order is shuffled between tests, so the letters here may differ from the ones you saw.</div>`;
+  })();
+
+  // Active Recall: the reading skills, split into the same sets as the drills.
+  // Grammar skills are left out — they don't test memory of a passage.
+  (function renderRecallSets(){
+    const ORDER = ['inferences','central-ideas-and-details','command-of-evidence','text-structure-and-purpose','cross-text-connections','words-in-context'];
+    document.getElementById('recall-sets').innerHTML = ORDER.map(slug => {
+      const t = DRILL_TOPICS.find(x => x.slug === slug); if (!t) return '';
+      return `<div class="sec-label">${t.skill}</div><div class="tests-list">` + t.sizes.map((n, i) =>
+        `<div class="test-row" onclick="window.location.href='recall.html?skill=${slug}&set=${i+1}'">
+          <div class="test-idx">${String(i+1).padStart(2,'0')}</div>
+          <div class="test-info"><div class="test-name">${t.skill} · Set ${i+1}</div><div class="test-detail">${n} passages · read, recall, compare · ~${Math.round(n*2)} min</div></div>
+          <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+        </div>`).join('') + '</div>';
+    }).join('');
+  })();
+
   // Build topic list, grouped by domain
   (function renderDrillTopics(){
     let html = '', n = 1;
@@ -782,7 +894,7 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','hard'].includes(h)) show(h); }
+  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','recall','hard','recycles'].includes(h)) show(h); }
 </script>
 
 <div class="reco-popup" id="reco-popup">

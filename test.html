@@ -507,6 +507,7 @@
 
 <script src="questionbank.js"></script>
 <script src="hardbank.js"></script>
+<script src="recyclebank.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  STATE
@@ -521,7 +522,11 @@ const moduleKey = `${testId}_${moduleId}`;
 // the question server doesn't know about them, so they're loaded and graded in the browser.
 const HARD_MODE = testId === 'hard';
 const hardSkill = params.get('skill') || '';
+// Recycles sets (test=recycles&module=<group key|all>) come from recyclebank.js and are graded locally too.
+const RECYCLE_MODE = testId === 'recycles';
+const LOCAL_MODE = HARD_MODE || RECYCLE_MODE;
 const modWord   = HARD_MODE ? 'Set' : 'Module';
+const setName   = RECYCLE_MODE && window.RecycleBank ? RecycleBank.name(moduleId) : `${modWord} ${moduleId}`;
 let QUESTIONS = [];
 
 // ── Your Cloudflare Worker API ──────────────────────────────────
@@ -545,6 +550,9 @@ async function initTest() {
       ? HardBank.rwSet(parseInt(moduleId, 10), hardSkill) : [];
     // Hard sets vary in size, so scale the timer to the real-test pace (32 min / 27 questions).
     if (rawQuestions.length) timerSecs = Math.max(60, Math.round(rawQuestions.length * 32 / 27) * 60);
+  } else if (RECYCLE_MODE) {
+    rawQuestions = window.RecycleBank ? RecycleBank.set(moduleId) : [];
+    if (rawQuestions.length) timerSecs = Math.max(60, Math.round(rawQuestions.length * 32 / 27) * 60);
   } else try {
     const res = await fetch(`${API_BASE}/api/module?bank=${encodeURIComponent(moduleKey)}`);
     if (!res.ok) throw new Error('Bad response');
@@ -557,7 +565,7 @@ async function initTest() {
 
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
-      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : 'module: ' + moduleKey}</div>`;
+      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey}</div>`;
     return;
   }
 
@@ -577,9 +585,9 @@ async function initTest() {
   initHighlights(totalQ);
 
   document.getElementById('bar-module').textContent =
-    `Writing · ${label} · ${modWord} ${moduleId}`;
+    `Writing · ${label} · ${setName}`;
   document.getElementById('score-sub').textContent =
-    `${label} · ${modWord} ${moduleId}`;
+    `${label} · ${setName}`;
 
   document.getElementById('loading-screen').classList.add('hidden');
   buildNav();
@@ -970,7 +978,7 @@ async function submitTest() {
   QUESTIONS.forEach((q, i) => { if (answers[i] !== null) answerMap[q.id] = answers[i]; });
 
   let result;
-  if (HARD_MODE) result = gradeLocally(answerMap);
+  if (LOCAL_MODE) result = gradeLocally(answerMap);
   else try {
     const res = await fetch(`${API_BASE}/api/submit-module`, {
       method: 'POST',
@@ -1040,7 +1048,7 @@ async function submitTest() {
 
   await saveScoreHistory({
     type: 'english', typeLabel: 'English',
-    title: `${label} · ${modWord} ${moduleId}`,
+    title: `${label} · ${setName}`,
     correct, total: totalQ, pct,
     stats,
     breakdownLabel: 'Domain', breakdown: domainData,

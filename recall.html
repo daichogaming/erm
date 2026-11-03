@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TMX8HFTQVZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TMX8HFTQVZ');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Practice — Active Recall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; }
+
+    .top-bar { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:0 1.5rem; height:52px; border-bottom:1px solid var(--gray-border); position:fixed; top:0; left:0; right:0; z-index:200; }
+    .top-bar-left { display:flex; align-items:center; gap:1rem; min-width:0; overflow:hidden; }
+    .top-bar-logo { white-space:nowrap; }
+    .top-bar-sep { color:var(--gray-border); font-size:18px; font-weight:200; }
+    .top-bar-module { font-family:'DM Mono',monospace; font-size:12px; color:var(--gray-mid); letter-spacing:.05em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .top-bar-center { display:flex; align-items:center; flex-shrink:0; }
+    .top-bar-right { display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
+    .timer { font-size:18px; font-weight:500; letter-spacing:.06em; min-width:68px; text-align:center; }
+    .timer.idle { color:var(--gray-mid); font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+    .btn-exit { font:500 13px var(--font-ui); padding:6px 14px; border-radius:999px; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); cursor:pointer; }
+
+    .loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1rem; z-index:500; font-family:'DM Mono',monospace; font-size:13px; color:var(--gray-mid); }
+    .loading.gone { display:none; }
+    .spinner { width:28px; height:28px; border:2px solid var(--gray-border); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+
+    .app { max-width:900px; margin:0 auto; padding:84px 1.5rem 4rem; }
+    .screen { animation:fadeIn .22s ease; }
+    .eyebrow { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); }
+    .h1 { font-size:clamp(28px,4vw,40px); font-weight:700; letter-spacing:-.02em; margin:.6rem 0 .75rem; }
+    .lead { color:var(--gray-mid); line-height:1.65; max-width:640px; }
+    .card { background:var(--card); border:1px solid var(--gray-border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); padding:1.5rem 1.75rem; }
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:.9rem; margin:1.75rem 0; }
+    .step b { display:block; font-size:15px; margin:.35rem 0 .3rem; }
+    .step p { font-size:13px; color:var(--gray-mid); line-height:1.55; }
+    .step .num { font-family:'DM Mono',monospace; font-size:11px; color:var(--gold-deep); letter-spacing:.1em; }
+    .opt-label { font-size:13px; font-weight:600; margin:1.25rem 0 .55rem; }
+    .pills { display:flex; flex-wrap:wrap; gap:8px; }
+    .pill { font:500 13px var(--font-ui); padding:8px 15px; border-radius:999px; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); cursor:pointer; transition:all .15s; }
+    .pill:hover { border-color:var(--gold-2); }
+    .pill.on { background:var(--gold-grad); border-color:transparent; color:#fff; }
+    .actions { display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1.75rem; }
+    .btn { font:600 14px var(--font-ui); padding:12px 22px; border-radius:999px; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); cursor:pointer; }
+    .btn.primary { background:var(--gold-grad); color:#fff; border-color:transparent; }
+    .btn:disabled { opacity:.45; cursor:default; }
+
+    .q-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .phase { display:flex; gap:6px; }
+    .phase span { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:4px 10px; border-radius:999px; background:var(--gray-bg); color:var(--gray-mid); }
+    .phase span.on { background:var(--gold-soft); color:var(--gold-deep); }
+    .qcount { font-family:'DM Mono',monospace; font-size:12px; color:var(--gray-mid); }
+    .bar { height:6px; border-radius:999px; background:var(--gray-bg); overflow:hidden; margin-bottom:1.1rem; }
+    .bar i { display:block; height:100%; background:var(--gold-grad); transition:width 1s linear; }
+    .bar.low i { background:var(--incorrect); }
+
+    .passage-text p { font-size:16.5px; line-height:1.85; color:var(--gray-dark); margin-bottom:.9rem; }
+    .passage-text p:last-child { margin-bottom:0; }
+    .passage-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gray-mid); margin:1rem 0 .4rem; }
+    .passage-label:first-child { margin-top:0; }
+    .passage-poem { display:flex; flex-direction:column; font-size:16px; line-height:1.8; color:var(--gray-dark); }
+    .pline-blank { height:.9rem; }
+    .pline.indent-1 { padding-left:1.5rem; } .pline.indent-2 { padding-left:3rem; } .pline.indent-3 { padding-left:4.5rem; }
+    .passage-table-title { font-weight:600; font-size:14px; margin:.75rem 0 .4rem; }
+    .passage-table-wrap { overflow-x:auto; margin:.5rem 0 1rem; }
+    .passage-table { border-collapse:collapse; font-size:13.5px; }
+    .passage-table th, .passage-table td { border:1px solid var(--gray-border); padding:6px 10px; text-align:left; }
+    .passage-chart-wrap { margin:.75rem 0; } .passage-chart-img { max-width:100%; }
+    .passage-chart-note { font-size:13px; color:var(--gray-mid); font-style:italic; margin:.5rem 0; }
+    mark.rc-hit { background:rgba(31,138,76,.18); color:inherit; border-radius:4px; padding:0 2px; }
+
+    .hidden-card { border:1.5px dashed var(--gray-border); border-radius:var(--r-lg); padding:2rem; text-align:center; color:var(--gray-mid); font-size:14px; }
+    .hidden-card b { display:block; color:var(--black); font-size:16px; margin-bottom:.3rem; }
+    .recall-box { width:100%; min-height:170px; resize:vertical; border:1px solid var(--gray-border); border-radius:var(--r-md); padding:14px 16px; font:15px/1.6 var(--font-ui); background:var(--card); color:var(--black); }
+    .recall-box:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 4px var(--gold-soft); }
+    .hint { font-size:13px; color:var(--gray-mid); margin:.5rem 0 1rem; line-height:1.55; }
+    .q-text { font-size:17px; font-weight:600; line-height:1.55; margin:1.25rem 0 1rem; }
+    .answer-option { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--card); border:1px solid var(--gray-border); border-radius:var(--r-md); padding:.9rem 1.1rem; margin-bottom:.6rem; cursor:pointer; font:15px/1.5 var(--font-ui); color:var(--black); }
+    .answer-option:disabled { cursor:default; }
+    .answer-text { flex:1; }
+
+    .compare { display:grid; grid-template-columns:1.25fr 1fr; gap:1rem; align-items:start; }
+    .col-title { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:.75rem; }
+    .your-recall { white-space:pre-wrap; font-size:15px; line-height:1.7; color:var(--gray-dark); }
+    .your-recall.empty { color:var(--gray-mid); font-style:italic; }
+    .stat { display:flex; align-items:baseline; gap:.5rem; margin:1.1rem 0 .4rem; }
+    .stat b { font-size:26px; font-weight:800; color:var(--gold-deep); }
+    .missed { display:flex; flex-wrap:wrap; gap:6px; margin-top:.5rem; }
+    .missed span { font-size:12px; padding:3px 9px; border-radius:999px; background:rgba(209,73,59,.1); color:var(--incorrect); }
+    .result { margin-top:1rem; }
+    .verdict { font-weight:700; margin-bottom:.6rem; }
+    .verdict.ok { color:var(--correct); } .verdict.bad { color:var(--incorrect); }
+    .rationale { font-size:14px; line-height:1.65; color:var(--gray-dark); background:var(--gold-soft); border-radius:var(--r-md); padding:1rem 1.15rem; margin-top:.75rem; }
+    .rate { margin-top:1.25rem; }
+
+    .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:.9rem; margin:1.5rem 0; }
+    .summary .card b { display:block; font-size:30px; font-weight:800; color:var(--gold-deep); }
+    .summary .card span { font-size:13px; color:var(--gray-mid); }
+    .rows { display:flex; flex-direction:column; gap:.5rem; }
+    .row { display:flex; gap:1rem; align-items:center; padding:.75rem 1rem; border:1px solid var(--gray-border); border-radius:var(--r-md); background:var(--card); font-size:14px; }
+    .row .n { font-family:'DM Mono',monospace; color:var(--gray-mid); width:28px; }
+    .row .t { flex:1; min-width:0; color:var(--gray-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .row .ok { color:var(--correct); font-weight:600; } .row .bad { color:var(--incorrect); font-weight:600; }
+
+    @media (max-width:760px) {
+      .app { padding:76px 1rem 3rem; }
+      .card { padding:1.2rem 1.15rem; }
+      .steps, .summary { grid-template-columns:1fr; }
+      .compare { grid-template-columns:1fr; }
+      .top-bar { padding:0 .75rem; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<div class="loading" id="loading"><div class="spinner"></div><div id="load-lbl">Loading questions…</div></div>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <div class="top-bar-logo">SAT Practice</div>
+    <div class="top-bar-sep">|</div>
+    <div class="top-bar-module" id="bar-module">Active Recall</div>
+  </div>
+  <div class="top-bar-center"><div class="timer idle" id="timer">Ready</div></div>
+  <div class="top-bar-right">
+    <button class="btn-exit" onclick="exitRecall()">Exit</button>
+  </div>
+</div>
+
+<main class="app" id="app"></main>
+
+<script src="drillbank.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  ACTIVE RECALL — read a passage for a set time, it disappears,
+//  then write what you remember and/or answer from memory, then
+//  compare against the passage and the answer key.
+//  URL: recall.html?skill=<drill slug>&set=<1-based set number>
+// ══════════════════════════════════════════════════════════════
+const P = new URLSearchParams(location.search);
+const skillSlug = P.get('skill') || 'inferences';
+const setNum = Math.max(1, parseInt(P.get('set'), 10) || 1);
+const SKILL_NAMES = {
+  'inferences': 'Inferences', 'central-ideas-and-details': 'Central Ideas and Details',
+  'command-of-evidence': 'Command of Evidence', 'text-structure-and-purpose': 'Text Structure and Purpose',
+  'cross-text-connections': 'Cross-Text Connections', 'words-in-context': 'Words in Context',
+};
+const skillName = SKILL_NAMES[skillSlug] || skillSlug;
+const BACK_URL = 'index.html#recall';
+const LETTERS = ['A', 'B', 'C', 'D'];
+
+// Names report.js reads to know which question is on screen.
+let QUESTIONS = [];
+let currentQ = 0;
+
+const prefs = loadPrefs();
+let results = [];          // per question: { recall, choice, rating, keyPct }
+let phase = 'start';       // start | read | recall | answer | compare | done
+let timer = null, secsLeft = 0;
+
+function loadPrefs() {
+  const d = { secs: 60, mode: 'both' };
+  try { return Object.assign(d, JSON.parse(localStorage.getItem('sat-recall-prefs') || '{}')); } catch (e) { return d; }
+}
+function savePrefs() { try { localStorage.setItem('sat-recall-prefs', JSON.stringify(prefs)); } catch (e) {} }
+const writes = () => prefs.mode !== 'mc';
+const answers = () => prefs.mode !== 'write';
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const $ = id => document.getElementById(id);
+
+window.addEventListener('load', () => {
+  if (typeof DRILL_BANK === 'undefined') { $('load-lbl').textContent = 'Couldn’t load the question bank. Check your connection and reload.'; return; }
+  QUESTIONS = DRILL_BANK[`${skillSlug}_${setNum}`] || [];
+  if (!QUESTIONS.length) { $('load-lbl').textContent = `No questions found for ${skillName} · Set ${setNum}.`; return; }
+  results = QUESTIONS.map(() => ({ recall: '', choice: null, rating: null, keyPct: null }));
+  $('bar-module').textContent = `Active Recall · ${skillName} · Set ${setNum}`;
+  document.title = `Active Recall — ${skillName} · Set ${setNum}`;
+  $('loading').classList.add('gone');
+  showStart();
+});
+
+function render(html) { const app = $('app'); app.innerHTML = `<div class="screen">${html}</div>`; window.scrollTo(0, 0); }
+function setTimerLabel(text) { const t = $('timer'); t.textContent = text; t.classList.add('idle'); }
+
+// ── Start ─────────────────────────────────────────────────────
+function showStart() {
+  phase = 'start'; setTimerLabel('Ready');
+  const secsOpts = [30, 45, 60, 90, 120];
+  const modeOpts = [['both', 'Write + answer'], ['write', 'Write only'], ['mc', 'Answer only']];
+  render(`
+    <div class="eyebrow">Active Recall · Reading &amp; Writing</div>
+    <div class="h1">${esc(skillName)} · Set ${setNum}</div>
+    <p class="lead">Train yourself to hold on to what you read. ${QUESTIONS.length} passages, one at a time.</p>
+    <div class="steps">
+      <div class="card step"><span class="num">STEP 1</span><b>Read</b><p>The passage is shown for a set time. Read it closely — it will disappear.</p></div>
+      <div class="card step"><span class="num">STEP 2</span><b>Recall</b><p>With the passage hidden, write what you remember and/or answer the question from memory.</p></div>
+      <div class="card step"><span class="num">STEP 3</span><b>Compare</b><p>The passage comes back. See what you remembered, what you missed, and the right answer.</p></div>
+    </div>
+    <div class="card">
+      <div class="opt-label" style="margin-top:0">Reading time per passage</div>
+      <div class="pills" id="secs">${secsOpts.map(s => `<button class="pill${prefs.secs === s ? ' on' : ''}" data-secs="${s}">${s} seconds</button>`).join('')}</div>
+      <div class="opt-label">After the passage disappears</div>
+      <div class="pills" id="mode">${modeOpts.map(([v, l]) => `<button class="pill${prefs.mode === v ? ' on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" onclick="startQuestion(0)">Start →</button>
+      <button class="btn" onclick="exitRecall(true)">Back</button>
+    </div>`);
+  $('secs').onclick = e => { const b = e.target.closest('.pill'); if (!b) return; prefs.secs = +b.dataset.secs; savePrefs(); showStart(); };
+  $('mode').onclick = e => { const b = e.target.closest('.pill'); if (!b) return; prefs.mode = b.dataset.mode; savePrefs(); showStart(); };
+}
+
+function header(active) {
+  const steps = [['read', 'Read'], ['recall', 'Recall'], ['compare', 'Compare']];
+  return `<div class="q-head">
+    <div class="phase">${steps.map(([k, l], i) => `<span class="${k === active ? 'on' : ''}">${i + 1} · ${l}</span>`).join('')}</div>
+    <div class="qcount">Question ${currentQ + 1} of ${QUESTIONS.length}</div>
+  </div>`;
+}
+
+// ── Step 1: read ──────────────────────────────────────────────
+function startQuestion(i) {
+  currentQ = i; phase = 'read';
+  const q = QUESTIONS[i];
+  secsLeft = prefs.secs;
+  render(`${header('read')}
+    <div class="bar" id="bar"><i style="width:100%"></i></div>
+    <div class="card" id="passage">${passageHTML(q)}</div>
+    <div class="actions"><button class="btn primary" onclick="endReading()">I’m ready — hide the passage</button></div>`);
+  tick();
+  clearInterval(timer);
+  timer = setInterval(() => { secsLeft--; tick(); if (secsLeft <= 0) endReading(); }, 1000);
+}
+function tick() {
+  const t = $('timer'); t.classList.remove('idle');
+  t.textContent = `${Math.floor(Math.max(0, secsLeft) / 60)}:${String(Math.max(0, secsLeft) % 60).padStart(2, '0')}`;
+  const bar = $('bar'); if (!bar) return;
+  bar.firstElementChild.style.width = `${Math.max(0, secsLeft) / prefs.secs * 100}%`;
+  bar.classList.toggle('low', secsLeft <= 10);
+}
+function endReading() {
+  if (phase !== 'read') return;
+  clearInterval(timer);
+  writes() ? showRecall() : showAnswer();
+}
+
+// ── Step 2: recall ────────────────────────────────────────────
+const hiddenCard = `<div class="hidden-card"><b>The passage is hidden</b>Work from memory — it comes back in step 3.</div>`;
+function showRecall() {
+  phase = 'recall'; setTimerLabel('Recall');
+  render(`${header('recall')}${hiddenCard}
+    <div class="opt-label">Write everything you remember</div>
+    <p class="hint">Who or what is it about? What is the main claim or finding? Which details support it? How does it end?</p>
+    <textarea class="recall-box" id="recall" placeholder="Type what you remember…">${esc(results[currentQ].recall)}</textarea>
+    <div class="actions"><button class="btn primary" onclick="submitRecall()">${answers() ? 'Next: answer the question →' : 'Compare with the passage →'}</button></div>`);
+  setTimeout(() => { const r = $('recall'); if (r) r.focus(); }, 50);
+}
+function submitRecall() {
+  results[currentQ].recall = ($('recall').value || '').trim();
+  answers() ? showAnswer() : showCompare();
+}
+function showAnswer() {
+  phase = 'answer'; setTimerLabel('Recall');
+  const q = QUESTIONS[currentQ];
+  render(`${header('recall')}${hiddenCard}
+    <div class="q-text">${esc(q.question)}</div>
+    <div id="choices">${q.choices.map((c, ci) => `
+      <button class="answer-option${results[currentQ].choice === ci ? ' selected' : ''}" data-ci="${ci}">
+        <span class="answer-letter">${LETTERS[ci]}</span><span class="answer-text">${esc(c)}</span></button>`).join('')}</div>
+    <div class="actions"><button class="btn primary" id="check" onclick="showCompare()" ${results[currentQ].choice === null ? 'disabled' : ''}>Check answer →</button></div>`);
+  $('choices').onclick = e => {
+    const b = e.target.closest('.answer-option'); if (!b) return;
+    results[currentQ].choice = +b.dataset.ci;
+    document.querySelectorAll('#choices .answer-option').forEach(x => x.classList.toggle('selected', x === b));
+    $('check').disabled = false;
+  };
+}
+
+// ── Step 3: compare ───────────────────────────────────────────
+function showCompare() {
+  phase = 'compare'; setTimerLabel('Compare');
+  const q = QUESTIONS[currentQ], r = results[currentQ];
+  let recallCol = '';
+  if (writes()) {
+    const kw = keywordsOf(passageText(q));
+    const said = new Set(wordsOf(r.recall).map(norm));
+    const hit = kw.filter(k => said.has(k.n));
+    const missed = kw.filter(k => !said.has(k.n)).sort((a, b) => (b.cap - a.cap) || (b.w.length - a.w.length)).slice(0, 12);
+    r.keyPct = kw.length ? Math.round(hit.length / kw.length * 100) : null;
+    recallCol = `<div class="card">
+      <div class="col-title">What you remembered</div>
+      <div class="your-recall${r.recall ? '' : ' empty'}">${r.recall ? esc(r.recall) : 'You didn’t write anything.'}</div>
+      <div class="stat"><b>${hit.length}/${kw.length}</b><span>key words from the passage</span></div>
+      ${missed.length ? `<div class="hint" style="margin:0">Key words you didn’t use:</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
+      <div class="rate"><div class="opt-label" style="margin-top:0">How much did you remember?</div>
+        <div class="pills" id="rate">${['Most of it', 'Some of it', 'Very little'].map((l, i) => `<button class="pill${r.rating === i ? ' on' : ''}" data-r="${i}">${l}</button>`).join('')}</div></div>
+    </div>`;
+    window.__hits = new Set(hit.map(h => h.n));
+  }
+  let answerBlock = '';
+  if (answers()) {
+    const ok = r.choice === q.answer;
+    answerBlock = `<div class="card result">
+      <div class="verdict ${ok ? 'ok' : 'bad'}">${ok ? '✓ Correct' : `✗ Not quite — the answer is ${LETTERS[q.answer]}`}</div>
+      <div class="q-text" style="margin-top:.25rem">${esc(q.question)}</div>
+      ${q.choices.map((c, ci) => `<div class="answer-option${ci === q.answer ? ' correct' : (ci === r.choice ? ' incorrect' : '')}">
+        <span class="answer-letter">${LETTERS[ci]}</span><span class="answer-text">${esc(c)}</span></div>`).join('')}
+      ${q.rationale ? `<div class="rationale">${esc(q.rationale)}</div>` : ''}
+    </div>`;
+  }
+  const last = currentQ === QUESTIONS.length - 1;
+  render(`${header('compare')}
+    <div class="${writes() ? 'compare' : ''}">
+      <div class="card"><div class="col-title">Original passage</div><div id="passage">${passageHTML(q)}</div></div>
+      ${recallCol}
+    </div>
+    ${answerBlock}
+    <div class="actions"><button class="btn primary" onclick="${last ? 'showDone()' : `startQuestion(${currentQ + 1})`}">${last ? 'See results →' : 'Next passage →'}</button></div>`);
+  if (writes()) {
+    markHits($('passage'), window.__hits);
+    $('rate').onclick = e => { const b = e.target.closest('.pill'); if (!b) return; r.rating = +b.dataset.r; document.querySelectorAll('#rate .pill').forEach(x => x.classList.toggle('on', x === b)); };
+  }
+}
+
+// ── Results ───────────────────────────────────────────────────
+function showDone() {
+  phase = 'done'; setTimerLabel('Done');
+  const n = QUESTIONS.length;
+  const correct = results.filter((r, i) => r.choice === QUESTIONS[i].answer).length;
+  const pcts = results.map(r => r.keyPct).filter(x => x !== null);
+  const avg = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+  const most = results.filter(r => r.rating === 0).length;
+  const cards = [];
+  if (answers()) cards.push(`<div class="card"><b>${correct}/${n}</b><span>answered correctly from memory</span></div>`);
+  if (writes()) cards.push(`<div class="card"><b>${avg === null ? '—' : avg + '%'}</b><span>of key words recalled, on average</span></div>`,
+                           `<div class="card"><b>${most}/${n}</b><span>passages where you remembered most of it</span></div>`);
+  const hasNext = typeof DRILL_BANK !== 'undefined' && DRILL_BANK[`${skillSlug}_${setNum + 1}`];
+  render(`
+    <div class="eyebrow">Active Recall · Results</div>
+    <div class="h1">${esc(skillName)} · Set ${setNum}</div>
+    <div class="summary">${cards.join('')}</div>
+    <div class="rows">${QUESTIONS.map((q, i) => {
+      const r = results[i];
+      const mc = answers() ? (r.choice === q.answer ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>') : '';
+      const kp = writes() && r.keyPct !== null ? `<span>${r.keyPct}% key words</span>` : '';
+      return `<div class="row"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${esc(passageText(q).slice(0, 90))}…</span>${kp}${mc}</div>`;
+    }).join('')}</div>
+    <div class="actions">
+      ${hasNext ? `<button class="btn primary" onclick="location.href='recall.html?skill=${encodeURIComponent(skillSlug)}&set=${setNum + 1}'">Next set →</button>` : ''}
+      <button class="btn${hasNext ? '' : ' primary'}" onclick="location.reload()">Do this set again</button>
+      <button class="btn" onclick="exitRecall(true)">Back to Active Recall</button>
+    </div>`);
+}
+
+function exitRecall(noConfirm) {
+  if (!noConfirm && phase !== 'start' && phase !== 'done' && !confirm('Leave this set? Your progress will not be saved.')) return;
+  location.href = BACK_URL;
+}
+
+// ── Key words: the content words of the passage, used to compare
+//    what the student wrote against the original. ──────────────
+const STOP = new Set(('about above after again against also although among another because been before being below between both but could did does doing down during each even every from further have having here however into itself just like made make many more most much must never only other over same should since some such than that their them themselves then there these they this those through thus under until upon very were what when where which while whom whose will with within without would your yours text texts author authors following adapted the and for are was not one two its has had who how all any can may way often still yet less least among new old ever being').split(' '));
+function wordsOf(s) { return String(s || '').match(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*/g) || []; }
+function norm(w) {
+  w = w.toLowerCase().replace(/['’]s$/, '').replace(/['’]/g, '');
+  if (w.length > 5) w = w.replace(/(ing|ed|es|s|ly)$/, '');
+  return w;
+}
+function keywordsOf(text) {
+  const seen = new Map();
+  for (const w of wordsOf(text)) {
+    const lw = w.toLowerCase();
+    if (lw.length < 4 || STOP.has(lw)) continue;
+    const n = norm(w);
+    if (!seen.has(n)) seen.set(n, { w, n, cap: /^[A-ZÀ-Þ]/.test(w) ? 1 : 0 });
+  }
+  return [...seen.values()];
+}
+function markHits(root, hits) {
+  if (!root || !hits || !hits.size) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*)/);
+    if (!parts.some((p, i) => i % 2 && p.length >= 4 && hits.has(norm(p)))) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((p, i) => {
+      if (i % 2 && p.length >= 4 && hits.has(norm(p))) { const m = document.createElement('mark'); m.className = 'rc-hit'; m.textContent = p; frag.appendChild(m); }
+      else if (p) frag.appendChild(document.createTextNode(p));
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+
+// ── Passage rendering (same structure as the drill pages) ─────
+function passageText(q) {
+  if (q.passage_lines && q.passage_lines.length)
+    return q.passage_lines.map(l => l.text || (l.type === 'table' ? [l.title || '', ...(l.headers || []), ...(l.rows || []).flat()].join(' ') : '')).join(' ').replace(/\s+/g, ' ').trim();
+  return String(q.passage || '').replace(/\s+/g, ' ').trim();
+}
+function passageHTML(q) {
+  const lines = q.passage_lines;
+  function renderTable(t) {
+    const title = t.title ? `<div class="passage-table-title">${esc(t.title)}</div>` : '';
+    return `${title}<div class="passage-table-wrap"><table class="passage-table"><thead><tr>${(t.headers || []).map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>` +
+      `<tbody>${(t.rows || []).map(row => `<tr>${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  function renderLines(arr) {
+    const parts = []; let buf = [];
+    function flush() {
+      if (!buf.length) return;
+      const poem = buf.some(l => l.type === 'line' && l.indent > 0) || buf.filter(l => l.type === 'blank').length > 2;
+      if (poem) {
+        parts.push(`<div class="passage-poem">${buf.map(l => l.type === 'blank' ? '<span class="pline-blank"></span>' : `<span class="pline indent-${l.indent || 0}">${esc(l.text || '')}</span>`).join('')}</div>`);
+      } else {
+        const paras = []; let cur = [];
+        for (const l of buf) { if (l.type === 'blank') { if (cur.length) { paras.push(cur); cur = []; } } else cur.push(typeof l.text === 'string' ? l.text : ''); }
+        if (cur.length) paras.push(cur);
+        if (paras.length) parts.push(`<div class="passage-text">${paras.map(p => `<p>${esc(p.join(' '))}</p>`).join('')}</div>`);
+      }
+      buf = [];
+    }
+    for (const l of arr) {
+      if (l.type === 'table') { flush(); parts.push(renderTable(l)); }
+      else if (l.type === 'chart') { flush(); parts.push(l.image ? `<div class="passage-chart-wrap"><img class="passage-chart-img" src="${l.image}" alt="Chart for this question" /></div>` : `<div class="passage-chart-note">${esc(l.note || '[Graph — see original source]')}</div>`); }
+      else if (l.type === 'text') { flush(); parts.push(`<div class="passage-text"><p>${esc(l.text)}</p></div>`); }
+      else buf.push(l);
+    }
+    flush();
+    return parts.join('');
+  }
+  if (lines && lines.length) {
+    const t1 = lines.findIndex(l => l.type === 'line' && /^Text\s+1\s*$/i.test(l.text));
+    const t2 = lines.findIndex(l => l.type === 'line' && /^Text\s+2\s*$/i.test(l.text));
+    if (t1 !== -1 && t2 > t1)
+      return `<div class="passage-label">Text 1</div>${renderLines(lines.slice(t1 + 1, t2))}<div class="passage-label">Text 2</div>${renderLines(lines.slice(t2 + 1))}`;
+    return renderLines(lines);
+  }
+  const raw = String(q.passage || '');
+  const t2i = /^Text 1\b/i.test(raw) ? raw.search(/Text 2\b/i) : -1;
+  if (t2i > 0)
+    return `<div class="passage-label">Text 1</div><div class="passage-text"><p>${esc(raw.slice(0, t2i).replace(/^Text 1\s*/i, '').trim())}</p></div>` +
+           `<div class="passage-label">Text 2</div><div class="passage-text"><p>${esc(raw.slice(t2i).replace(/^Text 2\s*/i, '').trim())}</p></div>`;
+  return `<div class="passage-text">${raw.split('\n\n').map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
+}
+</script>
+<script src="auth.js"></script>
+<script src="report.js"></script>
+</body>
+</html>
