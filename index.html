@@ -60,10 +60,10 @@
       position: fixed; bottom: 1.5rem; right: 1.5rem; max-width: 320px;
       background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px;
       box-shadow: 0 8px 28px rgba(0,0,0,0.14); padding: 1.1rem 1.2rem 1.15rem;
-      z-index: 500; opacity: 0; transform: translateY(16px); pointer-events: none;
-      transition: opacity .25s ease, transform .25s ease;
+      z-index: 500; opacity: 0; transform: translateY(16px); pointer-events: none; visibility: hidden;
+      transition: opacity .25s ease, transform .25s ease, visibility .25s;
     }
-    .reco-popup.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .reco-popup.show { opacity: 1; transform: translateY(0); pointer-events: auto; visibility: visible; }
     .reco-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
     .reco-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--black); font-weight: 500; }
     .reco-close { background: none; border: none; color: var(--gray-mid); font-size: 16px; cursor: pointer; line-height: 1; padding: 2px; margin: -2px -2px 0 0; }
@@ -171,8 +171,8 @@
     @media (max-width:600px) { .badge-hard { display:none; } }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=3" />
-  <link rel="stylesheet" href="home.css?v=2" />
+  <link rel="stylesheet" href="theme.css?v=5" />
+  <link rel="stylesheet" href="home.css?v=4" />
 </head>
 <body>
 
@@ -259,7 +259,7 @@
         <div class="card-tests-lbl">Practice tests</div>
         <div class="card-test-list">
           <div class="card-test-item">Practice Tests 1–15</div>
-          <div class="card-test-item">22 questions · 35 min per module</div>
+          <div class="card-test-item">21–22 questions · 35 min per module</div>
           <div class="card-test-item">MC + free response · Calculator + Desmos</div>
         </div>
       </div>
@@ -363,7 +363,7 @@
   <div class="subj-hero">
     <div class="subj-label">SAT · Mathematics</div>
     <div class="subj-title">Math</div>
-    <div class="subj-meta">Module 1 &amp; 2 · Algebra, Advanced Math, Problem-Solving &amp; Data Analysis, Geometry &amp; Trig · 22 questions · 35 min · MC + Free Response</div>
+    <div class="subj-meta">Module 1 &amp; 2 · Algebra, Advanced Math, Problem-Solving &amp; Data Analysis, Geometry &amp; Trig · 21–22 questions · 35 min · MC + Free Response</div>
   </div>
   <div class="tests-section">
     <div class="sec-label">Available practice tests</div>
@@ -591,7 +591,7 @@
 <script>
   let curSubj = 'math', curTestId = 'mathtest01', curLabel = 'Practice Test 1';
   const cfg = {
-    math:    { label:'SAT · Mathematics',         title:'Math',    q:22, min:35, file:'math.html',  chips:['Algebra','Advanced Math','PS & Data Analysis','Geometry & Trig'] },
+    math:    { label:'SAT · Mathematics',         title:'Math',    q:'21–22', min:35, file:'math.html',  chips:['Algebra','Advanced Math','PS & Data Analysis','Geometry & Trig'] },
     english: { label:'SAT · Reading and Writing',  title:'Writing', q:27, min:32, file:'test.html', chips:['Info & Ideas','Craft & Structure','Expression of Ideas','Standard English'] },
   };
 
@@ -600,7 +600,7 @@
     const n=i+1, id=`mathtest${String(n).padStart(2,'0')}`, name=`Practice Test ${n}`;
     return `<div class="test-row" onclick="showMods('math','${id}','${name}')">
       <div class="test-idx">${String(n).padStart(2,'0')}</div>
-      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 22 questions each · 35 min · Multiple choice &amp; free response · Calculator &amp; Desmos</div></div>
+      <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 21–22 questions each · 35 min · Multiple choice &amp; free response · Calculator &amp; Desmos</div></div>
       <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
     </div>`;
   }).join('');
@@ -642,7 +642,15 @@
     </div>`;
   }).join('');
 
-  function show(id) {
+  // Sections that have their own address (index.html#math …), so Back, reload and links work.
+  const ROUTES = ['math','english','fulltests','adaptive','drills','recall','hard','recycles'];
+  function show(id, fromHistory) {
+    if (!fromHistory) {
+      // sub-pages (a test's modules, a drill's sets) sit under their section's address
+      const route = ROUTES.includes(id) ? id : ({ modules: curSubj, drillmods: 'drills' })[id] || '';
+      const url = route ? '#' + route : location.pathname + location.search;
+      if (id !== 'home' || location.hash) window.history.pushState({ page: id }, '', url);
+    }
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     const navId = ({modules:curSubj, drillmods:'drills'})[id] || id;
@@ -698,7 +706,9 @@
     }
     function render() {
       const el = document.getElementById('hb-sets');
-      if (typeof HardBank === 'undefined' || (typeof QUESTION_BANK === 'undefined' && typeof MATH_MODULES === 'undefined')) {
+      // Both banks are needed: if either failed (flaky connection), show the notice and retry on the next visit
+      // instead of listing an empty half that would stay cached.
+      if (typeof HardBank === 'undefined' || typeof QUESTION_BANK === 'undefined' || typeof MATH_MODULES === 'undefined') {
         started = false; // let a later visit try again
         el.innerHTML = '<div class="hb-notice">Couldn’t load the question banks. Check your connection and open this page again.</div>';
         return;
@@ -719,7 +729,8 @@
       open() {
         if (started) return;
         started = true;
-        Promise.all([loadScript('questionbank.js'), loadScript('math_modules.js')])
+        Promise.all([typeof QUESTION_BANK === 'undefined' ? loadScript('questionbank.js') : null,
+                     typeof MATH_MODULES === 'undefined' ? loadScript('math_modules.js') : null])
           .then(() => typeof HardBank === 'undefined' ? loadScript('hardbank.js') : null)
           .then(render);
       }
@@ -752,7 +763,7 @@
   const DRILL_TOPICS = [
     { domain:"Information and Ideas",        skill:"Central Ideas and Details",  slug:"central-ideas-and-details", total:96,  sizes:[16,16,16,16,16,16],
       desc:"Identify the central idea, claim, or most important detail in a text." },
-    { domain:"Information and Ideas",        skill:"Command of Evidence",        slug:"command-of-evidence",        total:177, sizes:[15,15,15,15,15,15,15,15,15,14,14,14],
+    { domain:"Information and Ideas",        skill:"Command of Evidence",        slug:"command-of-evidence",        total:177, sizes:[15,15,15,15,15,15,15,15,15,14,14,14], recall:[12,14,13,12,12,13,13,15,11,13,10,11],
       desc:"Choose the textual or quantitative evidence that best supports a claim." },
     { domain:"Information and Ideas",        skill:"Inferences",                 slug:"inferences",                 total:91,  sizes:[16,15,15,15,15,15],
       desc:"Draw the logical conclusion that completes the text's reasoning." },
@@ -803,13 +814,15 @@
   // Active Recall: the reading skills, split into the same sets as the drills.
   // Grammar skills are left out — they don't test memory of a passage.
   (function renderRecallSets(){
+    // recall.html skips questions marked unusable (a chart that isn't available), so show what it will show.
+    const recallCount = (t, i, n) => (t.recall && t.recall[i]) || n;
     const ORDER = ['inferences','central-ideas-and-details','command-of-evidence','text-structure-and-purpose','cross-text-connections','words-in-context'];
     document.getElementById('recall-sets').innerHTML = ORDER.map(slug => {
       const t = DRILL_TOPICS.find(x => x.slug === slug); if (!t) return '';
       return `<div class="sec-label">${t.skill}</div><div class="tests-list">` + t.sizes.map((n, i) =>
         `<div class="test-row" onclick="window.location.href='recall.html?skill=${slug}&set=${i+1}'">
           <div class="test-idx">${String(i+1).padStart(2,'0')}</div>
-          <div class="test-info"><div class="test-name">${t.skill} · Set ${i+1}</div><div class="test-detail">${n} passages · read, recall, compare · ~${Math.round(n*2)} min</div></div>
+          <div class="test-info"><div class="test-name">${t.skill} · Set ${i+1}</div><div class="test-detail">${recallCount(t, i, n)} passages · read, recall, compare · ~${Math.round(n*2)} min</div></div>
           <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
         </div>`).join('') + '</div>';
     }).join('');
@@ -893,7 +906,13 @@
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  { const h = location.hash.slice(1); if (['math','english','fulltests','adaptive','drills','recall','hard','recycles'].includes(h)) show(h); }
+  // Back / Forward (or editing the #address): show that section. A sub-page entry shows its section.
+  function routeFromUrl() {
+    const h = location.hash.slice(1);
+    show(ROUTES.includes(h) ? h : 'home', true);
+  }
+  window.addEventListener('popstate', routeFromUrl);
+  { const h = location.hash.slice(1); if (ROUTES.includes(h)) show(h, true); }
 </script>
 
 <div class="reco-popup" id="reco-popup">
@@ -907,6 +926,7 @@
 </div>
 
 <script src="auth.js"></script>
+<script src="kbd.js"></script>
 <script>
   // ── Practice recommendation engine ───────────────────────────
   // Basic algorithm, no AI: looks at domain-level accuracy across every
@@ -918,7 +938,13 @@
 
   // Same domain-label variants used elsewhere on the site for the
   // same underlying category, mapped onto DRILL_TOPICS' domain names.
-  const RECO_DOMAIN_ALIAS = { 'Standard English': 'Standard English Conventions' };
+  // Saved results use short domain names; the drill list uses the full ones.
+  const RECO_DOMAIN_ALIAS = {
+    'Standard English': 'Standard English Conventions',
+    'Information & Ideas': 'Information and Ideas',
+    'Craft & Structure': 'Craft and Structure',
+    'Expression of Ideas': 'Expression of Ideas',
+  };
 
   function recoIsDismissed() {
     try {
@@ -946,9 +972,10 @@
       if (!Array.isArray(arr)) return;
       for (const d of arr) {
         if (!d || !d.name) continue;
-        if (!domainAgg[d.name]) domainAgg[d.name] = { name: d.name, correct: 0, total: 0 };
-        domainAgg[d.name].correct += d.correct || 0;
-        domainAgg[d.name].total += d.total || 0;
+        const name = RECO_DOMAIN_ALIAS[d.name] || d.name; // one bucket per domain, whatever the page called it
+        if (!domainAgg[name]) domainAgg[name] = { name, correct: 0, total: 0 };
+        domainAgg[name].correct += d.correct || 0;
+        domainAgg[name].total += d.total || 0;
       }
     }
     for (const rec of history) {

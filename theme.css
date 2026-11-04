@@ -82,6 +82,8 @@ body {
 .btn-nav.primary:hover, .bnav.pri:hover, .overlay-btn.primary:hover, .obtn.pri:hover, .btn-submit:hover,
 .submit-btn:hover, .reco-cta:hover, .guest-block a.cta:hover { filter:brightness(1.07); transform:translateY(-1px); opacity:1; }
 .timer-toggle, .timer-tog, .toolbar-action { border-radius:999px; }
+/* Pause is a <button>: without this it gets the browser's light default background (a white pill in dark mode). */
+.timer-toggle, .timer-tog { background:transparent; font-family:'DM Mono',monospace; }
 
 /* ── Cards / rows ── */
 .subject-card, .mod-card, .module-result-card, .total-score-card, .theme-option, .ref-item, .rationale-box {
@@ -186,6 +188,8 @@ body {
 .answer-option.incorrect { background:#fcefec; border-color:var(--incorrect); }
 .answer-option.correct .answer-letter { background:var(--correct); color:#fff; }
 .answer-option.incorrect .answer-letter { background:var(--incorrect); color:#fff; }
+:root[data-theme="dark"] .answer-option.correct { background:rgba(46,160,90,.18); }
+:root[data-theme="dark"] .answer-option.incorrect { background:rgba(220,90,75,.18); }
 .mc-btn.sel { background:var(--gold-grad); border-color:transparent; color:#fff; }
 
 .q-dot, .qdot { width:32px; height:32px; background:var(--card); }

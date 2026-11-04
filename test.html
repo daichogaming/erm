@@ -289,10 +289,10 @@
     .toolbar-action.note-active { color: var(--black); border-color: var(--black); background: var(--gray-bg); }
 
     /* Highlighted text spans */
-    .hl-yellow { background: #FFE066; border-radius: 2px; cursor: pointer; }
-    .hl-green  { background: #A8E6CF; border-radius: 2px; cursor: pointer; }
-    .hl-blue   { background: #A8D4F5; border-radius: 2px; cursor: pointer; }
-    .hl-pink   { background: #F5A8C8; border-radius: 2px; cursor: pointer; }
+    .hl-yellow { background: #FFE066; color: #111; border-radius: 2px; cursor: pointer; }
+    .hl-green  { background: #A8E6CF; color: #111; border-radius: 2px; cursor: pointer; }
+    .hl-blue   { background: #A8D4F5; color: #111; border-radius: 2px; cursor: pointer; }
+    .hl-pink   { background: #F5A8C8; color: #111; border-radius: 2px; cursor: pointer; }
     .hl-yellow:hover, .hl-green:hover, .hl-blue:hover, .hl-pink:hover {
       filter: brightness(0.92);
     }
@@ -408,9 +408,9 @@
     .passage-table { width: 100%; border-collapse: collapse; margin: 0 0 1.2em 0; font-size: 13.5px; font-family: 'DM Mono', monospace; }
     .passage-table-wrap { overflow-x: auto; margin-bottom: 1.2em; }
     .passage-table-title { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 0.5em; color: var(--black); font-family: 'Roboto', sans-serif; line-height: 1.4; }
-    .passage-table th { background: #e8e8e8; font-weight: 600; padding: 6px 10px; border: 1px solid #bbb; text-align: center; font-size: 13px; }
+    .passage-table th { background: var(--gray-border); font-weight: 600; padding: 6px 10px; border: 1px solid #bbb; text-align: center; font-size: 13px; }
     .passage-table td { padding: 5px 10px; border: 1px solid #ccc; text-align: center; }
-    .passage-table tr:nth-child(even) td { background: #f7f7f7; }
+    .passage-table tr:nth-child(even) td { background: var(--gray-bg); }
     .passage-table td:first-child { text-align: left; }
     .passage-table th:first-child { text-align: left; }
     .passage-chart-note { font-size: 13px; color: #888; font-style: italic; border: 1px solid #ddd; padding: 8px 14px; border-radius: 4px; margin-bottom: 1em; }
@@ -429,7 +429,7 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=3" />
+  <link rel="stylesheet" href="theme.css?v=5" />
 </head>
 <body>
 
@@ -507,7 +507,11 @@
   </div>
 </div>
 
-<script src="questionbank.js"></script>
+<script>
+// The 4 MB question bank is only needed for Hard Question Bank sets; practice modules come from the server
+// and Recycles from recyclebank.js. Written in during parsing so it still loads before the scripts below.
+if (new URLSearchParams(location.search).get('test') === 'hard') document.write('<script src="questionbank.js"><\/script>');
+</script>
 <script src="hardbank.js"></script>
 <script src="recyclebank.js"></script>
 <script>
@@ -567,7 +571,7 @@ async function initTest() {
 
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
-      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey}</div>`;
+      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for ${escHtml(HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey)}</div>`; // escaped: these come from the URL
     return;
   }
 
@@ -579,7 +583,8 @@ async function initTest() {
     const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
     if (match) _grouped[match].push(q);
   });
-  QUESTIONS = DOMAIN_ORDER.flatMap(d => _grouped[d]);
+  // Recycles sets keep their own order (most repeated first); everything else runs in domain order.
+  QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : DOMAIN_ORDER.flatMap(d => _grouped[d]);
 
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
@@ -594,6 +599,7 @@ async function initTest() {
   document.getElementById('loading-screen').classList.add('hidden');
   buildNav();
   renderQuestion(0);
+  updateTimerDisplay(); // show the real time for this set right away (sets can be shorter than 32 min)
   startTimer();
 }
 
@@ -656,12 +662,17 @@ function updateNav() {
     if (answers[i] !== null) dot.classList.add('answered');
     if (flagged[i]) dot.classList.add('flagged');
   }
+  // On narrow screens the dot row scrolls sideways: keep the current dot in view ('nearest' only moves what it must)
+  const cur = document.getElementById(`dot-${currentQ}`);
+  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function goToQuestion(i) {
   currentQ = i;
   renderQuestion(i);
   updateNav();
+  // A new question starts at the top (on phones the passage and question share one scroll).
+  ['.test-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
 }
 
 function prevQuestion() {
@@ -737,7 +748,7 @@ function renderQuestion(i) {
         } else if (l.type === 'chart') {
           flushText();
           if (l.image) {
-            parts.push(`<div class="passage-chart-wrap"><img class="passage-chart-img" src="${l.image}" alt="Chart or graph for this question" /></div>`);
+            parts.push(`<div class="passage-chart-wrap"><img class="passage-chart-img" src="${escHtml(l.image)}" alt="Chart or graph for this question" /></div>`);
           } else {
             parts.push(`<div class="passage-chart-note">${escHtml(l.note || '[Graph — see original source]')}</div>`);
           }
@@ -796,8 +807,9 @@ function renderQuestion(i) {
     }
 
     // Walk the HTML char-by-char, skipping tag content, to find and wrap each segment
-    function wrapSegment(htmlStr, segText) {
-      const segNorm = norm(segText);
+    let cursor = 0; // segments are in document order: look after the last one first, so a repeated phrase gets the right occurrence
+    function wrapSegment(htmlStr, segText, nextText) {
+      const segNorm = norm(escHtml(segText)); // the HTML is escaped (& -> &amp;), so escape the segment the same way or positions don't line up
       if (!segNorm) return htmlStr;
 
       // Build plain-text version (strip tags) to locate the segment
@@ -810,12 +822,18 @@ function renderQuestion(i) {
       }
       const plainNorm = norm(plain);
 
-      // Try exact match
-      let idx = plainNorm.indexOf(segNorm);
+      // Try exact match. A segment that continues on the next line (the next segment follows it
+      // directly) is placed where that whole run occurs, so an earlier copy of a short word isn't picked.
+      let idx = -1;
+      const run = nextText ? segNorm + ' ' + norm(escHtml(nextText)) : '';
+      if (run) { idx = plainNorm.indexOf(run, cursor); if (idx === -1) idx = plainNorm.indexOf(run); }
+      if (idx === -1) idx = plainNorm.indexOf(segNorm, cursor);
+      if (idx === -1) idx = plainNorm.indexOf(segNorm);
       if (idx === -1) {
         // Try first 40 chars of segment (handles truncated multi-line rects)
         const partial = segNorm.substring(0, Math.min(40, segNorm.length));
-        idx = plainNorm.indexOf(partial);
+        idx = plainNorm.indexOf(partial, cursor);
+        if (idx === -1) idx = plainNorm.indexOf(partial);
         if (idx === -1) return htmlStr; // can't find it
       }
 
@@ -825,16 +843,19 @@ function renderQuestion(i) {
       let charCount = 0, inT = false;
       let startHtmlPos = -1, endHtmlPos = -1;
       for (let i = 0; i < htmlStr.length; i++) {
+        // Check the end before skipping a tag: a segment that ends right before a tag must
+        // close there, or the browser carries the open <u> over the rest of the passage.
+        if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
         if (htmlStr[i] === '<') { inT = true; }
         if (!inT) {
           if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
-          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
           charCount++;
         }
         if (htmlStr[i] === '>') { inT = false; }
       }
       if (endHtmlPos === -1) endHtmlPos = htmlStr.length;
       if (startHtmlPos === -1) return htmlStr;
+      cursor = endIdx;
 
       return htmlStr.slice(0, startHtmlPos) +
              '<u>' + htmlStr.slice(startHtmlPos, endHtmlPos) + '</u>' +
@@ -843,16 +864,16 @@ function renderQuestion(i) {
 
     // Apply each segment in order
     let result = html;
-    for (const seg of segments) {
-      result = wrapSegment(result, seg);
-    }
+    segments.forEach((seg, k) => {
+      result = wrapSegment(result, seg, segments[k + 1]);
+    });
     return result;
   }
 
   pp.innerHTML = `
     <div class="passage-context">
-      <span>${q.domain || 'Reading and Writing'}</span>
-      <span class="passage-skill-tag">${q.skill || ''}</span>
+      <span>${escHtml(q.domain || 'Reading and Writing')}</span>
+      <span class="passage-skill-tag">${escHtml(q.skill || '')}</span>
       ${diffLabel ? `<span class="passage-difficulty ${diffClass}">${diffLabel}</span>` : ''}
     </div>
     <div class="passage-toolbar">
@@ -919,7 +940,9 @@ function selectAnswer(qi, ci) {
   if (submitted) return;
   answers[qi] = ci;
   updateNav();
-  renderQuestion(qi);
+  // Update the choices in place. Re-rendering the whole question would rebuild the passage
+  // and re-apply highlights by searching for their text, which can move or drop them.
+  document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
 }
 
 function toggleFlag(qi) {
@@ -929,6 +952,7 @@ function toggleFlag(qi) {
 
 // ── Review Overlay ────────────────────────────────────────────
 function openReview() {
+  if (submitted) { document.getElementById('score-overlay').classList.add('active'); return; } // already graded: show the score
   const unanswered = answers.filter(a => a === null).length;
   const flagCount  = flagged.filter(Boolean).length;
   document.getElementById('review-sub').textContent =
@@ -972,6 +996,7 @@ function gradeLocally(answerMap) {
 }
 
 async function submitTest() {
+  if (submitted) return; // graded and saved once (also stops a double-click from saving twice)
   submitted = true;
   clearInterval(timerInterval);
 
@@ -987,10 +1012,13 @@ async function submitTest() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bank: moduleKey, answers: answerMap })
     });
+    if (!res.ok) throw new Error('Grading failed: ' + res.status);
     result = await res.json();
+    if (!result || !Array.isArray(result.review)) throw new Error('Bad grading response');
   } catch (e) {
     alert("Couldn't reach the grading server. Check your internet connection and try Submit again.");
     submitted = false;
+    if (timerSecs > 0) startTimer(); // the clock was stopped above; keep it running while they retry
     return;
   }
 
@@ -1019,7 +1047,7 @@ async function submitTest() {
   let domHtml = '';
   const domainData = [];
   for (const d of domains) {
-    const dQs = QUESTIONS.filter(q => q.domain === d);
+    const dQs = QUESTIONS.filter(q => q.domain && q.domain.startsWith(d)); // "Standard English" also covers "Standard English Conventions"
     if (dQs.length === 0) continue;
     const dCorrect = dQs.filter(q => (reviewById[q.id] || {}).status === 'correct').length;
     const dTotal = dQs.length;
@@ -1107,7 +1135,12 @@ function handlePassageMouseUp(e, qi) {
   if (!selectedText) return;
 
   const id = 'hl_' + (++hlCounter);
-  const h = { id, color: activeColor, text: selectedText, note: '' };
+  // Remember where it is (character offsets in #passage-content) so it comes back on the same words after a re-render
+  const pre = document.createRange();
+  pre.setStart(content, 0);
+  pre.setEnd(range.startContainer, range.startOffset);
+  const start = pre.toString().length;
+  const h = { id, color: activeColor, text: selectedText, note: '', start, end: start + range.toString().length };
   highlights[qi].push(h);
 
   try {
@@ -1138,8 +1171,32 @@ function attachHighlightListeners(qi) {
   });
 }
 
-// Re-apply a saved highlight to the current DOM (best-effort text search)
+// Re-apply a saved highlight to the current DOM: by its character offsets, or (older entries) by text search
 function applyHighlightSpan(container, h) {
+  if (h.start != null && h.end != null) {
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    let node, pos = 0, sNode = null, sOff = 0, eNode = null, eOff = 0;
+    while ((node = walker.nextNode())) {
+      const len = node.textContent.length;
+      if (!sNode && h.start < pos + len) { sNode = node; sOff = h.start - pos; }
+      if (sNode && h.end <= pos + len) { eNode = node; eOff = h.end - pos; break; }
+      pos += len;
+    }
+    if (sNode && eNode) {
+      const range = document.createRange();
+      range.setStart(sNode, sOff);
+      range.setEnd(eNode, eOff);
+      // An edge at the very start/end of an element (e.g. a whole <u>) goes outside it, so the element isn't half-selected
+      let n = range.startContainer;
+      while (range.startOffset === 0 && n !== container && !n.contains(range.endContainer)) { range.setStartBefore(n); n = range.startContainer; }
+      n = range.endContainer;
+      while (range.endOffset === (n.nodeType === 3 ? n.length : n.childNodes.length) && n !== container && !n.contains(range.startContainer)) { range.setEndAfter(n); n = range.endContainer; }
+      const span = document.createElement('span');
+      span.className = h.color + (h.note ? ' has-note' : '');
+      span.dataset.hlId = h.id;
+      try { range.surroundContents(span); return; } catch(e) {}
+    }
+  }
   // Walk text nodes and wrap first match
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   let node;
@@ -1259,7 +1316,7 @@ function renderNotesPanel(qi) {
 
   const entries = qHighlights.map(h => `
     <div class="note-entry">
-      <div class="note-entry-quote" style="border-left:3px solid var(--${colorToVar(h.color)});padding-left:6px;">
+      <div class="note-entry-quote" style="border-left:3px solid ${colorToVar(h.color)};padding-left:6px;">
         "${escHtml(h.text.substring(0,50))}${h.text.length>50?'…':''}"
       </div>
       ${h.note ? `<div class="note-entry-text">${escHtml(h.note)}</div>` : '<div class="notes-empty">No note yet — click highlight to add.</div>'}
@@ -1276,10 +1333,10 @@ function renderNotesPanel(qi) {
     </div>`;
 }
 
-function colorToVar(cls) {
+function colorToVar(cls) { // same colours as the .hl-* classes
   return {
-    'hl-yellow': '--hl-y', 'hl-green': '--hl-g',
-    'hl-blue': '--hl-b',   'hl-pink': '--hl-p'
+    'hl-yellow': '#FFE066', 'hl-green': '#A8E6CF',
+    'hl-blue': '#A8D4F5',   'hl-pink': '#F5A8C8'
   }[cls] || 'black';
 }
 

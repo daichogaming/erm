@@ -128,10 +128,13 @@
       .total-score-card { flex-direction:column; align-items:flex-start; }
       .dom-name { width:110px; }
     }
+    /* Guest "Log in" link: theme colour instead of the browser's default blue (unreadable on navy in dark mode) */
+    #sync-status a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+    :root[data-theme="dark"] #sync-status a { color: var(--gold-2); }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=3" />
-  <script src="sidebar.js?v=7"></script>
+  <link rel="stylesheet" href="theme.css?v=5" />
+  <script src="sidebar.js?v=8"></script>
 </head>
 <body>
 
@@ -242,24 +245,87 @@
     if (token) {
       const email = await authVerifySession();
       if (email) {
-        isAccountMode = true;
+        await uploadPending(token, email);
+        let fromServer = null;
         try {
           const res = await fetch(`${AUTH_API_BASE}/api/my-results`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
-          history = res.ok ? await res.json() : [];
-        } catch (e) { history = []; }
+          if (res.ok) fromServer = await res.json();
+        } catch (e) {}
+        if (Array.isArray(fromServer)) {
+          isAccountMode = true;
+          history = normalize(fromServer);
+          history.sort((a, b) => new Date(b.date) - new Date(a.date));
+          showSyncStatus(email);
+          return;
+        }
+        // Server unreachable: show what's saved on this device (scores taken while offline are kept here)
+        // instead of an empty list.
+        isAccountMode = false;
+        try { history = normalize(JSON.parse(localStorage.getItem(HKEY) || '[]')); } catch (e) { history = []; }
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
-        showSyncStatus(email);
+        const el = document.getElementById('sync-status');
+        if (el) el.innerHTML = `Signed in as <strong>${escH(email)}</strong>, but the results server can’t be reached right now — showing results saved on this device.`;
         return;
       }
     }
     // Guest / not logged in — same as before
     isAccountMode = false;
-    try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); }
+    try { history = normalize(JSON.parse(localStorage.getItem(HKEY) || '[]')); }
     catch (e) { history = []; }
     history.sort((a, b) => new Date(b.date) - new Date(a.date));
     showSyncStatus(null);
+  }
+
+  // Results saved on this device while the server was unreachable (marked pendingSync by auth.js):
+  // send them to the account now, and drop the local copy once the server has them.
+  // Only records saved under this same account are sent (a shared device may hold someone else's).
+  async function uploadPending(token, email) {
+    const readList = () => { try { const l = JSON.parse(localStorage.getItem(HKEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } };
+    const now = Date.now();
+    const mine = readList().filter(x => x && x.pendingSync && x.pendingSync === email && !(x.syncing && now - x.syncing < 30000));
+    if (!mine.length) return;
+    // Claim them first so another open tab doesn't upload the same ones.
+    const ids = new Set(mine.map(x => x.id));
+    try { localStorage.setItem(HKEY, JSON.stringify(readList().map(x => x && ids.has(x.id) ? { ...x, syncing: now } : x))); } catch (e) { return; }
+    // A save that timed out may still have reached the server: skip results it already has.
+    let server = [];
+    try {
+      const res = await fetch(`${AUTH_API_BASE}/api/my-results`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) server = await res.json();
+    } catch (e) {}
+    const already = r => Array.isArray(server) && server.some(s => s && s.title === r.title && s.correct === r.correct &&
+      s.total === r.total && Math.abs(new Date(s.date) - new Date(r.date)) < 120000);
+    const done = new Set();
+    for (const r of mine) {
+      if (already(r)) { done.add(r.id); continue; }
+      try {
+        const { pendingSync, syncing, id, ...rec } = r;
+        const res = await fetch(`${AUTH_API_BASE}/api/save-result`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(rec)
+        });
+        if (res.ok) done.add(r.id);
+      } catch (e) { break; }
+    }
+    // Re-read before writing so results another tab added meanwhile aren't lost.
+    try {
+      localStorage.setItem(HKEY, JSON.stringify(readList().filter(x => !(x && done.has(x.id)))
+        .map(x => x && ids.has(x.id) ? (({ syncing, ...rest }) => rest)(x) : x)));
+    } catch (e) {}
+  }
+
+  // Old or partial records shouldn't break the list: give every entry an id and the fields the page reads.
+  function normalize(list) {
+    if (!Array.isArray(list)) return [];
+    return list.filter(r => r && typeof r === 'object').map((r, i) => {
+      if (r.id == null || r.id === '') { r.id = 'r' + i + '-' + String(r.date || ''); r._madeId = true; } // not the server's id
+      if (r.type === 'fulltest' && (!r.fulltest || typeof r.fulltest !== 'object')) r.fulltest = { total: '—', rw: '—', math: '—' };
+      if (!r.stats || typeof r.stats !== 'object') r.stats = { correct: r.correct ?? '—', incorrect: '—', unanswered: '—' };
+      return r;
+    });
   }
 
   function showSyncStatus(email) {
@@ -296,18 +362,18 @@
     }
     empty.style.display = 'none';
     list.innerHTML = history.map(r => {
-      const scoreLabel = r.type === 'fulltest' ? `${r.fulltest.total}` : `${r.correct}/${r.total}`;
-      const pctLabel = r.type === 'fulltest' ? `RW ${r.fulltest.rw} · Math ${r.fulltest.math}` : `${r.pct}% correct`;
+      const scoreLabel = r.type === 'fulltest' ? escH(r.fulltest.total) : `${escH(r.correct)}/${escH(r.total)}`;
+      const pctLabel = r.type === 'fulltest' ? `RW ${escH(r.fulltest.rw)} · Math ${escH(r.fulltest.math)}` : `${escH(r.pct)}% correct`;
       return `<div class="hist-row">
-        <input type="checkbox" class="hist-check" data-id="${r.id}" onchange="updateDeleteBtn()" />
-        <div class="hist-main" onclick="openDetail('${r.id}')">
+        <input type="checkbox" class="hist-check" data-id="${escH(r.id)}" onchange="updateDeleteBtn()" />
+        <div class="hist-main" data-id="${escH(r.id)}" onclick="openDetail(this.dataset.id)">
           <div class="hist-top">
-            <span class="hist-type">${r.typeLabel}</span>
+            <span class="hist-type">${escH(r.typeLabel)}</span>
             <span class="hist-title">${escH(r.title)}</span>
           </div>
           <span class="hist-date">${fmtDate(r.date)}</span>
         </div>
-        <div class="hist-right" onclick="openDetail('${r.id}')" style="cursor:pointer">
+        <div class="hist-right" data-id="${escH(r.id)}" onclick="openDetail(this.dataset.id)" style="cursor:pointer">
           <div class="hist-score"><div class="hist-score-num">${scoreLabel}</div><div class="hist-score-pct">${pctLabel}</div></div>
           <div class="hist-arrow">→</div>
         </div>
@@ -318,7 +384,7 @@
   }
 
   function escH(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
   function toggleSelectAll(checked) {
@@ -337,11 +403,12 @@
     if (!confirm(`Delete ${ids.length} result${ids.length===1?'':'s'}? This can't be undone.`)) return;
     if (isAccountMode) {
       try {
-        await fetch(`${AUTH_API_BASE}/api/delete-result`, {
+        const res = await fetch(`${AUTH_API_BASE}/api/delete-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify({ ids: ids.filter(x => !(history.find(r => r.id === x) || {})._madeId) })
         });
+        if (!res.ok) throw new Error('delete failed');
       } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
     }
     history = history.filter(r => !ids.includes(r.id));
@@ -368,7 +435,7 @@
       document.getElementById('module-detail').style.display = 'none';
       document.getElementById('full-detail').style.display = 'block';
       document.getElementById('f-title').textContent = r.title;
-      document.getElementById('f-sub').textContent = `Full-Length Practice Test · ${fmtDate(r.date)}`;
+      document.getElementById('f-sub').textContent = `${r.typeLabel === 'Adaptive Test' ? 'Adaptive Practice Test' : 'Full-Length Practice Test'} · ${fmtDate(r.date)}`;
       document.getElementById('f-total').textContent = r.fulltest.total;
       document.getElementById('f-rw').textContent = r.fulltest.rw;
       document.getElementById('f-math').textContent = r.fulltest.math;
@@ -392,7 +459,7 @@
         const cls = q.status === 'correct' ? 'rd-ok' : q.status === 'incorrect' ? 'rd-bad' : 'rd-skip';
         const lbl = q.status === 'correct' ? 'Correct' : q.status === 'incorrect' ? 'Incorrect' : 'Unanswered';
         return `<div class="rev-item">
-          <div class="rev-num">${q.num}</div>
+          <div class="rev-num">${escH(q.num)}</div>
           <div class="rev-dot ${cls}"></div>
           <div style="flex:1;color:var(--black)">${escH(q.domain||'')}</div>
           <div style="font-size:12px;color:var(--gray-mid)">${lbl}</div>
@@ -405,15 +472,15 @@
     const pct = m.total ? Math.round(m.correct/m.total*100) : 0;
     return `<div class="module-result-card">
       <div class="module-result-name">${escH(m.name)}</div>
-      <div class="module-result-score">${m.correct}/${m.total}</div>
+      <div class="module-result-score">${escH(m.correct)}/${escH(m.total)}</div>
       <div class="module-result-detail">${pct}% correct</div>
     </div>`;
   }
   function breakdownRows(arr) {
     return (arr||[]).map(d => `<div class="dom-row">
       <div class="dom-name">${escH(d.name)}</div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${d.pct}%"></div></div>
-      <div class="dom-sc">${d.correct}/${d.total}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Number(d.pct) || 0}%"></div></div>
+      <div class="dom-sc">${escH(d.correct)}/${escH(d.total)}</div>
     </div>`).join('');
   }
 
@@ -422,11 +489,12 @@
     if (!confirm("Delete this result? This can't be undone.")) return;
     if (isAccountMode) {
       try {
-        await fetch(`${AUTH_API_BASE}/api/delete-result`, {
+        const res = await fetch(`${AUTH_API_BASE}/api/delete-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authGetToken()}` },
           body: JSON.stringify({ ids: [curId] })
         });
+        if (!res.ok) throw new Error('delete failed');
       } catch (e) { alert("Couldn't delete — check your connection and try again."); return; }
     }
     history = history.filter(r => r.id !== curId);

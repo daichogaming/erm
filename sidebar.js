@@ -1,7 +1,7 @@
 /* Injects the shared sidebar on secondary pages (weakness, settings, previous scores). */
 (function () {
   var cur = location.pathname.split('/').pop();
-  var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'home.css?v=2'; document.head.appendChild(l);
+  var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'home.css?v=3'; document.head.appendChild(l);
   var I = {
     home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
     math:'<path d="M5 12h14M12 5v14"/>', eng:'<path d="M4 5h16M4 12h10M4 19h16"/>',

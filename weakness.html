@@ -75,8 +75,8 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=3" />
-  <script src="sidebar.js?v=7"></script>
+  <link rel="stylesheet" href="theme.css?v=5" />
+  <script src="sidebar.js?v=8"></script>
 </head>
 <body>
 
@@ -146,13 +146,13 @@
       return `<div class="domain-row">
         ${isFocus ? '<span class="domain-focus-badge">Focus</span>' : ''}
         <div class="domain-name">${escH(d.name)}</div>
-        <div class="bar-wrap"><div class="bar-fill ${barClass(d.pct)}" style="width:${d.pct}%"></div></div>
-        <div class="domain-sc">${d.correct}/${d.total} · ${d.pct}%</div>
+        <div class="bar-wrap"><div class="bar-fill ${barClass(d.pct)}" style="width:${Number(d.pct) || 0}%"></div></div>
+        <div class="domain-sc">${escH(d.correct)}/${escH(d.total)} · ${escH(d.pct)}%</div>
       </div>`;
     }).join('');
   }
 
-  function escH(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function escH(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   async function load() {
     const token = authGetToken();
@@ -172,6 +172,7 @@
       const res = await fetch(`${AUTH_API_BASE}/api/weakness-profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error("profile " + res.status);
       data = await res.json();
     } catch (e) {
       document.getElementById('loading-view').innerHTML = '<div class="empty-state"><div class="big">Couldn\'t load your profile</div>Check your connection and reload the page.</div>';

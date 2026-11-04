@@ -148,9 +148,9 @@
     .passage-table { width: 100%; border-collapse: collapse; margin: 0 0 1.2em 0; font-size: 13.5px; font-family: 'DM Mono', monospace; }
     .passage-table-wrap { overflow-x: auto; margin-bottom: 1.2em; }
     .passage-table-title { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 0.5em; color: var(--black); font-family: 'Roboto', sans-serif; line-height: 1.4; }
-    .passage-table th { background: #e8e8e8; font-weight: 600; padding: 6px 10px; border: 1px solid #bbb; text-align: center; font-size: 13px; }
+    .passage-table th { background: var(--gray-border); font-weight: 600; padding: 6px 10px; border: 1px solid #bbb; text-align: center; font-size: 13px; }
     .passage-table td { padding: 5px 10px; border: 1px solid #ccc; text-align: center; }
-    .passage-table tr:nth-child(even) td { background: #f7f7f7; }
+    .passage-table tr:nth-child(even) td { background: var(--gray-bg); }
     .passage-table td:first-child { text-align: left; }
     .passage-table th:first-child { text-align: left; }
     .passage-chart-note { font-size: 13px; color: #888; font-style: italic; border: 1px solid #ddd; padding: 8px 14px; border-radius: 4px; margin-bottom: 1em; }
@@ -286,10 +286,10 @@
       padding: 3px 8px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
     }
     .toolbar-action:hover { color: var(--black); border-color: var(--black); }
-    .hl-yellow { background: #FFE066; border-radius: 2px; cursor: pointer; }
-    .hl-green  { background: #A8E6CF; border-radius: 2px; cursor: pointer; }
-    .hl-blue   { background: #A8D4F5; border-radius: 2px; cursor: pointer; }
-    .hl-pink   { background: #F5A8C8; border-radius: 2px; cursor: pointer; }
+    .hl-yellow { background: #FFE066; color: #111; border-radius: 2px; cursor: pointer; }
+    .hl-green  { background: #A8E6CF; color: #111; border-radius: 2px; cursor: pointer; }
+    .hl-blue   { background: #A8D4F5; color: #111; border-radius: 2px; cursor: pointer; }
+    .hl-pink   { background: #F5A8C8; color: #111; border-radius: 2px; cursor: pointer; }
     .hl-yellow:hover, .hl-green:hover, .hl-blue:hover, .hl-pink:hover { filter: brightness(0.92); }
     .has-note::after { content: '✎'; font-size: 10px; vertical-align: super; margin-left: 1px; opacity: 0.7; }
 
@@ -489,13 +489,16 @@
       .divider { display: none; }
       .question-pane { flex: none; overflow: visible; min-width: 0; width: 100% !important; padding: 1.25rem; }
       .tool-pane { display: none; }
+      /* Phones: the open Calculator/Desmos pane is a bottom sheet above the bottom bar. */
+      .test-body:has(.tool-pane:not(.closed)) .q-pane { padding-bottom: calc(60vh + 1rem); }
+      .tool-pane:not(.closed) { display: flex; position: fixed; left: 0; right: 0; bottom: 60px; width: auto; height: 60vh; max-height: calc(100vh - 130px); z-index: 250; background: var(--white); border-left: none; border-top: 1px solid var(--gray-border); box-shadow: 0 -6px 20px rgba(0,0,0,0.15); }
       .module-result-grid { grid-template-columns: 1fr; }
       .total-score-card { flex-direction: column; align-items: flex-start; }
       .section-scores { width: 100%; justify-content: space-between; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=3" />
+  <link rel="stylesheet" href="theme.css?v=5" />
 </head>
 <body>
 
@@ -750,7 +753,7 @@
     <div class="domain-breakdown" id="math-domain-breakdown"></div>
 
     <div class="report-actions">
-      <button class="btn-start" onclick="window.location.href='fulltest.html'">Take Another Full Test</button>
+      <button class="btn-start" onclick="window.location.href='fulltest.html?test=' + (parseInt(fullTestNum) % 10 + 1)">Take Another Full Test</button>
       <button class="btn-back-home" onclick="window.location.href='index.html'">← Back to Tests</button>
     </div>
   </div>
@@ -759,7 +762,7 @@
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="questionbank.js"></script>
 <script src="math_modules.js"></script>
-<script src="math_images.js"></script>
+<script src="math_explain.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  SAT SCORING CURVES (approximate official Digital SAT curves)
@@ -792,7 +795,7 @@ function rawToScaled(raw, curve, maxRaw) {
 //  STATE
 // ══════════════════════════════════════════════════════════════
 const params = new URLSearchParams(window.location.search);
-const fullTestNum = params.get('test') || '1';
+const fullTestNum = String(Math.max(1, parseInt(params.get('test')) || 1));
 // Adaptive mode (fulltest.html?mode=adaptive&test=N): Module 2 of each section is
 // harder or easier depending on Module 1, like the real Digital SAT. No pause button.
 const ADAPTIVE = params.get('mode') === 'adaptive';
@@ -897,7 +900,7 @@ function buildEnglishModule(rng, excludeIds, mix) {
   for (const modKey in QUESTION_BANK) {
     for (const q of QUESTION_BANK[modKey]) {
       const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
-      if (match && !excludeIds.has(q.id)) pools[match].push(q);
+      if (match && !excludeIds.has(q.id) && !q.unusable) pools[match].push(q); // skip questions whose graph was lost
     }
   }
   DOMAIN_ORDER.forEach(d => pools[d] = shuffleArray(pools[d], rng));
@@ -937,8 +940,9 @@ function buildEnglishModule(rng, excludeIds, mix) {
 // ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──
 function buildMathModule(rng, excludeIds, mix) {
   const DOMAINS = ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry'];
-  const MC_PER = {'Algebra': 5, 'Advanced Math': 5, 'Problem-Solving and Data Analysis': 4, 'Geometry and Trigonometry': 3};
-  const FR_PER = {'Algebra': 1, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 2, 'Geometry and Trigonometry': 1};
+  // Like the real SAT (about 35% / 35% / 15% / 15%): Algebra 8, Advanced Math 7, PSDA 4, Geometry 3.
+  const MC_PER = {'Algebra': 6, 'Advanced Math': 6, 'Problem-Solving and Data Analysis': 3, 'Geometry and Trigonometry': 2};
+  const FR_PER = {'Algebra': 2, 'Advanced Math': 1, 'Problem-Solving and Data Analysis': 1, 'Geometry and Trigonometry': 1};
 
   const mcPools = {}, frPools = {};
   DOMAINS.forEach(d => { mcPools[d] = []; frPools[d] = []; });
@@ -1019,22 +1023,18 @@ function initFullTest() {
   } else {
     sectionData.eng1.questions = buildEnglishModule(rng, usedIds);
     sectionData.eng2.questions = buildEnglishModule(rng, usedIds);
-    sectionData.math1.questions = buildMathModule(rng, usedMathIds);
-    sectionData.math2.questions = buildMathModule(rng, usedMathIds);
+    // The Math bank is mostly Easy questions; ask for an even Easy/Medium/Hard spread like the real test.
+    sectionData.math1.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
+    sectionData.math2.questions = buildMathModule(rng, usedMathIds, DIFFICULTY_MIX.routing);
   }
 
-  // ── Diagnostic: check every math question's page key exists in MATH_IMAGES ──
-  if (typeof MATH_IMAGES !== 'undefined') {
-    const allMathQs = [...sectionData.math1.questions, ...sectionData.math2.questions];
-    const missingImgs = allMathQs.filter(q => !MATH_IMAGES[String(q.page)]);
-    if (missingImgs.length) {
-      console.warn(`[fulltest.html] ${missingImgs.length}/${allMathQs.length} math questions have no matching image in MATH_IMAGES.`);
-      console.warn('Missing pages:', missingImgs.map(q => q.page));
-      console.warn('Sample MATH_IMAGES keys:', Object.keys(MATH_IMAGES).slice(0, 10));
-    }
-  } else {
-    console.warn('[fulltest.html] MATH_IMAGES is not defined — check that math_images.js is loaded.');
-  }
+  // Math images are one file each (math_img/<page>.jpg). Fetch this test's ones in the background
+  // (including both versions of an adaptive Module 2) so they're ready when the Math section starts.
+  setTimeout(() => {
+    const qs = [...sectionData.math1.questions, ...sectionData.math2.questions,
+      ...((module2Options.math && module2Options.math.harder) || []), ...((module2Options.math && module2Options.math.easier) || [])];
+    qs.forEach(q => { if (q && q.page != null) new Image().src = mathImgSrc(q); });
+  }, 3000);
 
   // Init per-section arrays
   ['eng1','eng2'].forEach(key => {
@@ -1104,6 +1104,7 @@ function escHtml(str) {
 //  SECTION ORCHESTRATION
 // ══════════════════════════════════════════════════════════════
 function loadSection(key) {
+  closeNotePopup();
   currentQ = 0;
   document.getElementById('english-ui').style.display = 'none';
   document.getElementById('math-ui').style.display = 'none';
@@ -1217,6 +1218,7 @@ window.SATReportContext = function () {
 };
 
 function backToReport() {
+  closeNotePopup();
   reviewMode = false;
   reviewKey = null;
   document.getElementById('english-ui').style.display = 'none';
@@ -1294,7 +1296,8 @@ function updateTimerDisplayEng(key) {
 }
 function toggleTimerEng() {
   timerHidden = !timerHidden;
-  document.getElementById('eng-timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  // one setting for the whole test: keep both sections' buttons in step
+  ['eng-timer-toggle', 'math-timer-toggle'].forEach(id => document.getElementById(id).textContent = timerHidden ? 'Show' : 'Hide');
   updateTimerDisplayEng(getCurrentSectionKey());
 }
 
@@ -1328,6 +1331,7 @@ function goToQuestionEng(key, i) {
   currentQ = i;
   renderQuestionEng(key, i);
   updateNavEng(key);
+  ['#english-ui .test-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
 }
 function prevQuestionEng() {
   if (currentQ > 0) goToQuestionEng(getCurrentSectionKey(), currentQ - 1);
@@ -1453,8 +1457,10 @@ function renderQuestionEng(key, i) {
       return s.replace(/\s+/g, ' ').replace(/[\u2018\u2019\u02bc]/g, "'")
               .replace(/[\u201c\u201d]/g, '"').replace(/[\u2013\u2014]/g, '-').trim();
     }
-    function wrapSegment(htmlStr, segText) {
-      const segNorm = norm(segText);
+    // Segments are in document order: look after the last one first, so a repeated phrase gets the right occurrence
+    let cursor = 0;
+    function wrapSegment(htmlStr, segText, nextText) {
+      const segNorm = norm(escHtml(segText)); // the HTML is escaped (& -> &amp;), so escape the segment the same way or positions don't line up
       if (!segNorm) return htmlStr;
       let plain = '', inTag = false;
       for (let i = 0; i < htmlStr.length; i++) {
@@ -1463,29 +1469,39 @@ function renderQuestionEng(key, i) {
         if (!inTag) plain += htmlStr[i];
       }
       const plainNorm = norm(plain);
-      let idx = plainNorm.indexOf(segNorm);
+      // A segment that continues on the next line (the next segment follows it directly) is placed
+      // where that whole run occurs, so an earlier copy of a short word isn't picked.
+      let idx = -1;
+      const run = nextText ? segNorm + ' ' + norm(escHtml(nextText)) : '';
+      if (run) { idx = plainNorm.indexOf(run, cursor); if (idx === -1) idx = plainNorm.indexOf(run); }
+      if (idx === -1) idx = plainNorm.indexOf(segNorm, cursor);
+      if (idx === -1) idx = plainNorm.indexOf(segNorm);
       if (idx === -1) {
         const partial = segNorm.substring(0, Math.min(40, segNorm.length));
-        idx = plainNorm.indexOf(partial);
+        idx = plainNorm.indexOf(partial, cursor);
+        if (idx === -1) idx = plainNorm.indexOf(partial);
         if (idx === -1) return htmlStr;
       }
       const endIdx = idx + segNorm.length;
       let charCount = 0, inT = false, startHtmlPos = -1, endHtmlPos = -1;
       for (let i = 0; i < htmlStr.length; i++) {
+        // Check the end before skipping a tag: a segment that ends right before a tag must
+        // close there, or the browser carries the open <u> over the rest of the passage.
+        if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
         if (htmlStr[i] === '<') inT = true;
         if (!inT) {
           if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
-          if (charCount === endIdx && endHtmlPos === -1) { endHtmlPos = i; break; }
           charCount++;
         }
         if (htmlStr[i] === '>') inT = false;
       }
       if (endHtmlPos === -1) endHtmlPos = htmlStr.length;
       if (startHtmlPos === -1) return htmlStr;
+      cursor = endIdx;
       return htmlStr.slice(0, startHtmlPos) + '<u>' + htmlStr.slice(startHtmlPos, endHtmlPos) + '</u>' + htmlStr.slice(endHtmlPos);
     }
     let result = html;
-    for (const seg of segments) result = wrapSegment(result, seg);
+    segments.forEach((seg, k) => { result = wrapSegment(result, seg, segments[k + 1]); });
     return result;
   }
 
@@ -1553,7 +1569,8 @@ function selectAnswerEng(key, qi, ci) {
   if (sd.submitted) return;
   sd.answers[qi] = ci;
   updateNavEng(key);
-  renderQuestionEng(key, qi);
+  // Update the choices in place so passage highlights stay exactly where they are.
+  document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
 }
 function toggleFlagEng(key, qi) {
   sectionData[key].flagged[qi] = document.getElementById('flag-cb').checked;
@@ -1585,6 +1602,7 @@ function submitEngModule() {
   const sd = sectionData[key];
   sd.submitted = true;
   clearInterval(timerInterval);
+  closeNotePopup(); // a note popup left open would sit over the module-complete screen
   if (ADAPTIVE && key === 'eng1') routeModule2('eng');
 
   closeOverlay('eng-review-overlay');
@@ -1631,7 +1649,12 @@ function handlePassageMouseUp(e, key, qi) {
   const selectedText = sel.toString().trim();
   if (!selectedText) return;
   const id = 'hl_' + (++hlCounter);
-  const h = { id, color: activeColor, text: selectedText, note: '' };
+  // Remember where it is (character offsets in #passage-content) so it comes back on the same words after a re-render
+  const pre = document.createRange();
+  pre.setStart(content, 0);
+  pre.setEnd(range.startContainer, range.startOffset);
+  const start = pre.toString().length;
+  const h = { id, color: activeColor, text: selectedText, note: '', start, end: start + range.toString().length };
   sectionData[key].highlights[qi].push(h);
   try {
     const span = document.createElement('span');
@@ -1654,7 +1677,32 @@ function attachHighlightListeners(key, qi) {
     span.onclick = (e) => { e.stopPropagation(); openNotePopup(span.dataset.hlId, key, qi, span); };
   });
 }
+// Re-apply a saved highlight to the current DOM: by its character offsets, or (older entries) by text search
 function applyHighlightSpan(container, h) {
+  if (h.start != null && h.end != null) {
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    let node, pos = 0, sNode = null, sOff = 0, eNode = null, eOff = 0;
+    while ((node = walker.nextNode())) {
+      const len = node.textContent.length;
+      if (!sNode && h.start < pos + len) { sNode = node; sOff = h.start - pos; }
+      if (sNode && h.end <= pos + len) { eNode = node; eOff = h.end - pos; break; }
+      pos += len;
+    }
+    if (sNode && eNode) {
+      const range = document.createRange();
+      range.setStart(sNode, sOff);
+      range.setEnd(eNode, eOff);
+      // An edge at the very start/end of an element (e.g. a whole <u>) goes outside it, so the element isn't half-selected
+      let n = range.startContainer;
+      while (range.startOffset === 0 && n !== container && !n.contains(range.endContainer)) { range.setStartBefore(n); n = range.startContainer; }
+      n = range.endContainer;
+      while (range.endOffset === (n.nodeType === 3 ? n.length : n.childNodes.length) && n !== container && !n.contains(range.startContainer)) { range.setEndAfter(n); n = range.endContainer; }
+      const span = document.createElement('span');
+      span.className = h.color + (h.note ? ' has-note' : '');
+      span.dataset.hlId = h.id;
+      try { range.surroundContents(span); return; } catch(e) {}
+    }
+  }
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
@@ -1868,7 +1916,8 @@ function updateTimerDisplayMath(key) {
 }
 function toggleTimerMath() {
   timerHidden = !timerHidden;
-  document.getElementById('math-timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  // one setting for the whole test: keep both sections' buttons in step
+  ['eng-timer-toggle', 'math-timer-toggle'].forEach(id => document.getElementById(id).textContent = timerHidden ? 'Show' : 'Hide');
   updateTimerDisplayMath(getCurrentSectionKey());
 }
 
@@ -1918,12 +1967,14 @@ function saveFrInput(key) {
   if (el) sectionData[key].frInputs[currentQ] = el.value;
 }
 
+// Question images live in math_img/, one file per page number.
+function mathImgSrc(q) { return q && q.page != null ? `math_img/${q.page}.jpg` : ''; }
+
 function renderQuestionMath(key, i) {
   const sd = sectionData[key];
   const q = sd.questions[i];
   const submitted = sd.submitted;
-  const imgSrc = (typeof MATH_IMAGES !== 'undefined' && MATH_IMAGES[String(q.page)])
-    ? `data:image/jpeg;base64,${MATH_IMAGES[String(q.page)]}` : '';
+  const imgSrc = mathImgSrc(q);
   const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
 
   let ansHtml = '';
@@ -1951,8 +2002,8 @@ function renderQuestionMath(key, i) {
     const val = sd.frInputs[i] || '';
     if (submitted) {
       const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
-      const clsInp = !val ? '' : correct ? ' correct' : ' wrong';
-      const resHtml = !val
+      const clsInp = !val.trim() ? '' : correct ? ' correct' : ' wrong';
+      const resHtml = !val.trim()
         ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`
         : correct
           ? `<div class="fr-result ok">✓ Correct</div>`
@@ -1965,7 +2016,7 @@ function renderQuestionMath(key, i) {
     } else {
       ansHtml = `<div class="fr-wrap">
         <div class="fr-label">Enter your answer</div>
-        <input id="fr-inp" class="fr-input" type="text" inputmode="decimal"
+        <input id="fr-inp" class="fr-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
           value="${escHtml(val)}" placeholder="e.g. 3/2"
           oninput="sectionData['${key}'].frInputs[${i}]=this.value;updateNavMath('${key}')"
           onkeydown="if(event.key==='Enter'&&${i}<sectionData['${key}'].questions.length-1)goToQuestionMath('${key}',${i}+1)" />
@@ -1984,6 +2035,7 @@ function renderQuestionMath(key, i) {
     ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escHtml(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}).</div>'"/></div>`
             :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image found for page ${q.page} (question ${q.id}).</div>`}
     ${ansHtml}
+    ${submitted && window.mathExplainHTML ? mathExplainHTML(q, escHtml) : ''}
     <label class="flag-row">
       <input type="checkbox" ${sd.flagged[i]?'checked':''} onchange="sectionData['${key}'].flagged[${i}]=this.checked;updateNavMath('${key}')">
       <span class="flag-lbl">Flag for review</span>
@@ -2004,26 +2056,34 @@ function selMC(key, qi, li) {
   renderQuestionMath(key, qi);
 }
 
-// Check free response — supports decimals, fractions, equivalent forms,
-// several accepted answers ("11/4, 2.75") and the "−" minus sign
+// Check free response like the SAT answer box: plain numbers or fractions, several accepted
+// answers ("11/4, 2.75"), the "−" minus sign, and decimals that fill the box may be rounded or cut off
 function checkFR(input, correct) {
   if (!input || !correct) return false;
-  const norm = s => String(s).trim().toLowerCase().replace(/[\u2212\u2013\u2014]/g,'-').replace(/\s+/g,'');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  // Only plain numbers and fractions count, like the SAT answer box: 7, -0.5, .25, 11/4
+  const NUM = /^-?(\d+\.?\d*|\.\d+)(\/(\d+\.?\d*|\.\d+))?$/;
   const toNum = s => {
-    if (s.includes('/')) {
-      const parts = s.split('/');
-      return parts.length === 2 ? parseFloat(parts[0]) / parseFloat(parts[1]) : NaN;
-    }
-    return parseFloat(s);
+    if (!NUM.test(s)) return NaN;
+    const [n, d] = s.split('/');
+    return d === undefined ? Number(n) : Number(n) / Number(d);
   };
-  const a = norm(input);
-  const va = toNum(a);
+  const a = norm(input), va = toNum(a);
+  const dec = /^-?\d*\.(\d+)$/.exec(a);
   return String(correct).split(',').some(acc => {
     const b = norm(acc);
     if (!b) return false;
     if (a === b) return true;
     const vb = toNum(b);
-    return isFinite(va) && isFinite(vb) && Math.abs(va - vb) < 0.0001;
+    if (!isFinite(va) || !isFinite(vb)) return false;
+    if (Math.abs(va - vb) < 1e-9) return true;
+    // A decimal that fills the answer box (5 characters, not counting a minus sign)
+    // may be the answer rounded or cut off at its last digit, as the SAT allows.
+    if (dec && a.replace('-', '').length >= 5) {
+      const f = Math.pow(10, dec[1].length);
+      return Math.abs(va - Math.round(vb * f) / f) < 1e-9 || Math.abs(va - Math.trunc(vb * f) / f) < 1e-9;
+    }
+    return false;
   });
 }
 
@@ -2038,7 +2098,7 @@ function openReviewMath() {
   document.getElementById('math-review-list').innerHTML = sd.questions.map((q,i) => {
     let st;
     if (q.is_mc) st = sd.answers[i]===null ? 'Not answered' : `Answer ${letters[sd.answers[i]]}`;
-    else st = sd.frInputs[i].trim()==='' ? 'Not answered' : `"${sd.frInputs[i].trim().slice(0,12)}"`;
+    else st = sd.frInputs[i].trim()==='' ? 'Not answered' : `"${escHtml(sd.frInputs[i].trim().slice(0,12))}"`;
     const fl = sd.flagged[i] ? ' <span style="color:#c0392b;font-size:11px">★</span>':'';
     const frBadge = q.is_mc ? '' : ' <span style="font-size:10px;color:var(--gray-mid)">[FR]</span>';
     return `<div class="review-item" onclick="closeOverlay('math-review-overlay');goToQuestionMath('${key}',${i})">
@@ -2056,6 +2116,7 @@ function submitMathModule() {
   const sd = sectionData[key];
   sd.submitted = true;
   clearInterval(timerInterval);
+  closeNotePopup();
   if (ADAPTIVE && key === 'math1') routeModule2('math');
 
   closeOverlay('math-review-overlay');
@@ -2071,20 +2132,25 @@ function submitMathModule() {
 }
 
 // ── Calculator ──
-let calcExpr = '';
-function cn(d) { calcExpr += d; updateCalcDisplay(); }
-function cf(f) { calcExpr += f; updateCalcDisplay(); }
-function cBk() { calcExpr = calcExpr.slice(0,-1); updateCalcDisplay(); }
-function cClr() { calcExpr = ''; document.getElementById('c-res').textContent = '0'; updateCalcDisplay(); }
-function updateCalcDisplay() { document.getElementById('c-expr').textContent = calcExpr; }
+let calcExpr = '', justEvaluated = false;
+function cn(d) { if (justEvaluated) calcExpr = ''; justEvaluated = false; calcExpr += d; updateCalcDisplay(); }
+// After "=", an operator continues from the result; anything else starts a new expression.
+function cf(f) { if (justEvaluated && !/^(\*\*|[*\/+\-)])$/.test(f)) calcExpr = ''; justEvaluated = false; calcExpr += f; updateCalcDisplay(); }
+function cBk() { justEvaluated = false; calcExpr = calcExpr.endsWith('**') ? calcExpr.slice(0,-2) : calcExpr.endsWith('Math.PI') ? calcExpr.slice(0,-7) : calcExpr.slice(0,-1); updateCalcDisplay(); }
+function cClr() { calcExpr = ''; justEvaluated = false; document.getElementById('c-res').textContent = '0'; updateCalcDisplay(); }
+function updateCalcDisplay() { document.getElementById('c-expr').textContent = calcExpr.replace(/\*\*/g,'^').replace(/Math\.PI/g,'π'); }
 function cEval() {
   try {
     const sanitized = calcExpr.replace(/sqrt\(/g, 'Math.sqrt(').replace(/sin\(/g,'Math.sin(')
       .replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(')
-      .replace(/ln\(/g,'Math.log(');
+      .replace(/ln\(/g,'Math.log(')
+      // unary minus -> (-1)* so -3^2 = -9 (JS rejects -3**2); 2^-3 is already valid
+      .replace(/(\*\*|^|[(*\/+\-])-/g, (m, p) => p === '**' ? m : p === '/' ? '/(-1)/' : p + '(-1)*'); // 8/-2 → 8/(-1)/2
     const result = Function('"use strict";return ('+sanitized+')')();
     document.getElementById('c-res').textContent = Number.isFinite(result) ? String(Math.round(result*1e10)/1e10) : 'Error';
     calcExpr = String(result);
+    justEvaluated = true;
+    updateCalcDisplay();
   } catch(e) {
     document.getElementById('c-res').textContent = 'Error';
   }
@@ -2132,6 +2198,7 @@ function switchTab(tab) {
 // only if you're not (same as before).
 
 async function showFinalReport() {
+  closeNotePopup();
   document.getElementById('english-ui').style.display = 'none';
   document.getElementById('math-ui').style.display = 'none';
   document.getElementById('report-title').textContent = fullTestLabel;
@@ -2251,7 +2318,9 @@ async function showFinalReport() {
   );
   document.getElementById('math-domain-breakdown').innerHTML = mathBreakdownResult.html;
 
-  await saveScoreHistory({
+  document.getElementById('report-screen').style.display = 'block';
+
+  saveScoreHistory({
     type: 'fulltest', typeLabel: ADAPTIVE ? 'Adaptive Test' : 'Full Test',
     title: fullTestLabel,
     correct: total, total: 1600, pct: Math.round(total/1600*100),
@@ -2265,9 +2334,7 @@ async function showFinalReport() {
       ],
       rwBreakdown, mathBreakdown: mathBreakdownResult.data
     }
-  });
-
-  document.getElementById('report-screen').style.display = 'block';
+  }).catch(() => {});
 }
 
 

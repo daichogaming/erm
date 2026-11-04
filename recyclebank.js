@@ -1718,7 +1718,7 @@ const RECYCLE_BANK = [
    "However,"
   ],
   "answer": 2,
-  "rationale": "Recycled question: it appeared in 4 different tests (FMT 2 V2 · FMT 43 V2 · FMT 48 V2 · FMT 50 V2 (có bản dùng tên mặt trăng Leda thay cho Lysithea)).",
+  "rationale": "Recycled question: it appeared in 4 different tests (FMT 2 V2 · FMT 43 V2 · FMT 48 V2 · FMT 50 V2 (one version uses the moon name Leda instead of Lysithea)).",
   "recycle": {
    "code": "TR5",
    "group": "tr",
@@ -1728,7 +1728,7 @@ const RECYCLE_BANK = [
     "FMT 2 V2",
     "FMT 43 V2",
     "FMT 48 V2",
-    "FMT 50 V2 (có bản dùng tên mặt trăng Leda thay cho Lysithea)"
+    "FMT 50 V2 (one version uses the moon name Leda instead of Lysithea)"
    ]
   }
  },

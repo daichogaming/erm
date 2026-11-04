@@ -79,7 +79,7 @@
     .passage-chart-wrap { margin:.75rem 0; } .passage-chart-img { max-width:100%; }
     .passage-chart-note { font-size:13px; color:var(--gray-mid); font-style:italic; margin:.5rem 0; }
     mark.rc-hit { background:rgba(31,138,76,.18); color:inherit; border-radius:4px; padding:0 2px; }
-    mark.rc-miss { background:none; color:inherit; text-decoration:underline wavy rgba(209,73,59,.75); text-underline-offset:3px; }
+    mark.rc-miss { background:rgba(209,73,59,.16); color:inherit; border-radius:2px; box-shadow:0 0 0 1px rgba(209,73,59,.35); }
     .got { display:flex; flex-wrap:wrap; gap:6px; margin-top:.5rem; }
     .got span { font-size:12px; padding:3px 9px; border-radius:999px; background:rgba(31,138,76,.12); color:var(--correct); }
 
@@ -125,7 +125,7 @@
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=3" />
+  <link rel="stylesheet" href="theme.css?v=5" />
 </head>
 <body>
 
@@ -145,7 +145,16 @@
 
 <main class="app" id="app"></main>
 
-<script src="drillbank.js"></script>
+<script>
+// Load only this set's passages plus the bank-wide word counts (built by tools/build_recall.js),
+// not the whole 4 MB drill bank. Written in during parsing so they load before the page script.
+(function () {
+  var P = new URLSearchParams(location.search);
+  var slug = (P.get('skill') || 'inferences').replace(/[^a-z-]/g, '');
+  var set = Math.max(1, parseInt(P.get('set'), 10) || 1);
+  document.write('<script src="recall/docfreq.js"><\/script><script src="recall/' + slug + '_' + set + '.js"><\/script>');
+})();
+</script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  ACTIVE RECALL — read a passage for a set time, it disappears,
@@ -172,11 +181,18 @@ let currentQ = 0;
 const prefs = loadPrefs();
 let results = [];          // per question: { recall, choice, rating, keyPct }
 let phase = 'start';       // start | read | recall | answer | compare | done
+// On the start and results screens no single question is on screen, so report none.
+window.SATReportContext = () => (phase === 'start' || phase === 'done') ? { questionNumber: null, questionId: '' } : {};
 let timer = null, secsLeft = 0;
 
 function loadPrefs() {
   const d = { secs: 60, mode: 'both' };
-  try { return Object.assign(d, JSON.parse(localStorage.getItem('sat-recall-prefs') || '{}')); } catch (e) { return d; }
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('sat-recall-prefs') || '{}') || {}; } catch (e) {}
+  // only accept values the start screen offers (a bad value would freeze the timer)
+  if ([30, 45, 60, 90, 120].includes(saved.secs)) d.secs = saved.secs;
+  if (['both', 'write', 'mc'].includes(saved.mode)) d.mode = saved.mode;
+  return d;
 }
 function savePrefs() { try { localStorage.setItem('sat-recall-prefs', JSON.stringify(prefs)); } catch (e) {} }
 const writes = () => prefs.mode !== 'mc';
@@ -185,8 +201,8 @@ const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'
 const $ = id => document.getElementById(id);
 
 window.addEventListener('load', () => {
-  if (typeof DRILL_BANK === 'undefined') { $('load-lbl').textContent = 'Couldn’t load the question bank. Check your connection and reload.'; return; }
-  QUESTIONS = DRILL_BANK[`${skillSlug}_${setNum}`] || [];
+  if (typeof RECALL_DF === 'undefined') { $('load-lbl').textContent = 'Couldn’t load the question bank. Check your connection and reload.'; return; }
+  QUESTIONS = (window.RECALL_SET || []).filter(q => !q.unusable); // skip questions whose graph was lost
   if (!QUESTIONS.length) { $('load-lbl').textContent = `No questions found for ${skillName} · Set ${setNum}.`; return; }
   results = QUESTIONS.map(() => ({ recall: '', choice: null, rating: null, keyPct: null }));
   $('bar-module').textContent = `Active Recall · ${skillName} · Set ${setNum}`;
@@ -241,7 +257,7 @@ function startQuestion(i) {
   secsLeft = prefs.secs;
   render(`${header('read')}
     <div class="bar" id="bar"><i style="width:100%"></i></div>
-    <div class="card" id="passage">${passageHTML(q)}</div>
+    <div class="card" id="passage">${applyUnderline(passageHTML(q), q)}</div>
     <div class="actions"><button class="btn primary" onclick="endReading()">I’m ready — hide the passage</button></div>`);
   tick();
   clearInterval(timer);
@@ -308,7 +324,7 @@ function showCompare() {
       <div class="your-recall${r.recall ? '' : ' empty'}">${r.recall ? esc(r.recall) : 'You didn’t write anything.'}</div>
       <div class="stat"><b>${hit.length}/${kw.length}</b><span>key words from the passage</span></div>
       ${hit.length ? `<div class="hint" style="margin:0">You remembered:</div><div class="got">${hit.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
-      ${missed.length ? `<div class="hint" style="margin:.6rem 0 0">You missed (underlined in the passage):</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
+      ${missed.length ? `<div class="hint" style="margin:.6rem 0 0">You missed (marked in red in the passage):</div><div class="missed">${missed.map(m => `<span>${esc(m.w)}</span>`).join('')}</div>` : ''}
       <div class="rate"><div class="opt-label" style="margin-top:0">How much did you remember?</div>
         <div class="pills" id="rate">${['Most of it', 'Some of it', 'Very little'].map((l, i) => `<button class="pill${r.rating === i ? ' on' : ''}" data-r="${i}">${l}</button>`).join('')}</div></div>
     </div>`;
@@ -328,7 +344,7 @@ function showCompare() {
   const last = currentQ === QUESTIONS.length - 1;
   render(`${header('compare')}
     <div class="${writes() ? 'compare' : ''}">
-      <div class="card"><div class="col-title">Original passage</div><div id="passage">${passageHTML(q)}</div></div>
+      <div class="card"><div class="col-title">Original passage</div><div id="passage">${applyUnderline(passageHTML(q), q)}</div></div>
       ${recallCol}
     </div>
     ${answerBlock}
@@ -351,7 +367,7 @@ function showDone() {
   if (answers()) cards.push(`<div class="card"><b>${correct}/${n}</b><span>answered correctly from memory</span></div>`);
   if (writes()) cards.push(`<div class="card"><b>${avg === null ? '—' : avg + '%'}</b><span>of key words recalled, on average</span></div>`,
                            `<div class="card"><b>${most}/${n}</b><span>passages where you remembered most of it</span></div>`);
-  const hasNext = typeof DRILL_BANK !== 'undefined' && DRILL_BANK[`${skillSlug}_${setNum + 1}`];
+  const hasNext = typeof RECALL_SETS !== 'undefined' && (RECALL_SETS[skillSlug] || 0) > setNum;
   render(`
     <div class="eyebrow">Active Recall · Results</div>
     <div class="h1">${esc(skillName)} · Set ${setNum}</div>
@@ -380,7 +396,7 @@ function exitRecall(noConfirm) {
 //    the whole question bank, so everyday words (found, group, possible…)
 //    never count. ─────────────────────────────────────────────────────
 const STOP = new Set(('about above after again against also although among another because been before being below between both but could did does doing down during each even every from further have having here however into itself just like made make many more most much must never only other over same should since some such than that their them themselves then there these they this those through thus under until upon very were what when where which while whom whose will with within without would your yours text texts author authors following adapted the and for are was not one two its has had who how all any can may way often still yet less least among new old ever being').split(' '));
-function wordsOf(s) { return String(s || '').match(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*/g) || []; }
+function wordsOf(s) { return String(s || '').match(/\p{L}[\p{L}'’-]*/gu) || []; } // any alphabet: Čapek, Pūnana
 function norm(w) {
   w = w.toLowerCase().replace(/['’]s$/, '').replace(/['’]/g, '');
   if (w.length > 5) w = w.replace(/(ing|ed|es|s|ly)$/, '');
@@ -390,12 +406,9 @@ const GENERIC = new Set(('produce produced producing examined examine found find
 let DOC_FREQ = null, DOC_COUNT = 0;
 function docFreq() {   // how many passages in the bank use each word (built once)
   if (DOC_FREQ) return DOC_FREQ;
-  DOC_FREQ = new Map();
-  const seen = new Set();
-  Object.values(typeof DRILL_BANK !== 'undefined' ? DRILL_BANK : {}).forEach(list => list.forEach(q => {
-    if (seen.has(q.id)) return; seen.add(q.id); DOC_COUNT++;
-    new Set(wordsOf(passageText(q)).map(norm)).forEach(n => DOC_FREQ.set(n, (DOC_FREQ.get(n) || 0) + 1));
-  }));
+  // Counted ahead of time over the whole drill bank by tools/build_recall.js (recall/docfreq.js).
+  DOC_FREQ = new Map(Object.entries(typeof RECALL_DF !== 'undefined' ? RECALL_DF : {}));
+  DOC_COUNT = typeof RECALL_DOC_COUNT !== 'undefined' ? RECALL_DOC_COUNT : 0;
   return DOC_FREQ;
 }
 function keywordsOf(text) {
@@ -415,8 +428,14 @@ function keywordsOf(text) {
     .sort((a, b) => b.score - a.score);
   return ranked.slice(0, Math.max(6, Math.min(10, Math.round(tf.size * 0.22))));
 }
-// Same word, allowing other forms of it (fossil / fossilized, pigment / pigments).
-function sameWord(a, b) { return a === b || (a.length >= 5 && b.length >= 5 && a.slice(0, 5) === b.slice(0, 5)); }
+// Same word, allowing longer forms of it (fossil / fossilized) but not words that only
+// share a start (photograph / photosynthesis).
+function sameWord(a, b) {
+  if (a === b) return true;
+  // Same word in another form (prefer / preferred). A cut-off fragment ("phase" for "phaseolus") doesn't count.
+  const [sh, lo] = a.length <= b.length ? [a, b] : [b, a];
+  return sh.length >= 5 && lo.startsWith(sh) && sh.length >= lo.length * 0.75;
+}
 function markKeywords(root, marks) {
   if (!root || !marks) return;
   const kind = p => {
@@ -429,7 +448,7 @@ function markKeywords(root, marks) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
   nodes.forEach(node => {
-    const parts = node.nodeValue.split(/([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’-]*)/);
+    const parts = node.nodeValue.split(/(\p{L}[\p{L}'’-]*)/u);
     if (!parts.some((p, i) => i % 2 && kind(p))) return;
     const frag = document.createDocumentFragment();
     parts.forEach((p, i) => {
@@ -442,6 +461,83 @@ function markKeywords(root, marks) {
 }
 
 // ── Passage rendering (same structure as the drill pages) ─────
+// Underline the parts of the passage the question points to ("the underlined sentence").
+function applyUnderline(html, q) {
+  const segments = q.underline_segments;
+  if (!segments || !segments.length) return html;
+
+  function norm(s) {
+    return s.replace(/\s+/g, ' ')
+            .replace(/[\u2018\u2019\u02bc]/g, "'")
+            .replace(/[\u201c\u201d]/g, '"')
+            .replace(/[\u2013\u2014]/g, '-')
+            .replace(/\u2019/g, "'")
+            .trim();
+  }
+
+  // Walk the HTML char-by-char, skipping tag content, to find and wrap each segment
+  let cursor = 0; // segments are in document order: look after the last one first, so a repeated phrase gets the right occurrence
+  function wrapSegment(htmlStr, segText, nextText) {
+    const segNorm = norm(esc(segText)); // the HTML is escaped (& -> &amp;), so escape the segment the same way or positions don't line up
+    if (!segNorm) return htmlStr;
+
+    // Build plain-text version (strip tags) to locate the segment
+    let plain = '';
+    let inTag = false;
+    for (let i = 0; i < htmlStr.length; i++) {
+      if (htmlStr[i] === '<') { inTag = true; continue; }
+      if (htmlStr[i] === '>') { inTag = false; continue; }
+      if (!inTag) plain += htmlStr[i];
+    }
+    const plainNorm = norm(plain);
+
+    // Try exact match. A segment that continues on the next line (the next segment follows it
+    // directly) is placed where that whole run occurs, so an earlier copy of a short word isn't picked.
+    let idx = -1;
+    const run = nextText ? segNorm + ' ' + norm(esc(nextText)) : '';
+    if (run) { idx = plainNorm.indexOf(run, cursor); if (idx === -1) idx = plainNorm.indexOf(run); }
+    if (idx === -1) idx = plainNorm.indexOf(segNorm, cursor);
+    if (idx === -1) idx = plainNorm.indexOf(segNorm);
+    if (idx === -1) {
+      // Try first 40 chars of segment (handles truncated multi-line rects)
+      const partial = segNorm.substring(0, Math.min(40, segNorm.length));
+      idx = plainNorm.indexOf(partial, cursor);
+      if (idx === -1) idx = plainNorm.indexOf(partial);
+      if (idx === -1) return htmlStr; // can't find it
+    }
+
+    const endIdx = idx + segNorm.length;
+
+    // Map plain-text char positions back to HTML positions and wrap
+    let charCount = 0, inT = false;
+    let startHtmlPos = -1, endHtmlPos = -1;
+    for (let i = 0; i < htmlStr.length; i++) {
+      // Check the end before skipping a tag: a segment that ends right before a tag must
+      // close there, or the browser carries the open <u> over the rest of the passage.
+      if (charCount === endIdx && endHtmlPos === -1 && startHtmlPos !== -1) { endHtmlPos = i; break; }
+      if (htmlStr[i] === '<') { inT = true; }
+      if (!inT) {
+        if (charCount === idx && startHtmlPos === -1) startHtmlPos = i;
+        charCount++;
+      }
+      if (htmlStr[i] === '>') { inT = false; }
+    }
+    if (endHtmlPos === -1) endHtmlPos = htmlStr.length;
+    if (startHtmlPos === -1) return htmlStr;
+    cursor = endIdx;
+
+    return htmlStr.slice(0, startHtmlPos) +
+           '<u>' + htmlStr.slice(startHtmlPos, endHtmlPos) + '</u>' +
+           htmlStr.slice(endHtmlPos);
+  }
+
+  // Apply each segment in order
+  let result = html;
+  segments.forEach((seg, k) => {
+    result = wrapSegment(result, seg, segments[k + 1]);
+  });
+  return result;
+}
 function passageText(q) {
   if (q.passage_lines && q.passage_lines.length)
     return q.passage_lines.map(l => l.text || (l.type === 'table' ? [l.title || '', ...(l.headers || []), ...(l.rows || []).flat()].join(' ') : '')).join(' ').replace(/\s+/g, ' ').trim();

@@ -20,7 +20,7 @@
     var seen = {}, out = [];
     Object.keys(bank).sort().forEach(function (k) {
       (bank[k] || []).forEach(function (q) {
-        if (isHard(q) && !seen[q.id]) { seen[q.id] = true; out.push(q); }
+        if (isHard(q) && !q.unusable && !seen[q.id]) { seen[q.id] = true; out.push(q); } // unusable: graph lost in extraction
       });
     });
     return out;

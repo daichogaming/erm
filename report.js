@@ -39,6 +39,9 @@
 .rq-msg{font-size:13px;margin-top:.9rem;padding:9px 12px;border-radius:10px;display:none}\
 .rq-msg.ok{display:block;background:rgba(31,138,76,.12);color:#1f8a4c}\
 .rq-msg.err{display:block;background:rgba(209,73,59,.12);color:#d1493b}\
+.rq-count{font-size:11px;color:var(--gray-mid,#777);text-align:right;margin-top:.3rem;font-family:"DM Mono",monospace}\
+@media(max-width:600px){.rq-box textarea,.rq-box input{font-size:16px}}\
+@media(max-width:420px){.rq-btn{padding:6px 8px;gap:0;font-size:0}.rq-btn svg{margin:0}}\
 ';
 
   var ICON = '<svg viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>';
@@ -53,11 +56,17 @@
     var cq = g('currentQ'), cu = g('cur');
     if (typeof cq === 'number') { n = cq + 1; var Q = g('QUESTIONS'); if (Q && Q[cq]) id = Q[cq].id || ''; }
     else if (typeof cu === 'number') { n = cu + 1; var S = g('QS'); if (S && S[cu]) id = S[cu].id || S[cu].num || ''; }
-    if (window.SATReportContext) { try { var c = window.SATReportContext(); n = c.questionNumber || n; id = c.questionId || id; module = c.module || module; } catch (e) {} }
+    if (window.SATReportContext) { try { var c = window.SATReportContext(); if ('questionNumber' in c) n = c.questionNumber; if ('questionId' in c) id = c.questionId; module = c.module || module; } catch (e) {} }
     return { page: location.pathname.split('/').pop() || 'index.html', module: module, questionNumber: n || null, questionId: String(id || '') };
   }
 
-  var ov, ta, ctxEl, msg, submit, cur;
+  var MAX_LEN = 2000;          // the backend keeps at most 2000 characters
+  var SEND_TIMEOUT_MS = 10000;
+  var ov, box, ta, ctxEl, msg, submit, count, cur, opener;
+  var sending = false, done = false, sendSeq = 0, closeTimer = null;
+
+  function updateSubmit() { submit.disabled = sending || done || !ta.value.trim(); }
+  function updateCount() { count.textContent = ta.value.length + '/' + MAX_LEN; }
 
   function build() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
@@ -67,26 +76,48 @@
       '<div class="rq-head"><div class="rq-title" id="rq-t">Report Question Issue</div><button class="rq-x" aria-label="Close">×</button></div>' +
       '<div class="rq-ctx"></div>' +
       '<label class="rq-lbl" for="rq-ta">What is wrong with this question?</label>' +
-      '<textarea id="rq-ta" placeholder="Describe typos, wrong answers, unclear graphs, or any issues…"></textarea>' +
+      '<textarea id="rq-ta" maxlength="' + MAX_LEN + '" placeholder="Describe typos, wrong answers, unclear graphs, or any issues…"></textarea>' +
+      '<div class="rq-count" aria-live="polite">0/' + MAX_LEN + '</div>' +
       '<div class="rq-msg"></div>' +
       '<div class="rq-row"><button class="rq-submit" disabled>Submit Report</button><button class="rq-cancel">Cancel</button></div></div>';
     document.body.appendChild(ov);
+    box = ov.querySelector('.rq-box'); count = ov.querySelector('.rq-count');
     ta = ov.querySelector('textarea'); ctxEl = ov.querySelector('.rq-ctx');
     msg = ov.querySelector('.rq-msg'); submit = ov.querySelector('.rq-submit');
     ov.querySelector('.rq-x').onclick = ov.querySelector('.rq-cancel').onclick = close;
     ov.addEventListener('mousedown', function (e) { if (e.target === ov) close(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ov.classList.contains('open')) close(); });
-    ta.addEventListener('input', function () { submit.disabled = !ta.value.trim(); });
+    document.addEventListener('keydown', function (e) {
+      if (!ov.classList.contains('open')) return;
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key !== 'Tab') return;
+      // Keep Tab inside the dialog while it is open.
+      var f = Array.prototype.filter.call(box.querySelectorAll('button, textarea, input, [href], [tabindex]:not([tabindex="-1"])'), function (el) { return !el.disabled && el.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1], a = document.activeElement;
+      if (e.shiftKey && (a === first || !box.contains(a))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (a === last || !box.contains(a))) { e.preventDefault(); first.focus(); }
+    });
+    ta.addEventListener('input', function () { updateSubmit(); updateCount(); });
     submit.onclick = send;
   }
 
   function open(btn) {
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    sendSeq++;                 // any send still in flight is now stale: its result is ignored
+    sending = false; done = false;
+    if (!ov.classList.contains('open')) opener = btn || document.activeElement;
     cur = context(btn);
     ctxEl.textContent = cur.module + (cur.questionNumber ? ' · Question ' + cur.questionNumber : '');
-    ta.value = ''; submit.disabled = true; submit.textContent = 'Submit Report'; msg.className = 'rq-msg';
+    ta.value = ''; updateCount(); updateSubmit(); submit.textContent = 'Submit Report'; msg.className = 'rq-msg';
     ov.classList.add('open'); setTimeout(function () { ta.focus(); }, 30);
   }
-  function close() { ov.classList.remove('open'); }
+  function close() {
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    if (!ov.classList.contains('open')) return;
+    ov.classList.remove('open');
+    var o = opener; opener = null;
+    if (o && o.focus && document.contains(o)) { try { o.focus(); } catch (e) {} }
+  }
 
   function saveLocal(r) {
     try { var a = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); a.push(r); localStorage.setItem(STORE_KEY, JSON.stringify(a)); return true; }
@@ -94,32 +125,43 @@
   }
 
   async function send() {
+    if (sending || done) return;
     var r = {
       page: cur.page, module: cur.module, questionNumber: cur.questionNumber, questionId: cur.questionId,
-      message: ta.value.trim(), url: location.href,
+      message: ta.value.trim().slice(0, MAX_LEN), url: location.href,
       userAgent: navigator.userAgent, createdAt: new Date().toISOString()
     };
     if (!r.message) return;
-    submit.disabled = true; submit.textContent = 'Sending…';
-    var saved = saveLocal(r), sent = false;
+    var seq = ++sendSeq;
+    sending = true; updateSubmit(); submit.textContent = 'Sending…'; msg.className = 'rq-msg';
+    var saved = saveLocal(r), sent = false;   // always keep a copy on this device first
     if (REPORT_ENDPOINT) {
+      var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctl) ctl.abort(); }, SEND_TIMEOUT_MS);
       try {
         // text/plain avoids a CORS preflight, which Google Apps Script can't answer.
-        try {
-          var res = await fetch(REPORT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(r) });
-          sent = res.ok;
-        } catch (corsErr) {
-          // Some hosts redirect without CORS headers: the POST still lands, we just can't read the reply.
-          await fetch(REPORT_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(r) });
-          sent = true;
-        }
+        // Sent once only: retrying could file the same report twice.
+        var res = await fetch(REPORT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(r), signal: ctl ? ctl.signal : undefined });
+        // The backend answers HTTP 200 with {ok:false} when it fails, so read the body.
+        var body = null;
+        try { body = await res.json(); } catch (e) { body = null; }
+        sent = !!(res.ok && body && body.ok === true);
       } catch (e) { sent = false; }
+      finally { clearTimeout(timer); }
     }
-    if (REPORT_ENDPOINT && !sent) { msg.className = 'rq-msg err'; msg.textContent = saved ? "Couldn't reach the server — your report is saved on this device." : "Couldn't send your report. Please try again."; submit.disabled = false; submit.textContent = 'Submit Report'; return; }
+    if (seq !== sendSeq) return;   // the dialog was reopened or closed-and-reopened meanwhile
+    sending = false;
+    if (REPORT_ENDPOINT && !sent) {
+      msg.className = 'rq-msg err';
+      msg.textContent = saved ? "Couldn't reach the server — your report is saved on this device." : "Couldn't send your report. Please try again.";
+      submit.textContent = 'Submit Report'; updateSubmit();
+      return;
+    }
+    done = true; updateSubmit();
     msg.className = 'rq-msg ok';
     msg.textContent = REPORT_ENDPOINT ? 'Thanks — your report was sent.' : 'Thanks — report saved (test mode: stored on this device).';
     submit.textContent = 'Submitted';
-    setTimeout(close, 1400);
+    closeTimer = setTimeout(close, 1400);
   }
 
   // Adds a Report button to every top bar that lacks one. Safe to call again
@@ -130,6 +172,7 @@
       if (bar.querySelector('.rq-btn')) return;
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'rq-btn'; b.innerHTML = ICON + 'Report';
+      b.setAttribute('aria-label', 'Report a problem with this question');
       b.title = 'Report a problem with this question';
       b.addEventListener('click', function () { open(b); });
       bar.insertBefore(b, bar.firstChild);

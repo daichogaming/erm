@@ -59,7 +59,7 @@
     .rep small { color:var(--gray-mid); font-family:'DM Mono',monospace; display:block; margin-bottom:3px; }
     @media (max-width:560px) { .top-bar-module { display:none; } .q-text { font-size:16px; } }
   </style>
-  <link rel="stylesheet" href="theme.css?v=3" />
+  <link rel="stylesheet" href="theme.css?v=5" />
   <style>
     /* keep this page's own look; theme.css only supplies shared tokens */
     html, body { background:var(--white); }
@@ -137,7 +137,7 @@
         return '<div class="' + cls + '" onclick="pick(' + i + ')"><div class="l">' + L[i] + '</div><div>' + c + '</div></div>';
       }).join('') + '</div>';
     } else {
-      body += '<div class="fr"><input id="fr" inputmode="decimal" placeholder="Your answer" value="' + (answers[cur] ?? '') + '" ' + (submitted ? 'disabled' : '') + ' oninput="frIn(this.value)" /><div class="hint">Student-produced response — type a number.</div></div>';
+      body += '<div class="fr"><input id="fr" inputmode="decimal" placeholder="Your answer" value="' + String(answers[cur] ?? '').replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }) + '" ' + (submitted ? 'disabled' : '') + ' oninput="frIn(this.value)" /><div class="hint">Student-produced response — type a number.</div></div>';
     }
     if (submitted) {
       const ok = isCorrect(cur);
