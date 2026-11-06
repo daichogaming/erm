@@ -192,6 +192,35 @@
       letter-spacing: 0.1em; color: var(--gray-mid); margin-bottom: 0.5rem;
     }
 
+    /* ── CHECK ANSWER (one question at a time, before the final Submit) ── */
+    .check-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 0.85rem; margin-top: 1.25rem; }
+    .btn-check {
+      font-size: 13px; font-family: inherit; font-weight: 500;
+      border: 1px solid var(--black); background: var(--card, var(--white)); color: var(--black);
+      border-radius: 6px; padding: 7px 18px; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .btn-check:hover:not(:disabled) { border-color: var(--gold, var(--black)); color: var(--gold-deep, var(--black)); }
+    .btn-check:disabled { border-color: var(--gray-border); color: var(--gray-mid); cursor: not-allowed; opacity: 0.7; }
+    .check-result { font-size: 14px; font-weight: 500; line-height: 1.4; }
+    .check-result:focus { outline: none; }
+    .check-result.is-correct { color: var(--correct); }
+    .check-result.is-incorrect { color: var(--incorrect); }
+    .check-result.is-error { font-size: 13px; font-weight: 400; color: var(--gray-mid); }
+    :root[data-theme="dark"] .check-result.is-correct { color: #5fd08e; }
+    :root[data-theme="dark"] .check-result.is-incorrect { color: #ff8a7a; }
+    /* A checked question is locked: its choices no longer react to the pointer. */
+    .answers.locked .answer-option { cursor: default; }
+    .answers.locked .answer-option:not(.correct):not(.incorrect):hover { border-color: var(--gray-border); background: var(--card, var(--white)); }
+    .answers.locked .answer-option:not(.correct):not(.incorrect):hover .answer-letter { background: var(--gray-bg); color: var(--gray-dark); }
+    /* Nav dot of a checked question: small green / red corner mark. */
+    .q-dot { position: relative; }
+    .q-dot.checked::after {
+      content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px;
+      border-radius: 50%; border: 2px solid var(--white); background: var(--correct);
+    }
+    .q-dot.checked.checked-wrong::after { background: var(--incorrect); }
+
     /* ── BOTTOM BAR ── */
     .bottom-bar {
       position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
@@ -531,6 +560,11 @@ let timerHidden   = false;
 let timerInterval = null;
 let submitted     = false;
 let submittedResults = {}; // filled in after grading: { [questionId]: {status, rationale, correctAnswer} }
+// "Check answer": single questions graded before the final Submit, by question index. A checked question is
+// locked (its answer can't change); nothing here is saved — the final Submit still grades every question.
+let checkedResults = {}; // { [qIndex]: {status, rationale, correctAnswer} }
+let checkPending   = {}; // { [qIndex]: true } while a check is waiting for the server
+let checkFailed    = {}; // { [qIndex]: true } after a check couldn't reach the server
 
 // ── Load questions from the API (no answers included) ───────────
 async function initTest() {
@@ -633,6 +667,9 @@ function updateNav() {
     if (i === currentQ) dot.classList.add('active');
     if (answers[i] !== null) dot.classList.add('answered');
     if (flagged[i]) dot.classList.add('flagged');
+    const chk = !submitted && checkedResults[i];
+    if (chk) dot.classList.add('checked', chk.status === 'correct' ? 'checked-right' : 'checked-wrong');
+    dot.title = chk ? `Checked: ${chk.status === 'correct' ? 'correct' : 'incorrect'}` : '';
   }
   // On narrow screens the dot row scrolls sideways: keep the current dot in view ('nearest' only moves what it must)
   const cur = document.getElementById(`dot-${currentQ}`);
@@ -862,11 +899,12 @@ function renderQuestion(i) {
   const qp = document.getElementById('question-pane');
   const letters = ['A','B','C','D'];
   const result = submittedResults[q.id]; // only populated after grading (from the server)
+  const shown = submitted ? result : checkedResults[i]; // before Submit: a question checked with "Check answer"
   const choicesHTML = q.choices.map((c, ci) => {
     let cls = 'answer-option';
-    if (submitted && result) {
-      if (ci === result.correctAnswer) cls += ' correct';
-      else if (ci === answers[i] && ci !== result.correctAnswer) cls += ' incorrect';
+    if (shown) {
+      if (ci === shown.correctAnswer) cls += ' correct';
+      else if (ci === answers[i] && ci !== shown.correctAnswer) cls += ' incorrect';
     } else if (!submitted) {
       if (answers[i] === ci) cls += ' selected';
     }
@@ -885,7 +923,8 @@ function renderQuestion(i) {
   qp.innerHTML = `
     <div class="q-number">Question ${i + 1} of ${totalQ}</div>
     <div class="q-text">${escHtml(q.question)}</div>
-    <div class="answers">${choicesHTML}</div>
+    <div class="answers${isLocked(i) ? ' locked' : ''}">${choicesHTML}</div>
+    <div id="check-area">${checkAreaHTML(i)}</div>
     <label class="flag-row">
       <input type="checkbox" id="flag-cb" ${flagged[i] ? 'checked' : ''} onchange="toggleFlag(${i})">
       <span class="flag-label">Flag for review</span>
@@ -908,12 +947,87 @@ function escHtml(str) {
 }
 
 function selectAnswer(qi, ci) {
-  if (submitted) return;
+  if (submitted || isLocked(qi)) return; // a checked question keeps its answer
   answers[qi] = ci;
+  checkFailed[qi] = false;
   updateNav();
   // Update the choices in place. Re-rendering the whole question would rebuild the passage
   // and re-apply highlights by searching for their text, which can move or drop them.
   document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
+  const area = document.getElementById('check-area');
+  if (area && qi === currentQ) area.innerHTML = checkAreaHTML(qi);
+}
+
+// ── Check answer (one question, before the final Submit) ──────
+function isLocked(i) { return !submitted && !!(checkedResults[i] || checkPending[i]); }
+
+function checkAreaHTML(i) {
+  if (submitted) return ''; // after Submit the page shows its normal review
+  const r = checkedResults[i];
+  if (r) {
+    const line = r.status === 'correct'
+      ? '<div class="check-result is-correct" role="status" tabindex="-1">✓ Correct</div>'
+      : `<div class="check-result is-incorrect" role="status" tabindex="-1">✗ Incorrect — the answer is ${['A','B','C','D'][r.correctAnswer] || '?'}</div>`;
+    const expl = r.rationale ? `
+    <div class="rationale-box">
+      <div class="rationale-label">Explanation</div>
+      ${escHtml(r.rationale)}
+    </div>` : '';
+    return `<div class="check-row">${line}</div>${expl}`;
+  }
+  const pending = !!checkPending[i];
+  return `<div class="check-row">
+      <button type="button" class="btn-check" id="btn-check" onclick="checkAnswer(${i})"${answers[i] === null || pending ? ' disabled' : ''}>${pending ? 'Checking…' : 'Check answer'}</button>
+      ${checkFailed[i] ? '<span class="check-result is-error" role="status">Couldn\'t check — try again</span>' : ''}
+    </div>`;
+}
+
+// Redraw the check button / result and the choices of question i in place (no full re-render: see selectAnswer).
+// focus: the check was started from the keyboard-focused button, so move focus to the result (or the retry button).
+function refreshCheck(i, focus) {
+  updateNav();
+  if (submitted || i !== currentQ) return;
+  const area = document.getElementById('check-area');
+  if (area) area.innerHTML = checkAreaHTML(i);
+  const box = document.querySelector('#question-pane .answers');
+  if (box) box.classList.toggle('locked', isLocked(i));
+  const r = checkedResults[i];
+  if (r) document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => {
+    el.classList.remove('selected');
+    el.classList.toggle('correct', k === r.correctAnswer);
+    el.classList.toggle('incorrect', k === answers[i] && k !== r.correctAnswer);
+  });
+  if (focus) { const f = document.querySelector('#check-area .check-result:not(.is-error), #btn-check'); if (f) f.focus(); }
+}
+
+async function checkAnswer(qi) {
+  if (submitted || isLocked(qi) || answers[qi] === null) return;
+  const q = QUESTIONS[qi];
+  const picked = answers[qi];
+  const focus = document.activeElement && document.activeElement.id === 'btn-check';
+  let r = null;
+  {
+    // Grade just this question with the same stateless endpoint the final Submit uses.
+    checkPending[qi] = true; checkFailed[qi] = false;
+    refreshCheck(qi);
+    try {
+      const res = await fetch(`${API_BASE}/api/submit-module`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bank: moduleKey, answers: { [q.id]: picked } })
+      });
+      if (!res.ok) throw new Error('Check failed: ' + res.status);
+      const data = await res.json();
+      const entry = data && Array.isArray(data.review) ? data.review.find(x => String(x.id) === String(q.id)) : null;
+      if (!entry || typeof entry.correctAnswer !== 'number') throw new Error('Bad check response');
+      r = { status: entry.correctAnswer === picked ? 'correct' : 'incorrect', rationale: entry.rationale || '', correctAnswer: entry.correctAnswer };
+    } catch (e) { r = null; }
+    checkPending[qi] = false;
+    if (submitted) return; // the final Submit finished meanwhile; its results take over
+    if (!r) { checkFailed[qi] = true; refreshCheck(qi, focus); return; } // stays unlocked
+  }
+  checkedResults[qi] = r;
+  refreshCheck(qi, focus);
 }
 
 function toggleFlag(qi) {

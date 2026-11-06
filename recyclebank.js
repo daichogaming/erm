@@ -4,6 +4,10 @@
    end of their text matches, so lightly edited copies are grouped together. No Math question appeared
    more than 3 times. Answers come from correct attempts; RS6 and SE1 are worked out (see their notes).
    Abbreviations: BMV = Bluebook Mini Verbal Test, FMT = Final Mock Test, V1/V2 = Verbal Module 1/2.
+   Set 2 (group "set2", codes S2-n, ids rc_d2_n): the 17 questions in the team's "Recycles" Google Doc, kept in the doc's
+   order 1-17. Its questions 6 and 7 are SP4 and SP2 above, so the group points at those records instead of copying them.
+   Set-2 records have no repeat count or test list (recycle.source = "team doc"); their answers and explanations were
+   worked out from the questions. The table that S2-2 refers to wasn't in the doc, so that question runs without it.
    Records use the same shape as questionbank.js, so test.html can run them (test=recycles&module=<group key|all|question code>). */
 const RECYCLE_BANK = [
  {
@@ -1340,7 +1344,7 @@ const RECYCLE_BANK = [
    "She was gaining an unfair advantage over other contestants in the talent show."
   ],
   "answer": 1,
-  "rationale": "Recycled question: it appeared in 4 different tests (Bluebook PSAT 10 Practice 3 Extra Verbal · FMT 28 V1 · FMT 29 V1 · FMT 32 V1).",
+  "rationale": "Choice B is the best answer because the narrator was supposed to memorize the piece, but instead she played a few bars and then looked “up to see what notes followed” — she was breaking the expectation that she perform it from memory. Choice A is incorrect because her “cheating” is about how she practiced, not about how she judged her own ability. Choice C is incorrect because the text never says she hid anything from her teacher. Choice D is incorrect because she was practicing on her own; nothing suggests she gained an edge over other contestants. Recycled question: it appeared in 4 different tests (Bluebook PSAT 10 Practice 3 Extra Verbal · FMT 28 V1 · FMT 29 V1 · FMT 32 V1).",
   "recycle": {
    "code": "SP2",
    "group": "sp",
@@ -1415,7 +1419,7 @@ const RECYCLE_BANK = [
    "It indicates a distinction between horizontal gene transfer and vertical gene transfer."
   ],
   "answer": 0,
-  "rationale": "Recycled question: it appeared in 4 different tests (FMT 18 V2 · FMT 24 V2 · FMT 29 V1 · FMT 33 V2).",
+  "rationale": "Choice A is the best answer because the underlined sentence follows the claim that horizontal gene transfer has rarely been observed among eukaryotes and says new studies suggest it is more common in them than thought, implying that the usual view may be wrong. Choice B is incorrect because the sentence doesn’t compare how often transfer has been detected in two groups; it reports new findings about one. Choice C is incorrect because the sentence points to promising new research rather than calling any research direction fruitless. Choice D is incorrect because the distinction between horizontal and vertical gene transfer is drawn in the first sentence, not the underlined one. Recycled question: it appeared in 4 different tests (FMT 18 V2 · FMT 24 V2 · FMT 29 V1 · FMT 33 V2).",
   "recycle": {
    "code": "SP4",
    "group": "sp",
@@ -1952,22 +1956,554 @@ const RECYCLE_BANK = [
     "FMT 9 V2"
    ]
   }
+ },
+ {
+  "id": "rc_d2_1",
+  "domain": "Craft and Structure",
+  "skill": "Text Structure and Purpose",
+  "difficulty": "",
+  "context": "Craft and Structure · Text Structure and Purpose",
+  "passage": "Roy McLendon’s Moonlit St. Lucie, a riverscape featuring the silhouette of a single palm tree against the backdrop of shimmering water and a brilliant moonlit sky, is typical of paintings by Florida Highwaymen, loosely affiliated landscape artists mainly active in Fort Pierce, Florida, during the 1950s and ‘60s. Some art historians suggest that Highwaymen paintings played a role in shaping popular perceptions of the state that persist today: the natural iconography that McLendon and colleagues constantly revisited—placid inland rivers, windswept palm trees—is now seen as classically Floridian.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Roy McLendon’s Moonlit St. Lucie, a riverscape featuring the silhouette of a single palm tree against the backdrop of shimmering water and a brilliant moonlit sky, is typical of paintings by Florida Highwaymen, loosely affiliated landscape artists mainly active in Fort Pierce, Florida, during the 1950s and ‘60s. Some art historians suggest that Highwaymen paintings played a role in shaping popular perceptions of the state that persist today: the natural iconography that McLendon and colleagues constantly revisited—placid inland rivers, windswept palm trees—is now seen as classically Floridian.",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice best states the main purpose of the text?",
+  "choices": [
+   "To describe the historical circumstances in which paintings by the Florida Highwaymen experienced a resurgence in popularity",
+   "To explain that a particular painting by Roy McLendon has had greater influence on the broader culture of the state of Florida than is generally acknowledged",
+   "To contrast the public’s reaction during the 1950s and ‘60s to a particular painting by Roy McLendon with more recent reactions to it",
+   "To present the argument that paintings by Florida Highwaymen likely helped to create a particular widespread impression of Florida"
+  ],
+  "answer": 3,
+  "rationale": "Choice D is the best answer because the text uses McLendon’s Moonlit St. Lucie as a typical example of Highwaymen paintings and then presents art historians’ argument that these paintings helped shape a lasting popular image of Florida (placid rivers, windswept palms). Choice A is incorrect because the text never mentions a resurgence in the paintings’ popularity. Choice B is incorrect because the claim about influence concerns Highwaymen paintings as a group, not one McLendon painting, and the text doesn’t say this influence is underappreciated. Choice C is incorrect because the text doesn’t describe how the public reacted to the painting in the 1950s and ’60s or compare that with later reactions.",
+  "recycle": {
+   "code": "S2-1",
+   "group": "set2",
+   "title": "Florida Highwaymen (main purpose)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_2",
+  "unusable": true,
+  "domain": "Information and Ideas",
+  "skill": "Command of Evidence",
+  "difficulty": "",
+  "context": "Information and Ideas · Command of Evidence",
+  "passage": "Michelle Pereira et al. hypothesized that introducing health improvements into workplaces would increase productivity by reducing absenteeism (sick employees not working) and presenteeism (sick workers working less productively due to illness). Pereira’s team enrolled groups of Australian workers in two programs: one that gave employees exercise training (EET) and one that enrolled employees in health promotion seminars (EHP). They then calculated the productivity loss of those groups at 12 weeks and 12 months after the programs began (based on the 28 days preceding each point). They concluded that exercise training was more effective at restraining productivity loss than health promotion seminars were, though this result took time to become apparent.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Michelle Pereira et al. hypothesized that introducing health improvements into workplaces would increase productivity by reducing absenteeism (sick employees not working) and presenteeism (sick workers working less productively due to illness). Pereira’s team enrolled groups of Australian workers in two programs: one that gave employees exercise training (EET) and one that enrolled employees in health promotion seminars (EHP). They then calculated the productivity loss of those groups at 12 weeks and 12 months after the programs began (based on the 28 days preceding each point). They concluded that exercise training was more effective at restraining productivity loss than health promotion seminars were, though this result took time to become apparent.",
+    "indent": 0
+   },
+   {
+    "type": "chart",
+    "note": "[The table for this question wasn’t in the team’s doc — answer from the text and the choices.]"
+   }
+  ],
+  "question": "Which choice best describes data from the table that most effectively strengthen Pereira and colleagues’ conclusion?",
+  "choices": [
+   "Productivity loss for the EET group barely decreased between 12 weeks and 12 months after the program began, while productivity loss for the EHP group significantly increased during the same time period.",
+   "Productivity loss was largely due to absenteeism for the EHP group at 12 months after the program began, while productivity loss was largely due to presenteeism for the EET group at 12 months after the program began.",
+   "Productivity loss was consistently higher for the EHP group than for the EET group over the twelve months that it was measured, though the size of the difference between the two decreased over that time.",
+   "Productivity loss was fairly similar for the EET and EHP groups 12 weeks after each program began, but at 12 months afterward it had significantly increased for the EHP group and significantly decreased for the EET group."
+  ],
+  "answer": 0,
+  "rationale": "Choice A is the best answer because it describes the gap between the programs opening up over time: from 12 weeks to 12 months, productivity loss held steady (barely decreased) for the exercise group but rose sharply for the seminar group. That supports both parts of the conclusion — exercise training restrained productivity loss better, and the advantage only showed up later. Choice B is incorrect because whether loss came from absenteeism or presenteeism doesn’t show which program restrained total productivity loss more. Choice C is incorrect because a gap that shrinks over time would suggest the advantage faded, the opposite of a result that took time to appear. Choice D is incorrect because it overstates the data: in the study, the exercise group’s productivity loss stayed about level between 12 weeks and 12 months rather than dropping significantly.",
+  "recycle": {
+   "code": "S2-2",
+   "group": "set2",
+   "title": "Workplace health programs (table data)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_3",
+  "domain": "Information and Ideas",
+  "skill": "Central Ideas and Details",
+  "difficulty": "",
+  "context": "Information and Ideas · Central Ideas and Details",
+  "passage": "The soil on Mars can make missions to explore the planet challenging, as the sand and dust are known to clog filters and lock moving parts on robotic rovers and other exploration devices. Using simulants, which are materials designed to simulate different planetary surfaces, scientists are able to study the characteristics of Mars’s surface. Simulants like the Mars Mojave simulant—which was developed using lava deposits from California’s Mojave Desert—help scientists evaluate how well their devices will handle the surface when operated on Mars.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "The soil on Mars can make missions to explore the planet challenging, as the sand and dust are known to clog filters and lock moving parts on robotic rovers and other exploration devices. Using simulants, which are materials designed to simulate different planetary surfaces, scientists are able to study the characteristics of Mars’s surface. Simulants like the Mars Mojave simulant—which was developed using lava deposits from California’s Mojave Desert—help scientists evaluate how well their devices will handle the surface when operated on Mars.",
+    "indent": 0
+   }
+  ],
+  "question": "Based on the text, what is one reason why simulants are valuable for scientists?",
+  "choices": [
+   "Scientists use simulants to track how the chemical properties of planetary soils have changed over time.",
+   "Scientists use simulants to compare the physical properties of Mars’s surface to those of Earth’s surface.",
+   "Simulants can be mixed with soil from Earth to explore how research equipment will handle extreme terrains on Earth.",
+   "Simulants allow scientists to test the ability of research equipment to withstand some of the conditions it will encounter during a mission."
+  ],
+  "answer": 3,
+  "rationale": "Choice D is the best answer because the text says simulants “help scientists evaluate how well their devices will handle the surface when operated on Mars,” where sand and dust can clog filters and lock moving parts. Choice A is incorrect because the text says nothing about tracking changes in soils’ chemical properties over time. Choice B is incorrect because the text doesn’t say simulants are used to compare Mars’s surface with Earth’s. Choice C is incorrect because the text is about how equipment will handle Mars, not extreme terrains on Earth, and it never mentions mixing simulants with Earth soil.",
+  "recycle": {
+   "code": "S2-3",
+   "group": "set2",
+   "title": "Mars soil simulants",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_4",
+  "domain": "Information and Ideas",
+  "skill": "Central Ideas and Details",
+  "difficulty": "",
+  "context": "Information and Ideas · Central Ideas and Details",
+  "passage": "The following text is from a translation of Maria Duenas’s 2009 novel The Time in Between. The narrator has just rented an apartment and is entering it for the first time. Over the years there have been many times when my destiny has delivered me unexpected moments, unforeseen twists and turns that I’ve had to handle on the fly as they appeared. Occasionally I was ready for them; very often I wasn’t. Never, however, was I so aware of entering a new stage as I was that afternoon in October when I finally dared to cross the threshold and my steps sounded hollowly in the unfurnished apartment. Behind me was a complicated past, and in front of me, like an omen, I could see a space opening out, a great empty space that time would take care of filling up.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "The following text is from a translation of Maria Duenas’s 2009 novel The Time in Between. The narrator has just rented an apartment and is entering it for the first time.",
+    "indent": 0
+   },
+   {
+    "type": "blank"
+   },
+   {
+    "type": "line",
+    "text": "Over the years there have been many times when my destiny has delivered me unexpected moments, unforeseen twists and turns that I’ve had to handle on the fly as they appeared. Occasionally I was ready for them; very often I wasn’t. Never, however, was I so aware of entering a new stage as I was that afternoon in October when I finally dared to cross the threshold and my steps sounded hollowly in the unfurnished apartment. Behind me was a complicated past, and in front of me, like an omen, I could see a space opening out, a great empty space that time would take care of filling up.",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice best states the main idea of the text?",
+  "choices": [
+   "The narrator feels optimistic about the future success of a new business.",
+   "The narrator has always had a plan for how to handle big moments in her life.",
+   "The narrator recognizes that a particular moment marks a major shift in her life.",
+   "The narrator wants to express her gratitude for the people who have helped her."
+  ],
+  "answer": 2,
+  "rationale": "Choice C is the best answer because the narrator says she was never “so aware of entering a new stage” as when she crossed the threshold of the empty apartment, with “a complicated past” behind her and an empty space ahead for time to fill. Choice A is incorrect because the text doesn’t mention a business or predict any success. Choice B is incorrect because the narrator says she often wasn’t ready for life’s twists and had to handle them “on the fly.” Choice D is incorrect because the text doesn’t mention anyone who helped her.",
+  "recycle": {
+   "code": "S2-4",
+   "group": "set2",
+   "title": "The Time in Between (new stage)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_5",
+  "domain": "Craft and Structure",
+  "skill": "Text Structure and Purpose",
+  "difficulty": "",
+  "context": "Craft and Structure · Text Structure and Purpose",
+  "passage": "Though John Crowley, author of Endless Things, is perhaps not as well known as the most widely read American writers of the past fifty years, influential figures have championed his work, including the poet James Merrill and the literary critic Harold Bloom. In his afterword to Crowley’s book Little, Big, Bloom praises the novel’s adroit blend of what playwright Friedrich Schiller termed the naive and sentimental modes—while Schiller thought works could be classified as either naive (seeking to describe reality) or sentimental (seeking to develop ideas), Little, Big demonstrates that a work can be both.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Though John Crowley, author of Endless Things, is perhaps not as well known as the most widely read American writers of the past fifty years, influential figures have championed his work, including the poet James Merrill and the literary critic Harold Bloom. In his afterword to Crowley’s book Little, Big, Bloom praises the novel’s adroit blend of what playwright Friedrich Schiller termed the naive and sentimental modes—while Schiller thought works could be classified as either naive (seeking to describe reality) or sentimental (seeking to develop ideas), Little, Big demonstrates that a work can be both.",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice best states the main purpose of the text?",
+  "choices": [
+   "To explain what inspired an author to write a particular work",
+   "To present a reason why a literary critic is impressed by a certain novel",
+   "To compare the work of a writer with the work of a poet who admired him",
+   "To argue that all writing must be classified as belonging to one of two categories"
+  ],
+  "answer": 1,
+  "rationale": "Choice B is the best answer because, after noting that critics have championed Crowley, the text focuses on Harold Bloom’s praise of Little, Big: Bloom admires how the novel blends Schiller’s naive and sentimental modes. Choice A is incorrect because the text never discusses what inspired Crowley. Choice C is incorrect because James Merrill is only named as one of Crowley’s champions; his own work isn’t discussed. Choice D is incorrect because the text presents Schiller’s two categories only to say Little, Big shows a work can be both, which undercuts rather than argues for strict classification.",
+  "recycle": {
+   "code": "S2-5",
+   "group": "set2",
+   "title": "John Crowley's Little, Big (main purpose)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_8",
+  "domain": "Craft and Structure",
+  "skill": "Text Structure and Purpose",
+  "difficulty": "",
+  "context": "Craft and Structure · Text Structure and Purpose",
+  "passage": "Why do ocelots purr but jaguars roar? Researchers hypothesize that this difference between the two feline species may be partly due to a U-shaped bone in their throats. This bone is called the hyoid. Ocelots, which are much smaller than jaguars, have a rigid hyoid that rumbles when the cat’s larynx vibrates, resulting in a purr. By contrast, jaguars have a somewhat flexible hyoid, and the bone is attached to the skull with a stretchy ligament that ocelots lack. These traits allow jaguars and most other species of big cats to roar. The same traits may also prevent most big cats from purring.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Why do ocelots purr but jaguars roar? Researchers hypothesize that this difference between the two feline species may be partly due to a U-shaped bone in their throats. This bone is called the hyoid. Ocelots, which are much smaller than jaguars, have a rigid hyoid that rumbles when the cat’s larynx vibrates, resulting in a purr. By contrast, jaguars have a somewhat flexible hyoid, and the bone is attached to the skull with a stretchy ligament that ocelots lack. These traits allow jaguars and most other species of big cats to roar. The same traits may also prevent most big cats from purring.",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice best describes the function of the underlined sentence in the text as a whole?",
+  "choices": [
+   "The sentence explains the unique nature of the researchers’ hypothesis.",
+   "The sentence identifies the location of a bone in felines.",
+   "The sentence introduces a term that is used in the discussion that follows.",
+   "The sentence summarizes the debate presented in the text."
+  ],
+  "answer": 2,
+  "rationale": "Choice C is the best answer because the underlined sentence gives the U-shaped throat bone its name, “the hyoid,” and the rest of the text uses that term to explain how ocelots’ and jaguars’ hyoids differ. Choice A is incorrect because the sentence only names the bone; it says nothing about what makes the hypothesis unusual. Choice B is incorrect because the bone’s location (in the throat) is given in the previous sentence, not the underlined one. Choice D is incorrect because the text presents an explanation, not a debate, and the sentence doesn’t summarize anything.",
+  "recycle": {
+   "code": "S2-8",
+   "group": "set2",
+   "title": "Ocelots and jaguars (function of underlined sentence)",
+   "source": "team doc"
+  },
+  "underline_segments": [
+   "This bone is called the hyoid."
+  ]
+ },
+ {
+  "id": "rc_d2_9",
+  "domain": "Expression of Ideas",
+  "skill": "Rhetorical Synthesis",
+  "difficulty": "",
+  "context": "Expression of Ideas · Rhetorical Synthesis",
+  "passage": "While researching a topic, a student has taken the following notes: Onomatopoeias are words that imitate the sounds they represent. Onomatopoeias used to represent the same sound often vary from language to language. This variation is due in part to differences in how languages are structured. “Ba-dumm” is a German onomatopoeia that represents the sound of a heartbeat. “Doki doki” is a Japanese onomatopoeia that represents the sound of a heartbeat. The term “onomatopoeia” combines the Greek words for “name” (onoma) and “to make” (poiein). The student wants to provide a specific example of onomatopoeia.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "While researching a topic, a student has taken the following notes:",
+    "indent": 0
+   },
+   {
+    "type": "line",
+    "text": "Onomatopoeias are words that imitate the sounds they represent.",
+    "indent": 2
+   },
+   {
+    "type": "line",
+    "text": "Onomatopoeias used to represent the same sound often vary from language to language.",
+    "indent": 2
+   },
+   {
+    "type": "line",
+    "text": "This variation is due in part to differences in how languages are structured.",
+    "indent": 2
+   },
+   {
+    "type": "line",
+    "text": "“Ba-dumm” is a German onomatopoeia that represents the sound of a heartbeat.",
+    "indent": 2
+   },
+   {
+    "type": "line",
+    "text": "“Doki doki” is a Japanese onomatopoeia that represents the sound of a heartbeat.",
+    "indent": 2
+   },
+   {
+    "type": "line",
+    "text": "The term “onomatopoeia” combines the Greek words for “name” (onoma) and “to make” (poiein).",
+    "indent": 2
+   },
+   {
+    "type": "blank"
+   },
+   {
+    "type": "line",
+    "text": "The student wants to provide a specific example of onomatopoeia.",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+  "choices": [
+   "Differences in how languages are structured can cause variations in the words used in different languages to represent the same sound.",
+   "The Japanese word “doki doki” both imitates and represents the sound of a heartbeat.",
+   "The languages of German and Japanese use different words to represent the sound of a heartbeat.",
+   "The term “onomatopoeia,” which refers to words that imitate the sound they represent, combines the Greek words for “name” and “to make.”"
+  ],
+  "answer": 1,
+  "rationale": "Choice B is the best answer because it names one specific onomatopoeia, “doki doki,” and shows why it is one: it imitates and represents the sound of a heartbeat. Choice A is incorrect because it explains why onomatopoeias vary but gives no example. Choice C is incorrect because it notes that two languages use different words without giving either word, so it offers no specific example. Choice D is incorrect because it defines the term and its Greek origin rather than giving an example.",
+  "recycle": {
+   "code": "S2-9",
+   "group": "set2",
+   "title": "Onomatopoeia (specific example)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_10",
+  "domain": "Information and Ideas",
+  "skill": "Command of Evidence",
+  "difficulty": "",
+  "context": "Information and Ideas · Command of Evidence",
+  "passage": "Geneticist Elaine Ostrander led an international collaboration in which Norbert Benecke and other researchers investigated the evolutionary history of size variation in modern dogs. The researchers identified multiple versions of the gene regulating the production of IGF-1 (insulin-like growth factor 1) in dogs and found that dogs of the same breed consistently share the same version of the gene. In a discussion of the study, a student hypothesizes that small breeds of dogs (for example, Havaneses) must share a version that represses IGF-1 production that would otherwise confer larger body size.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Geneticist Elaine Ostrander led an international collaboration in which Norbert Benecke and other researchers investigated the evolutionary history of size variation in modern dogs. The researchers identified multiple versions of the gene regulating the production of IGF-1 (insulin-like growth factor 1) in dogs and found that dogs of the same breed consistently share the same version of the gene. In a discussion of the study, a student hypothesizes that small breeds of dogs (for example, Havaneses) must share a version that represses IGF-1 production that would otherwise confer larger body size.",
+    "indent": 0
+   }
+  ],
+  "question": "Which finding, if true, would most directly weaken the student’s claim?",
+  "choices": [
+   "The majority of the most prevalent dog breeds have limited activity in the gene that regulates IGF-1 production.",
+   "The degree of size variation among dogs is greater than that of any other land-based mammal.",
+   "Some breeds with small body sizes and low IGF-1 concentrations have a different version of the gene regulating IGF-1 production than do Havaneses.",
+   "The gene that regulates IGF-1 production is not the only gene that influences body size in dogs but is the only such gene that shows within-breed version consistency."
+  ],
+  "answer": 2,
+  "rationale": "Choice C is the best answer because the student claims small breeds must all share one IGF-1-repressing version of the gene; finding small, low-IGF-1 breeds with a different version from Havaneses shows that small breeds don’t all share the same version. Choice A is incorrect because limited gene activity in the most common breeds says nothing about whether small breeds share a version. Choice B is incorrect because the amount of size variation in dogs doesn’t address which gene versions small breeds carry. Choice D is incorrect because other genes also affecting size doesn’t show that small breeds lack a shared IGF-1 version.",
+  "recycle": {
+   "code": "S2-10",
+   "group": "set2",
+   "title": "Dog size and the IGF-1 gene (weaken)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_11",
+  "domain": "Information and Ideas",
+  "skill": "Command of Evidence",
+  "difficulty": "",
+  "context": "Information and Ideas · Command of Evidence",
+  "passage": "Scholars cite Pedro Páramo, the 1955 novel by Mexican author Juan Rulfo, as a foundational text of magical realism, the Latin American style of fiction in which antirealistic plot devices—often borrowed from the folkloric traditions of Indigenous and colonial societies in the Americas—are deployed in an otherwise realistic mode of representation typical of the modern novel. This style has exerted a decisive influence on authors around the world, including Orhan Pamuk, whose 2001 novel My Name Is Red resembles classic magical realist novels in its juxtaposition of literary realism with folklore—namely, that of Turkey.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Scholars cite Pedro Páramo, the 1955 novel by Mexican author Juan Rulfo, as a foundational text of magical realism, the Latin American style of fiction in which antirealistic plot devices—often borrowed from the folkloric traditions of Indigenous and colonial societies in the Americas—are deployed in an otherwise realistic mode of representation typical of the modern novel. This style has exerted a decisive influence on authors around the world, including Orhan Pamuk, whose 2001 novel My Name Is Red resembles classic magical realist novels in its juxtaposition of literary realism with folklore—namely, that of Turkey.",
+    "indent": 0
+   }
+  ],
+  "question": "Which quotation from a literary scholar would most directly support the claim in the underlined portion of the text?",
+  "choices": [
+   "“The logic of the realistic plot of My Name Is Red is repeatedly and productively disrupted by the presence of imagery and situations drawn from Turkish folklore.”",
+   "“While My Name Is Red alternates between realistic and antirealistic modes of representation, details suggesting the influence of Turkish folklore nevertheless occur throughout the novel.”",
+   "“Although Turkish folklore clearly informs the style and occasionally antirealistic plot of My Name Is Red, the novel also shows the inarguable influence of the magical realist tradition of Latin America.”",
+   "“Like many works in the Latin American magical realist tradition, My Name Is Red is indebted to antirealistic elements in the folkloric tradition of Turkey.”"
+  ],
+  "answer": 0,
+  "rationale": "Choice A is the best answer because the underlined claim is that My Name Is Red juxtaposes literary realism with Turkish folklore, as classic magical realist novels do, and this quotation describes exactly that: a realistic plot repeatedly disrupted by imagery and situations from Turkish folklore. Choice B is incorrect because it describes the novel switching between realistic and antirealistic modes, with folklore details scattered throughout, rather than folklore set within a realistic narrative. Choice C is incorrect because it focuses on the novel’s debt to the Latin American tradition, not on its juxtaposition of realism with Turkish folklore. Choice D is incorrect because it mentions only the novel’s use of antirealistic folklore elements, not their combination with literary realism.",
+  "recycle": {
+   "code": "S2-11",
+   "group": "set2",
+   "title": "My Name Is Red (support the underlined claim)",
+   "source": "team doc"
+  },
+  "underline_segments": [
+   "whose 2001 novel My Name Is Red resembles classic magical realist novels in its juxtaposition of literary realism with folklore—namely, that of Turkey."
+  ]
+ },
+ {
+  "id": "rc_d2_12",
+  "domain": "Information and Ideas",
+  "skill": "Inferences",
+  "difficulty": "",
+  "context": "Information and Ideas · Inferences",
+  "passage": "In a 2014 study that took place in Laos, Stéphane Guédron, Delphine Tisserand, and colleagues found a negative association between levels of dissolved organic carbon and mercury in bodies of fresh water. It may seem reasonable to be skeptical of this finding, since most other studies, such as research conducted in 2015 in Canada by Stéphane Hamelin and colleagues, have found that dissolved organic carbon and mercury levels rise together. Like the latter study, however, most studies of the topic have been conducted in North America, and many of those study sites have similar characteristics to one another, suggesting that ______",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "In a 2014 study that took place in Laos, Stéphane Guédron, Delphine Tisserand, and colleagues found a negative association between levels of dissolved organic carbon and mercury in bodies of fresh water. It may seem reasonable to be skeptical of this finding, since most other studies, such as research conducted in 2015 in Canada by Stéphane Hamelin and colleagues, have found that dissolved organic carbon and mercury levels rise together. Like the latter study, however, most studies of the topic have been conducted in North America, and many of those study sites have similar characteristics to one another, suggesting that ______",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice most logically completes the text?",
+  "choices": [
+   "few of the studies conducted in North America have been able to measure dissolved organic carbon and mercury levels with the same level of precision as in Guédron, Tisserand, and colleagues’ study.",
+   "the mercury levels reported in Guédron, Tisserand, and colleagues’ study were much higher than those reported in the study by Hamelin and colleagues even though the dissolved organic carbon levels reported in the two studies were approximately the same.",
+   "Guédron, Tisserand, and colleagues’ study may have inadvertently measured a different characteristic of bodies of fresh water than their levels of dissolved organic carbon and mercury.",
+   "Guédron, Tisserand, and colleagues’ finding may differ from the findings of other studies due to a difference in environmental circumstances that affects the relationship between dissolved organic carbon and mercury in fresh water."
+  ],
+  "answer": 3,
+  "rationale": "Choice D is the best answer because the text answers the skepticism with “however”: most conflicting studies were done at similar North American sites, so the Laos result may differ because environmental conditions there differ, changing how dissolved organic carbon and mercury relate. Choice A is incorrect because the text says nothing about measurement precision. Choice B is incorrect because the text gives no actual levels from either study, and the point about similar North American sites isn’t about the size of the readings. Choice C is incorrect because nothing in the text suggests the Laos study measured the wrong thing; the point about similar sites explains why results could genuinely differ.",
+  "recycle": {
+   "code": "S2-12",
+   "group": "set2",
+   "title": "Dissolved organic carbon and mercury (Laos study)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_13",
+  "domain": "Information and Ideas",
+  "skill": "Inferences",
+  "difficulty": "",
+  "context": "Information and Ideas · Inferences",
+  "passage": "As complex life cycle parasites, Opechona sp. and Cucullanellus kanabus require multiple host species throughout their development. Extrapolating from parasite counts on Pacific herring and seven other fish species collected from Puget Sound from 1880 to 2019, Chelsea Wood et al. found that the abundance of three-host parasites, such as Opechona sp. negatively correlated with rising average annual sea temperatures; the abundance of two-host parasites, such as C. kanabus, was largely stable. Noting that fish and other marine vertebrates are especially vulnerable to climate change, Wood et al. observed that all three-host parasites in the study depend on at least two vertebrate species, while all two-host parasites depend on only one, suggesting that _____",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "As complex life cycle parasites, Opechona sp. and Cucullanellus kanabus require multiple host species throughout their development. Extrapolating from parasite counts on Pacific herring and seven other fish species collected from Puget Sound from 1880 to 2019, Chelsea Wood et al. found that the abundance of three-host parasites, such as Opechona sp. negatively correlated with rising average annual sea temperatures; the abundance of two-host parasites, such as C. kanabus, was largely stable. Noting that fish and other marine vertebrates are especially vulnerable to climate change, Wood et al. observed that all three-host parasites in the study depend on at least two vertebrate species, while all two-host parasites depend on only one, suggesting that _____",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice most logically completes the text?",
+  "choices": [
+   "although Opechona sp. and C. kanabus both require Pacific herring as a host, C. kanabus was more adversely affected by warming-driven changes in the Pacific herring population than Opechona sp. was.",
+   "a parasite’s sensitivity to warming temperatures is negatively correlated with the number of unique vertebrate species it depends on throughout its life cycle.",
+   "warming-induced population changes among Puget Sound vertebrates may have suppressed some parasite populations, but there were no changes among the eight studied host species that affected two-host parasite abundance.",
+   "population size and density of the eight fish species examined in the study were likely largely unaffected by rising sea temperatures."
+  ],
+  "answer": 2,
+  "rationale": "Choice C is the best answer because three-host parasites, which need at least two climate-vulnerable vertebrate hosts, declined as the sea warmed, which suggests warming-driven changes among those vertebrates may have suppressed them; two-host parasites, which need only one vertebrate host, stayed largely stable, so no change among the studied hosts affected their abundance. Choice A is incorrect because it is C. kanabus (a two-host parasite) whose abundance stayed stable, so it wasn’t the one more harmed. Choice B is incorrect because it reverses the relationship: parasites that depend on more vertebrate species were the more sensitive to warming, so sensitivity rises, not falls, with the number of vertebrate hosts. Choice D is incorrect because the text stresses that fish are especially vulnerable to climate change, and the reasoning depends on warming affecting the vertebrate hosts.",
+  "recycle": {
+   "code": "S2-13",
+   "group": "set2",
+   "title": "Puget Sound parasites and warming",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_14",
+  "domain": "Information and Ideas",
+  "skill": "Inferences",
+  "difficulty": "",
+  "context": "Information and Ideas · Inferences",
+  "passage": "It’s common for jazz musicians and fans to refer to certain songs as having “swing,” indicating that the songs provoke a strong feeling, like the impulse to tap one’s foot or dance. The exact acoustic properties that give a song swing, however, have long been thought to be undefinable. To investigate swing, a team led by physicist Corentin Nelias delayed the downbeats and synchronized the offbeats in jazz piano solos and asked jazz musicians to compare the intensity of swing in each modified piece with the intensity of swing in the original piece. They found that participants were more than seven times likelier to characterize the modified songs as having swing than to characterize the original versions as having swing, suggesting that ______",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "It’s common for jazz musicians and fans to refer to certain songs as having “swing,” indicating that the songs provoke a strong feeling, like the impulse to tap one’s foot or dance. The exact acoustic properties that give a song swing, however, have long been thought to be undefinable. To investigate swing, a team led by physicist Corentin Nelias delayed the downbeats and synchronized the offbeats in jazz piano solos and asked jazz musicians to compare the intensity of swing in each modified piece with the intensity of swing in the original piece. They found that participants were more than seven times likelier to characterize the modified songs as having swing than to characterize the original versions as having swing, suggesting that ______",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice most logically completes the text?",
+  "choices": [
+   "synchronized offbeats tend to give a song swing regardless of whether downbeats are delayed.",
+   "the acoustic properties that give a song swing are not easy for jazz musicians to manipulate.",
+   "jazz songs that feature the piano are more likely to have swing than are jazz songs that do not feature the piano.",
+   "the timing of downbeats and offbeats may play a crucial role in giving a song swing."
+  ],
+  "answer": 3,
+  "rationale": "Choice D is the best answer because the only change the researchers made was to the timing of downbeats (delayed) and offbeats (synchronized), and the modified solos were far more often judged to swing, so that timing likely matters a great deal. Choice A is incorrect because the study changed both beats together; it can’t show that synchronized offbeats work without delayed downbeats. Choice B is incorrect because the researchers easily changed these properties and produced more swing, the opposite of suggesting they are hard to manipulate. Choice C is incorrect because only piano solos were tested, so the study can’t compare songs with and without piano.",
+  "recycle": {
+   "code": "S2-14",
+   "group": "set2",
+   "title": "Swing in jazz (downbeats and offbeats)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_15",
+  "domain": "Craft and Structure",
+  "skill": "Text Structure and Purpose",
+  "difficulty": "",
+  "context": "Craft and Structure · Text Structure and Purpose",
+  "passage": "In 1973, poet Miguel Algarín started inviting other writers who, like him, were Nuyorican—a term for New Yorkers of Puerto Rican heritage—to gather in his apartment to present their work. The gatherings were so well attended that Algarín soon had to rent space in a cafe to accommodate them. Thus, the Nuyorican Poets Cafe was born. Moving to a permanent location in 1981, the Nuyorican Poets Cafe expanded its original scope beyond the written word, hosting art exhibitions and musical performances as well. Half a century since its inception, it continues to foster emerging Nuyorican talent.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "In 1973, poet Miguel Algarín started inviting other writers who, like him, were Nuyorican—a term for New Yorkers of Puerto Rican heritage—to gather in his apartment to present their work. The gatherings were so well attended that Algarín soon had to rent space in a cafe to accommodate them. Thus, the Nuyorican Poets Cafe was born. Moving to a permanent location in 1981, the Nuyorican Poets Cafe expanded its original scope beyond the written word, hosting art exhibitions and musical performances as well. Half a century since its inception, it continues to foster emerging Nuyorican talent.",
+    "indent": 0
+   }
+  ],
+  "question": "Which choice best describes the overall purpose of the text?",
+  "choices": [
+   "To explain what motivated Algarín to found the Nuyorican Poets Cafe",
+   "To situate the Nuyorican Poets Cafe within the cultural life of New York as a whole",
+   "To discuss why the Nuyorican Poets Cafe expanded its scope to include art and music",
+   "To provide an overview of the founding and mission of the Nuyorican Poets Cafe"
+  ],
+  "answer": 3,
+  "rationale": "Choice D is the best answer because the text traces how the cafe began (gatherings in Algarín’s apartment that outgrew it), how it grew (a permanent home and art and music events), and what it still does (fosters emerging Nuyorican talent). Choice A is incorrect because the text describes how the cafe came about, not Algarín’s motives for starting it. Choice B is incorrect because the text doesn’t place the cafe within New York’s wider cultural life. Choice C is incorrect because the text mentions the expansion into art and music only briefly and never says why it happened.",
+  "recycle": {
+   "code": "S2-15",
+   "group": "set2",
+   "title": "Nuyorican Poets Cafe (overall purpose)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_16",
+  "domain": "Craft and Structure",
+  "skill": "Cross-Text Connections",
+  "difficulty": "",
+  "context": "Craft and Structure · Cross-Text Connections",
+  "passage": "Text 1 In 1916, H. Dugdale Sykes disputed claims that The Two Noble Kinsmen was coauthored by William Shakespeare and John Fletcher. Sykes felt Fletcher’s contributions to the play were obvious—Fletcher had a distinct style in his other plays, so much so that lines with that style were considered sufficient evidence of Fletcher’s authorship. But for the lines not deemed to be by Fletcher, Sykes felt that their depiction of women indicated that their author was not Shakespeare but Philip Massinger. Text 2 Scholars have accepted The Two Noble Kinsmen as coauthored by Shakespeare since the 1970s: it appears in all major one-volume editions of Shakespeare’s complete works. Though scholars disagree about who wrote what exactly, it is generally held that on the basis of style, Shakespeare wrote all of the first act and most of the last, while John Fletcher authored most of the three middle acts.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "Text 1",
+    "indent": 0
+   },
+   {
+    "type": "line",
+    "text": "In 1916, H. Dugdale Sykes disputed claims that The Two Noble Kinsmen was coauthored by William Shakespeare and John Fletcher. Sykes felt Fletcher’s contributions to the play were obvious—Fletcher had a distinct style in his other plays, so much so that lines with that style were considered sufficient evidence of Fletcher’s authorship. But for the lines not deemed to be by Fletcher, Sykes felt that their depiction of women indicated that their author was not Shakespeare but Philip Massinger.",
+    "indent": 0
+   },
+   {
+    "type": "blank"
+   },
+   {
+    "type": "line",
+    "text": "Text 2",
+    "indent": 0
+   },
+   {
+    "type": "line",
+    "text": "Scholars have accepted The Two Noble Kinsmen as coauthored by Shakespeare since the 1970s: it appears in all major one-volume editions of Shakespeare’s complete works. Though scholars disagree about who wrote what exactly, it is generally held that on the basis of style, Shakespeare wrote all of the first act and most of the last, while John Fletcher authored most of the three middle acts.",
+    "indent": 0
+   }
+  ],
+  "question": "Based on the texts, both Sykes in Text 1 and the scholars in Text 2 would most likely agree with which statement?",
+  "choices": [
+   "John Fletcher’s writing has a unique, readily identifiable style.",
+   "The women characters in John Fletcher’s plays are similar to the women characters in Philip Massinger’s plays.",
+   "The Two Noble Kinsmen belongs in one-volume compilations of Shakespeare’s complete plays.",
+   "Philip Massinger’s style in the first and last acts of The Two Noble Kinsmen is an homage to Shakespeare’s style."
+  ],
+  "answer": 0,
+  "rationale": "Choice A is the best answer because Sykes thought Fletcher’s style was so distinct that it alone proved which lines he wrote, and the scholars in Text 2 likewise assign the middle acts to Fletcher “on the basis of style.” Choice B is incorrect because Sykes uses the depiction of women to tell Massinger’s lines apart from Shakespeare’s, not to compare them with Fletcher’s, and Text 2 doesn’t mention women characters. Choice C is incorrect because Sykes rejected Shakespeare’s coauthorship, so he wouldn’t include the play in Shakespeare’s complete works. Choice D is incorrect because the scholars in Text 2 credit Shakespeare himself with the first and last acts, and neither text calls Massinger’s writing an homage.",
+  "recycle": {
+   "code": "S2-16",
+   "group": "set2",
+   "title": "The Two Noble Kinsmen (Sykes vs scholars)",
+   "source": "team doc"
+  }
+ },
+ {
+  "id": "rc_d2_17",
+  "domain": "Information and Ideas",
+  "skill": "Command of Evidence",
+  "difficulty": "",
+  "context": "Information and Ideas · Command of Evidence",
+  "passage": "American fashion designer Patrick Kelly was known for his love of colorful buttons. Many of his signature dresses feature bold assortments of buttons throughout the garment. In a paper, a fashion design student claims that Kelly’s use of buttons as decoration was inspired by his childhood observations of the styles and actions of the women in his family.",
+  "passage_lines": [
+   {
+    "type": "line",
+    "text": "American fashion designer Patrick Kelly was known for his love of colorful buttons. Many of his signature dresses feature bold assortments of buttons throughout the garment. In a paper, a fashion design student claims that Kelly’s use of buttons as decoration was inspired by his childhood observations of the styles and actions of the women in his family.",
+    "indent": 0
+   }
+  ],
+  "question": "Which quotation from a work by a historian would be the most effective evidence for the student to include in support of this claim?",
+  "choices": [
+   "“Although some of the assortments of buttons appear to be mismatched pieces scattered randomly throughout Kelly’s dresses, his most famous designs feature carefully crafted patterns of matching buttons.”",
+   "“Many of Kelly’s contemporaries were inspired by his designs to incorporate buttons, as well as zippers and snaps, as decorative items in their work.”",
+   "“Kelly’s grandmother, who would repair clothing when he was a child, frequently added mismatched buttons to the clothes to draw attention away from any flaws in the garments.”",
+   "“Kelly was destined to be a designer from a young age: he learned how to sew clothing from his aunt Bertha, and his love of drawing was developed by his mother.”"
+  ],
+  "answer": 2,
+  "rationale": "Choice C is the best answer because it links Kelly’s decorative buttons to something he watched a woman in his family do when he was a child: his grandmother sewed mismatched buttons onto clothes to draw the eye away from flaws. Choice A is incorrect because it describes the button patterns in Kelly’s dresses, not where the idea came from. Choice B is incorrect because it is about Kelly’s influence on other designers, not about what influenced him. Choice D is incorrect because, although it mentions women in his family, it ties them to his sewing and drawing skills, not to his use of buttons as decoration.",
+  "recycle": {
+   "code": "S2-17",
+   "group": "set2",
+   "title": "Patrick Kelly's buttons (quotation)",
+   "source": "team doc"
+  }
  }
 ];
-const RECYCLE_GROUPS = [{"key": "rs", "name": "Rhetorical Synthesis", "ids": ["rc_rs1", "rc_rs2", "rc_rs3", "rc_rs4", "rc_rs5", "rc_rs6", "rc_rs7", "rc_rs8", "rc_rs9", "rc_rs10", "rc_rs11", "rc_rs12", "rc_rs13"]}, {"key": "ev", "name": "Command of Evidence & Inferences", "ids": ["rc_ev1", "rc_ev2", "rc_ev3", "rc_ev4", "rc_ev5", "rc_ev6", "rc_ev7", "rc_ev8"]}, {"key": "sp", "name": "Text Structure & Purpose", "ids": ["rc_sp1", "rc_sp2", "rc_sp3", "rc_sp4", "rc_sp5", "rc_sp6", "rc_sp7"]}, {"key": "tr", "name": "Transitions", "ids": ["rc_tr1", "rc_tr2", "rc_tr3", "rc_tr4", "rc_tr5", "rc_tr6"]}, {"key": "se", "name": "Standard English Conventions", "ids": ["rc_se1", "rc_se2", "rc_se3"]}, {"key": "wc", "name": "Words in Context", "ids": ["rc_wc1", "rc_wc2"]}];
+const RECYCLE_GROUPS = [{"key": "rs", "name": "Rhetorical Synthesis", "ids": ["rc_rs1", "rc_rs2", "rc_rs3", "rc_rs4", "rc_rs5", "rc_rs6", "rc_rs7", "rc_rs8", "rc_rs9", "rc_rs10", "rc_rs11", "rc_rs12", "rc_rs13"]}, {"key": "ev", "name": "Command of Evidence & Inferences", "ids": ["rc_ev1", "rc_ev2", "rc_ev3", "rc_ev4", "rc_ev5", "rc_ev6", "rc_ev7", "rc_ev8"]}, {"key": "sp", "name": "Text Structure & Purpose", "ids": ["rc_sp1", "rc_sp2", "rc_sp3", "rc_sp4", "rc_sp5", "rc_sp6", "rc_sp7"]}, {"key": "tr", "name": "Transitions", "ids": ["rc_tr1", "rc_tr2", "rc_tr3", "rc_tr4", "rc_tr5", "rc_tr6"]}, {"key": "se", "name": "Standard English Conventions", "ids": ["rc_se1", "rc_se2", "rc_se3"]}, {"key": "wc", "name": "Words in Context", "ids": ["rc_wc1", "rc_wc2"]}, {"key": "set2", "name": "Set 2 · Team doc", "ids": ["rc_d2_1", "rc_d2_2", "rc_d2_3", "rc_d2_4", "rc_d2_5", "rc_sp4", "rc_sp2", "rc_d2_8", "rc_d2_9", "rc_d2_10", "rc_d2_11", "rc_d2_12", "rc_d2_13", "rc_d2_14", "rc_d2_15", "rc_d2_16", "rc_d2_17"]}];
 window.RecycleBank = {
   groups: RECYCLE_GROUPS,
   // a single question, by its code (e.g. 'rs10')
-  question: function (code) { code = String(code || '').toLowerCase(); return RECYCLE_BANK.filter(function (q) { return q.recycle.code.toLowerCase() === code; })[0] || null; },
+  // Records marked unusable (e.g. a table that wasn't in the source doc) are kept in the file but never shown.
+  question: function (code) { code = String(code || '').toLowerCase(); return RECYCLE_BANK.filter(function (q) { return !q.unusable && q.recycle.code.toLowerCase() === code; })[0] || null; },
   name: function (key) {
     if (key === 'all') return 'All recycled questions';
     var g = RECYCLE_GROUPS.filter(function (x) { return x.key === key; })[0]; if (g) return g.name;
     var q = this.question(key); return q ? q.recycle.code + ' \u00b7 ' + q.recycle.title : key;
   },
-  // key is a group key, 'all', or one question's code; most-repeated questions first
+  // key is a group key, 'all', or one question's code. Repeat-counted questions come most repeated first;
+  // set 2 keeps the team doc's order (its ids list, which also points at two set-1 records); 'all' lists each record once.
   set: function (key) {
     var one = this.question(key); if (one) return [one];
-    var qs = key === 'all' ? RECYCLE_BANK.slice() : RECYCLE_BANK.filter(function (q) { return q.recycle.group === key; });
-    return qs.sort(function (a, b) { return b.recycle.count - a.recycle.count; });
+    var g = RECYCLE_GROUPS.filter(function (x) { return x.key === key; })[0];
+    if (g && key === 'set2') return g.ids.map(function (id) { return RECYCLE_BANK.filter(function (q) { return q.id === id && !q.unusable; })[0]; }).filter(Boolean);
+    var qs = RECYCLE_BANK.filter(function (q) { return !q.unusable && (key === 'all' || q.recycle.group === key); });
+    var n = function (q) { return q.recycle.count || 0; };
+    return qs.map(function (q, i) { return [q, i]; })
+      .sort(function (a, b) { return n(b[0]) - n(a[0]) || a[1] - b[1]; })
+      .map(function (p) { return p[0]; });
   }
 };

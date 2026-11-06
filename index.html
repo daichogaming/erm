@@ -463,7 +463,7 @@
   <div class="subj-hero">
     <div class="subj-label">SAT · Reading &amp; Writing</div>
     <div class="subj-title">Recycles</div>
-    <div class="subj-meta">Questions that came up again and again. Out of 407 completed tests (7,515 questions), these 39 appeared in 4 or more different tests — all of them Reading &amp; Writing; no Math question appeared more than 3 times.</div>
+    <div class="subj-meta">Questions that came up again and again. Out of 407 completed tests (7,515 questions), these 39 appeared in 4 or more different tests — all of them Reading &amp; Writing; no Math question appeared more than 3 times. Set 2 adds the 17 questions from the team’s recycle doc (two of them are already in set 1).</div>
     <div class="hb-stats" id="rc-stats"></div>
   </div>
   <div class="tests-section" id="rc-sets"></div>
@@ -784,31 +784,45 @@
   ];
   const DOMAIN_ORDER_RW = ['Information and Ideas','Craft and Structure','Expression of Ideas','Standard English Conventions'];
 
-  // Recycles: questions from recyclebank.js that appeared in 4+ different tests.
+  // Recycles: questions from recyclebank.js. Set 1 appeared in 4+ different tests; set 2 comes from the team's recycle doc.
   (function renderRecycles(){
     const el = document.getElementById('rc-sets');
     if (!window.RecycleBank) { el.innerHTML = '<div class="hb-notice">Couldn’t load the recycled questions. Reload the page to try again.</div>'; return; }
     const all = RecycleBank.set('all');
-    const span = qs => { const c = qs.map(q => q.recycle.count); return Math.min(...c) === Math.max(...c) ? `${Math.max(...c)}` : `${Math.min(...c)}–${Math.max(...c)}`; };
+    const counted = all.filter(q => q.recycle.count);
+    const DOC_KEY = 'set2';
+    const docGroup = RecycleBank.groups.find(g => g.key === DOC_KEY);
+    const docQs = docGroup ? RecycleBank.set(DOC_KEY) : [];
+    const span = qs => { const c = qs.map(q => q.recycle.count).filter(Boolean); if (!c.length) return ''; return Math.min(...c) === Math.max(...c) ? `${Math.max(...c)}` : `${Math.min(...c)}–${Math.max(...c)}`; };
+    const about = (key, qs) => key === DOC_KEY ? "from the team's recycle doc · in the doc's order"
+      : qs.every(q => q.recycle.count) ? `each seen in ${span(qs)} tests · most repeated first`
+      : `set 1 seen in ${span(qs)} tests each, most repeated first · then the team doc's questions`;
     const row = (key, name, qs, i) => `<div class="test-row" onclick="window.location.href='test.html?test=recycles&module=${key}&label=Recycles'">
         <div class="test-idx">${String(i).padStart(2,'0')}</div>
-        <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">${qs.length} questions · ~${Math.round(qs.length*32/27)} min · each seen in ${span(qs)} tests · most repeated first</div></div>
+        <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">${qs.length} questions · ~${Math.round(qs.length*32/27)} min · ${about(key, qs)}</div></div>
         <div class="test-right"><div class="badge badge-avail">Practice</div><div class="test-arrow">→</div></div>
       </div>`;
+    const skillGroups = RecycleBank.groups.filter(g => g.key !== DOC_KEY);
     document.getElementById('rc-stats').innerHTML =
-      `<span><b>${all.length}</b> recycled questions</span><span>seen in ${span(all)} tests each</span><span>${RecycleBank.groups.length} skill groups</span>`;
+      `<span><b>${all.length}</b> recycled questions</span><span><b>${counted.length}</b> seen in ${span(counted)} tests each</span>` +
+      (docQs.length ? `<span><b>${docQs.length}</b> from the team doc</span>` : '') + `<span>${skillGroups.length} skill groups</span>`;
     const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    const qRow = (q, idx, note) => `<div class="test-row" title="Practice this question" onclick="window.location.href='test.html?test=recycles&module=${q.recycle.code.toLowerCase()}&label=Recycles'">
+          <div class="test-idx">${esc(idx)}</div>
+          <div class="test-info"><div class="test-name">${esc(q.recycle.title)}</div><div class="test-detail">${esc(q.skill)} · ${note ? esc(note) + ', seen in ' + q.recycle.count + ' tests' : q.recycle.count ? esc(q.recycle.sources.join(' · ')) : "from the team's recycle doc"}</div></div>
+          <div class="test-right"><span class="rc-count">${q.recycle.count ? q.recycle.count + ' tests' : 'team doc'}</span><div class="test-arrow">→</div></div>
+        </div>`;
     el.innerHTML =
       `<div class="sec-label">Practice</div><div class="tests-list">` +
         row('all', 'All recycled questions', all, 1) +
-        RecycleBank.groups.map((g, i) => row(g.key, g.name, RecycleBank.set(g.key), i + 2)).join('') +
-      `</div><div class="sec-label">Every recycled question · tap one to practice it</div><div class="tests-list rc-list">` +
-        all.map(q => `<div class="test-row" title="Practice this question" onclick="window.location.href='test.html?test=recycles&module=${q.recycle.code.toLowerCase()}&label=Recycles'">
-          <div class="test-idx">${q.recycle.code}</div>
-          <div class="test-info"><div class="test-name">${esc(q.recycle.title)}</div><div class="test-detail">${esc(q.skill)} · ${esc(q.recycle.sources.join(' · '))}</div></div>
-          <div class="test-right"><span class="rc-count">${q.recycle.count} tests</span><div class="test-arrow">→</div></div>
-        </div>`).join('') +
-      `</div>`;
+        skillGroups.map((g, i) => row(g.key, g.name, RecycleBank.set(g.key), i + 2)).join('') +
+        (docGroup ? row(DOC_KEY, docGroup.name, docQs, skillGroups.length + 2) : '') +
+      `</div><div class="sec-label">Set 1 · every question seen in 4+ tests · tap one to practice it</div><div class="tests-list rc-list">` +
+        counted.map(q => qRow(q, q.recycle.code)).join('') +
+      `</div>` +
+      (docQs.length ? `<div class="sec-label">${esc(docGroup.name)} · in the doc's order · tap one to practice it</div><div class="tests-list rc-list">` +
+        docQs.map(q => qRow(q, 'S2-' + (docGroup.ids.indexOf(q.id) + 1), q.recycle.group === DOC_KEY ? '' : `also set 1’s ${q.recycle.code}`)).join('') +
+      `</div>` : '');
   })();
 
   // Active Recall: the reading skills, split into the same sets as the drills.

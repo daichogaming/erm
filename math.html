@@ -101,6 +101,20 @@
     .fr-result.bad { color: var(--incorrect); }
     .rationale-box { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--gray-border); border-radius: 4px; background: var(--gray-bg); font-size: 14px; color: var(--gray-dark); line-height: 1.6; white-space: pre-line; }
     .rationale-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid); margin-bottom: 0.5rem; }
+    :root[data-theme="dark"] .mc-btn.correct, :root[data-theme="dark"] .fr-input.correct { background: rgba(46,160,90,.18); color: #5fd38d; }
+    :root[data-theme="dark"] .mc-btn.wrong, :root[data-theme="dark"] .fr-input.wrong { background: rgba(220,90,75,.18); color: #f08a7e; }
+
+    /* CHECK ANSWER (one question at a time, before final submit) */
+    .check-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-check { font-size: 13px; font-family: 'Roboto', sans-serif; border: 1px solid var(--black); background: var(--white); color: var(--black); border-radius: 6px; padding: 7px 16px; cursor: pointer; transition: all .15s; }
+    .btn-check:hover:not(:disabled) { background: var(--black); color: var(--white); }
+    .btn-check:disabled { border-color: var(--gray-border); color: var(--gray-light); cursor: not-allowed; }
+    .chk-lock { font-size: 12px; color: var(--gray-mid); }
+    .mc-btn.locked, .mc-btn.locked:hover { cursor: default; }
+    .qdot { position: relative; }
+    .qdot.chk-ok::after, .qdot.chk-bad::after { content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--white); }
+    .qdot.chk-ok::after  { background: var(--correct); }
+    .qdot.chk-bad::after { background: var(--incorrect); }
 
     /* FLAG */
     .flag-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; width: fit-content; }
@@ -344,7 +358,7 @@ const HARD_MODE = testId === 'hard';
 const modWord   = HARD_MODE ? 'Set' : 'Module';
 const modKey    = `${testId}_${modId}`;
 
-let QS = [], answers = [], flagged = [], frInputs = [];
+let QS = [], answers = [], flagged = [], frInputs = [], checked = [];
 let cur = 0, submitted = false;
 let timerSecs = 35*60, timerHidden = false, timerTick = null;
 let activeTool = null, desmosCalc = null;
@@ -366,6 +380,7 @@ window.addEventListener('load', () => {
   answers   = new Array(QS.length).fill(null);
   flagged   = new Array(QS.length).fill(false);
   frInputs  = new Array(QS.length).fill('');
+  checked   = new Array(QS.length).fill(false);
   // Hard sets vary in size: keep the real pace of 35 minutes per 22 questions.
   if (HARD_MODE) { timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22)); drawTimer(); }
   document.getElementById('tb-module').textContent  = `Math · ${testLabel} · ${modWord} ${modId}`;
@@ -473,6 +488,7 @@ function upNav() {
     const hasAns = q.is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
     if (hasAns) d.classList.add('ans');
     if (flagged[i]) d.classList.add('flag');
+    if (checked[i] && !submitted) { const ok = isRight(i); d.classList.add(ok ? 'chk-ok' : 'chk-bad'); d.title += ok ? ' · checked: correct' : ' · checked: incorrect'; }
   });
   // Keep the current dot visible in the sideways-scrolling nav (only the nav scrolls, never the page).
   const nav = document.getElementById('q-nav'), curDot = document.getElementById(`dot-${cur}`);
@@ -491,6 +507,23 @@ function saveFrInput() {
   if (inp) frInputs[cur] = inp.value;
 }
 
+function hasAnswer(i) { return QS[i].is_mc ? answers[i]!==null : (frInputs[i]||'').trim()!==''; }
+function isRight(i) { const q = QS[i]; return q.is_mc ? answers[i]===q.answer_idx : checkFR(frInputs[i], q.answer_raw); }
+
+// "Check answer": grade one question now and lock it. Nothing is saved until the final Submit.
+function checkQ(i) {
+  if (submitted || checked[i]) return;
+  if (i===cur) saveFrInput();
+  if (!hasAnswer(i)) return;
+  checked[i] = true;
+  renderQ(i); upNav();
+  const r = document.getElementById('chk-res'); if (r) r.focus({preventScroll:true});
+}
+function upCheckBtn(i) {
+  const b = document.getElementById('chk-btn');
+  if (b) b.disabled = !hasAnswer(i);
+}
+
 // Question images live in math_img/, one file per page number.
 function mathImgSrc(q) { return q && q.page != null ? `math_img/${q.page}.jpg` : ''; }
 
@@ -499,6 +532,7 @@ function renderQ(i) {
   const q = QS[i];
   const imgSrc = mathImgSrc(q);
   const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
+  const rev = submitted || checked[i]; // graded view: after final Submit, or this question was checked
 
   // Build answer section
   let ansHtml = '';
@@ -506,14 +540,15 @@ function renderQ(i) {
     const letters = ['A','B','C','D'];
     const btns = letters.map((l,li) => {
       let cls = 'mc-btn';
-      if (submitted) {
+      if (rev) {
+        if (!submitted) cls+=' locked';
         if (li===q.answer_idx) cls+=' correct';
         else if (answers[i]===li && li!==q.answer_idx) cls+=' wrong';
       } else {
         if (answers[i]===li) cls+=' sel';
       }
       const label = q.question && q.choices ? `${l}.&nbsp; ${escH(q.choices[li])}` : l;
-      return `<button class="${cls}" style="${q.question ? 'width:auto;padding:0 14px;text-align:left' : ''}" onclick="selMC(${i},${li})">${label}</button>`;
+      return `<button class="${cls}" style="${q.question ? 'width:auto;padding:0 14px;text-align:left' : ''}" onclick="selMC(${i},${li})"${rev && !submitted ? ' aria-disabled="true"' : ''}>${label}</button>`;
     }).join('');
 
     let hint = '';
@@ -521,12 +556,16 @@ function renderQ(i) {
       if (answers[i]===null) hint=`<span class="ans-hint">Unanswered — correct: ${letters[q.answer_idx]}</span>`;
       else if (answers[i]===q.answer_idx) hint=`<span class="ans-hint ok">✓ Correct</span>`;
       else hint=`<span class="ans-hint bad">✗ Incorrect — correct: ${letters[q.answer_idx]}</span>`;
+    } else if (checked[i]) {
+      hint = answers[i]===q.answer_idx
+        ? `<span class="ans-hint ok" id="chk-res" tabindex="-1">✓ Correct</span>`
+        : `<span class="ans-hint bad" id="chk-res" tabindex="-1">✗ Incorrect — the answer is ${letters[q.answer_idx]}</span>`;
     }
     ansHtml = `<div class="mc-btns">${btns}${hint}</div>`;
   } else {
     // Free response
     const val = frInputs[i] || '';
-    if (submitted) {
+    if (rev) {
       const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
       const clsInp  = !val.trim() ? '' : correct ? ' correct' : ' wrong';
       const resHtml = !val.trim()
@@ -534,10 +573,11 @@ function renderQ(i) {
         : correct
           ? `<div class="fr-result ok">✓ Correct</div>`
           : `<div class="fr-result bad">✗ Incorrect — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`;
+      const resOut = submitted ? resHtml : resHtml.replace('<div class="fr-result', '<div id="chk-res" tabindex="-1" class="fr-result');
       ansHtml = `<div class="fr-wrap">
         <div class="fr-label">Your answer</div>
-        <input class="fr-input${clsInp}" value="${escH(val)}" readonly />
-        ${resHtml}
+        <input class="fr-input${clsInp}" value="${escH(val)}" readonly aria-label="Your answer (locked)" />
+        ${resOut}
       </div>`;
     } else {
       ansHtml = `<div class="fr-wrap">
@@ -545,7 +585,7 @@ function renderQ(i) {
         <input id="fr-inp" class="fr-input" type="text" inputmode="text"
           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
           value="${escH(val)}" placeholder="e.g. 3/2"
-          oninput="frInputs[${i}]=this.value;upNav()"
+          oninput="frInputs[${i}]=this.value;upNav();upCheckBtn(${i})"
           onkeydown="if(event.key==='Enter'&&${i}<QS.length-1)goTo(${i}+1)" />
       </div>`;
     }
@@ -562,7 +602,9 @@ function renderQ(i) {
     ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escH(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check your connection and reload the page.</div>'"/></div>`
             :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image for question ${q.id}.</div>`}
     ${ansHtml}
-    ${submitted && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
+    ${!rev ? `<div class="check-row"><button class="btn-check" id="chk-btn" type="button" onclick="checkQ(${i})" ${hasAnswer(i)?'':'disabled'}>Check answer</button></div>`
+           : (!submitted ? `<div class="check-row"><span class="chk-lock">Checked — answer locked</span></div>` : '')}
+    ${rev && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
     <label class="flag-row">
       <input type="checkbox" ${flagged[i]?'checked':''} onchange="flagged[${i}]=this.checked;upNav()">
       <span class="flag-lbl">Flag for review</span>
@@ -571,13 +613,13 @@ function renderQ(i) {
   document.getElementById('btn-next').textContent = i===QS.length-1 ? 'Review →' : 'Next →';
 
   // Auto-focus FR input
-  if (!submitted && !q.is_mc) {
+  if (!rev && !q.is_mc) {
     setTimeout(() => { const el=document.getElementById('fr-inp'); if(el) el.focus(); }, 50);
   }
 }
 
 function selMC(qi, li) {
-  if (submitted) return;
+  if (submitted || checked[qi]) return;
   answers[qi]=li; upNav(); renderQ(qi);
 }
 
