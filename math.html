@@ -14,7 +14,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAT Practice — Math</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=DM+Mono:wght@400;500" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -24,219 +25,235 @@
     }
     :root[data-theme="dark"] {
       --black: #EDEDED; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
-      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B;
-      --white: #121212;
+      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B; --white: #121212;
     }
-    html, body { font-family: 'Roboto', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background .2s ease, color .2s ease; }
+    html, body { height: 100%; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    /* The shared exam layout (header, panes, choices, navigator, footer) lives in exam.css; Math-only parts are here. */
 
-    /* TOP BAR */
-    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid var(--gray-border); background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
-    .top-bar-left { display: flex; align-items: center; gap: 0.75rem; overflow: hidden; }
-    .tb-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; white-space: nowrap; }
-    .tb-sep { color: var(--gray-border); font-size: 18px; }
-    .tb-module { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tb-center { display: flex; align-items: center; gap: 0.5rem; }
-    .timer { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center; }
-    .timer.warn { color: var(--incorrect); }
-    .timer.paused { color: var(--gray-mid); }
-    .timer-tog { font-size: 11px; color: var(--gray-mid); cursor: pointer; border: 1px solid var(--gray-border); border-radius: 4px; padding: 3px 8px; font-family: 'DM Mono', monospace; }
-    .timer-tog:hover { color: var(--black); border-color: var(--black); }
-    .tb-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
-    .tbtn { display: flex; align-items: center; gap: 5px; font-size: 12px; font-family: 'Roboto', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 6px 11px; cursor: pointer; color: var(--gray-dark); transition: border-color 0.15s, background 0.15s, color 0.15s; white-space: nowrap; }
-    .tbtn:hover { border-color: var(--black); color: var(--black); }
-    .tbtn.on { background: var(--black); color: var(--white); border-color: var(--black); }
-    .btn-exit { font-size: 12px; color: var(--gray-mid); background: none; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px 11px; cursor: pointer; font-family: 'Roboto', sans-serif; }
-    .btn-exit:hover { color: var(--black); border-color: var(--black); }
-    .btn-submit { font-size: 12px; font-family: 'Roboto', sans-serif; background: var(--black); color: var(--white); border: 1px solid var(--black); border-radius: 6px; padding: 6px 14px; cursor: pointer; white-space: nowrap; }
-    .btn-submit:hover { background: var(--gray-dark); }
-
-    /* LOADING */
-    .loading { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; z-index: 500; }
-    .loading.gone { display: none; }
-    .spinner { width: 28px; height: 28px; border: 2px solid var(--gray-border); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; }
+    /* ── LOADING ── */
+    .loading-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; z-index: 500; }
+    .loading-screen.gone { display: none; }
+    .loading-spinner { width: 32px; height: 32px; border: 2px solid var(--ex-line, #ddd); border-top-color: var(--ex-blue, #3046c5); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .load-lbl { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: .08em; }
+    .loading-label { font-size: 13px; color: var(--ex-muted, #666); max-width: 32rem; text-align: center; padding: 0 1rem; }
 
-    /* LAYOUT */
-    .test-body { position: fixed; top: 52px; bottom: 56px; left: 0; right: 0; display: flex; overflow: hidden; }
+    /* ── BODY: question area (one column for multiple choice, two panes for student-produced response) + tool pane ── */
+    .mx-main { flex: 1 1 0; min-width: 0; display: flex; overflow: hidden; --ex-split: 44%; }
+    .mx-main.is-mc .mx-dir, .mx-main.is-mc .ex-divider { display: none; }
+    .mx-main.is-mc .ex-question { padding: 1.5rem 2rem 3rem; }
+    .mx-main.is-mc .ex-question-inner { max-width: 780px; }
+    .mx-main.is-fr .ex-question-inner { max-width: 720px; }
 
-    /* QUESTION PANE */
-    .q-pane { flex: 1; overflow-y: auto; padding: 1.5rem 2rem 2rem 2.5rem; min-width: 0; display: flex; flex-direction: column; gap: 0.75rem; }
-    .q-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-    .skill-tag { background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: 2px; padding: 2px 7px; }
-    .diff-tag { padding: 2px 7px; border-radius: 2px; border: 1px solid; }
-    .d-easy { color: #1a7a3c; border-color: #b7dfc7; background: #edf7f1; }
-    .d-med  { color: #7a5c00; border-color: #e0d0a0; background: #fdf9ed; }
-    .d-hard { color: #c0392b; border-color: #f0b0a8; background: #fdf0ee; }
-    .q-num { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
-    .q-img-wrap { border: 1px solid var(--gray-border); border-radius: 4px; overflow-y: auto; overflow-x: hidden; background: var(--white); max-height: calc(100vh - 220px); }
-    .q-img-wrap img { width: 100%; display: block; min-height: 0; }
-    /* Phones: less padding, and keep the question image readable — it scrolls sideways inside its box, not the page. */
-    @media (max-width: 720px) {
-      .q-pane { padding: 1rem; }
-      .q-img-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .q-img-wrap img { min-width: 640px; }
+    /* student-produced response directions (left pane) */
+    .mx-dir { font-size: 14.5px; line-height: 1.55; color: var(--ex-fg); }
+    .mx-dir-inner { max-width: 600px; margin: 0 auto; }
+    .mx-dir summary { list-style: none; cursor: default; font-size: 16px; font-weight: 700; margin-bottom: .6rem; display: flex; align-items: center; gap: 6px; }
+    .mx-dir summary::-webkit-details-marker { display: none; }
+    .mx-dir summary .ex-ico { display: none !important; }
+    .mx-dir ul { margin: 0 0 1rem 1.15rem; display: flex; flex-direction: column; gap: .4rem; }
+    .mx-dir p { margin: 0 0 .7rem; }
+    .mx-ex-title { font-weight: 700; margin: 1rem 0 .5rem; }
+    .mx-ex { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .mx-ex th, .mx-ex td { border: 1px solid var(--ex-choice-border); padding: 6px 9px; text-align: center; vertical-align: top; }
+    .mx-ex th { background: var(--ex-band); font-weight: 700; }
+    .mx-ex td { font-variant-numeric: tabular-nums; line-height: 1.7; }
+
+    /* question image (stem + answer choices are part of the picture) */
+    .q-img-wrap { border: 1px solid var(--ex-line); border-radius: 6px; overflow: hidden; background: #fff; margin-bottom: 1.25rem; }
+    .q-img-wrap img { width: 100%; display: block; }
+    .q-img-crop { overflow: hidden; min-width: 600px; } /* trimmed to the image's content (see cropImg); never shrunk past readable */
+    .q-img-wrap { overflow-x: auto; }
+    .ex-body.tool-open .mx-main { --ex-split: 30%; } /* calculator open: give the question more room */
+    .q-img-err { padding: 1rem; color: var(--ex-incorrect); font-size: 13px; }
+    .q-text-block { font-family: var(--ex-serif); font-size: 17px; line-height: 1.6; color: var(--ex-fg); margin: 0 0 1.25rem; }
+
+    /* multiple choice: "Choice A" boxes (the choice text is in the image above) */
+    .exam .answer-option .answer-text.mx-choice-lbl { font-family: var(--ex-ui); font-size: 15px; font-weight: 600; }
+    .mx-hint { font-size: 14px; font-weight: 600; }
+    .mx-hint.ok { color: var(--ex-correct); } .mx-hint.bad { color: var(--ex-incorrect); } .mx-hint.skip { color: var(--ex-muted); font-weight: 500; }
+
+    /* student-produced response box + preview */
+    .fr-wrap { display: flex; flex-direction: column; gap: .55rem; margin-top: .25rem; }
+    .fr-input {
+      width: 190px; max-width: 100%; padding: 10px 14px; border: 2px solid var(--ex-choice-border); border-radius: 8px;
+      font-family: var(--ex-ui); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums;
+      color: var(--ex-fg); background: var(--ex-bg); outline: none; transition: border-color .12s, box-shadow .12s;
     }
+    .fr-input:focus { border-color: var(--ex-blue); box-shadow: 0 0 0 1px var(--ex-blue); }
+    .fr-input.correct { border-color: var(--ex-correct); background: var(--ex-correct-soft); }
+    .fr-input.wrong { border-color: var(--ex-incorrect); background: var(--ex-incorrect-soft); }
+    .fr-input[readonly] { cursor: default; }
+    .mx-preview { display: flex; align-items: center; gap: .5rem; min-height: 40px; font-size: 15px; }
+    .mx-preview-lbl { font-weight: 700; }
+    .mx-preview-val { font-family: var(--ex-serif); font-size: 19px; display: inline-flex; align-items: center; gap: 2px; }
+    .mx-frac { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.05; font-size: 16px; vertical-align: middle; }
+    .mx-frac > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 3px 1px; }
+    .mx-frac > span:last-child { padding: 1px 3px 0; }
+    .mx-len-note { font-size: 12.5px; color: var(--ex-muted); }
+    .fr-result { font-size: 14px; font-weight: 600; }
+    .fr-result.ok { color: var(--ex-correct); } .fr-result.bad { color: var(--ex-incorrect); }
+    .chk-lock { font-size: 13px; color: var(--ex-muted); }
+    .exam .rationale-box { white-space: pre-line; }
 
-    /* MC ANSWER BUTTONS */
-    .mc-btns { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .mc-btn { width: 44px; height: 44px; border: 1px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--gray-mid); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-    .mc-btn:hover { border-color: var(--black); color: var(--black); }
-    .mc-btn.sel { background: var(--black); color: var(--white); border-color: var(--black); }
-    .mc-btn.correct { background: #edf7f1; color: var(--correct); border-color: var(--correct); }
-    .mc-btn.wrong   { background: #fdf0ee; color: var(--incorrect); border-color: var(--incorrect); }
-    .ans-hint { font-size: 12px; color: var(--gray-mid); padding-left: 0.25rem; }
-    .ans-hint.ok  { color: var(--correct); font-weight: 500; }
-    .ans-hint.bad { color: var(--incorrect); font-weight: 500; }
-
-    /* FREE RESPONSE INPUT */
-    .fr-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
-    .fr-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
-    .fr-input { width: 200px; padding: 10px 14px; border: 1px solid var(--gray-border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 18px; color: var(--black); background: var(--white); outline: none; transition: border-color 0.15s; }
-    .fr-input:focus { border-color: var(--black); }
-    .fr-input.correct { border-color: var(--correct); background: #edf7f1; color: var(--correct); }
-    .fr-input.wrong   { border-color: var(--incorrect); background: #fdf0ee; color: var(--incorrect); }
-    .fr-result { font-size: 13px; font-family: 'DM Mono', monospace; }
-    .fr-result.ok  { color: var(--correct); }
-    .fr-result.bad { color: var(--incorrect); }
-    .rationale-box { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--gray-border); border-radius: 4px; background: var(--gray-bg); font-size: 14px; color: var(--gray-dark); line-height: 1.6; white-space: pre-line; }
-    .rationale-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid); margin-bottom: 0.5rem; }
-    :root[data-theme="dark"] .mc-btn.correct, :root[data-theme="dark"] .fr-input.correct { background: rgba(46,160,90,.18); color: #5fd38d; }
-    :root[data-theme="dark"] .mc-btn.wrong, :root[data-theme="dark"] .fr-input.wrong { background: rgba(220,90,75,.18); color: #f08a7e; }
-
-    /* CHECK ANSWER (one question at a time, before final submit) */
-    .check-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    .btn-check { font-size: 13px; font-family: 'Roboto', sans-serif; border: 1px solid var(--black); background: var(--white); color: var(--black); border-radius: 6px; padding: 7px 16px; cursor: pointer; transition: all .15s; }
-    .btn-check:hover:not(:disabled) { background: var(--black); color: var(--white); }
-    .btn-check:disabled { border-color: var(--gray-border); color: var(--gray-light); cursor: not-allowed; }
-    .chk-lock { font-size: 12px; color: var(--gray-mid); }
-    .mc-btn.locked, .mc-btn.locked:hover { cursor: default; }
-    .qdot { position: relative; }
-    .qdot.chk-ok::after, .qdot.chk-bad::after { content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--white); }
-    .qdot.chk-ok::after  { background: var(--correct); }
-    .qdot.chk-bad::after { background: var(--incorrect); }
-
-    /* FLAG */
-    .flag-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; width: fit-content; }
-    .flag-row input { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
-    .flag-lbl { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
-
-    /* TOOL PANE */
-    .tool-pane { width: 420px; flex-shrink: 0; border-left: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.2s ease; }
-    .tool-pane.closed { width: 0; border-left: none; }
-    /* Phones: the calculator / Desmos opens as a full-width panel over the question instead of squeezing it. */
-    @media (max-width: 720px) {
-      .tool-pane:not(.closed) { position: fixed; top: 60px; bottom: 60px; left: 0; right: 0; width: auto; z-index: 300; background: var(--white); border-left: none; }
-    }
-    .tool-tabs { display: flex; border-bottom: 1px solid var(--gray-border); background: var(--gray-bg); flex-shrink: 0; }
-    .ttab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
-    .ttab.on { color: var(--black); border-bottom-color: var(--black); background: var(--white); }
+    /* ── TOOL PANE (calculator) ── */
+    .tool-pane { width: 420px; flex-shrink: 0; border-left: 2px solid var(--ex-line); display: flex; flex-direction: column; overflow: hidden; background: var(--ex-bg); }
+    .tool-pane.closed { display: none; }
+    .tool-tabs { display: flex; align-items: stretch; border-bottom: 1px solid var(--ex-line); background: var(--ex-band); flex-shrink: 0; }
+    .ttab { flex: 1; padding: 11px 0; text-align: center; font-size: 13px; font-weight: 600; color: var(--ex-muted); cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; }
+    .ttab:hover { color: var(--ex-fg); }
+    .ttab.on { color: var(--ex-fg); border-bottom-color: var(--ex-blue); background: var(--ex-bg); }
+    .tool-x { padding: 0 12px; font-size: 18px; }
     .tcontent { flex: 1; overflow: hidden; display: none; }
     .tcontent.on { display: flex; flex-direction: column; }
-    .calc-wrap { padding: 1.25rem; display: flex; flex-direction: column; height: 100%; }
-    .calc-disp { background: var(--black); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; min-height: 76px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 4px; }
-    .c-expr { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); word-break: break-all; text-align: right; min-height: 16px; }
-    .c-res  { font-family: 'DM Mono', monospace; font-size: 26px; color: var(--white); word-break: break-all; text-align: right; }
-    .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; }
-    .cbtn { padding: 12px 0; border: 1px solid var(--gray-border); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 14px; cursor: pointer; background: var(--white); color: var(--black); transition: background .1s; user-select: none; }
-    .cbtn:hover { background: var(--gray-bg); border-color: var(--black); }
-    .cbtn.op { background: var(--gray-bg); }
-    .cbtn.eq { background: var(--black); color: var(--white); border-color: var(--black); }
-    .cbtn.fn { font-size: 11px; color: var(--gray-mid); }
-    .cbtn.fn:hover { color: var(--black); }
-    .cbtn.clr { color: var(--incorrect); }
+    .calc-wrap { padding: 1.25rem; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+    .calc-disp { background: #15171c; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; min-height: 80px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 4px; }
+    .c-expr { font-family: 'DM Mono', monospace; font-size: 13px; color: #9aa0aa; word-break: break-all; text-align: right; min-height: 16px; }
+    .c-res { font-family: 'DM Mono', monospace; font-size: 28px; color: #fff; word-break: break-all; text-align: right; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .cbtn { padding: 12px 0; border: 1.5px solid var(--ex-line); border-radius: 8px; font-family: var(--ex-ui); font-size: 15px; font-weight: 600; cursor: pointer; background: var(--ex-bg); color: var(--ex-fg); user-select: none; }
+    .cbtn:hover { border-color: var(--ex-blue); }
+    .cbtn.op { background: var(--ex-band); }
+    .cbtn.eq { background: var(--ex-blue); color: #fff; border-color: var(--ex-blue); }
+    :root[data-theme="dark"] .exam .cbtn.eq { color: #10121a; }
+    .cbtn.fn { font-size: 13px; color: var(--ex-muted); }
+    .cbtn.fn:hover { color: var(--ex-fg); }
+    .cbtn.clr { color: var(--ex-incorrect); }
     .desmos-wrap { flex: 1; overflow: hidden; }
     #desmos-el { width: 100%; height: 100%; }
 
-    /* BOTTOM BAR */
-    .bot-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; border-top: 1px solid var(--gray-border); background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
-    .q-nav { display: flex; align-items: center; gap: 5px; flex: 1; overflow-x: auto; padding: 4px 0; }
-    .qdot { width: 29px; height: 29px; border-radius: 4px; border: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid); cursor: pointer; flex-shrink: 0; transition: all .12s; }
-    .qdot:hover { border-color: var(--black); color: var(--black); }
-    .qdot.cur { border-color: var(--black); background: var(--black); color: var(--white); }
-    .qdot.ans { border-color: var(--black); color: var(--black); }
-    .qdot.flag { border-color: var(--incorrect); color: var(--incorrect); }
-    .qdot.fr-dot { border-style: dashed; }
-    .nav-btns { display: flex; gap: 0.6rem; flex-shrink: 0; }
-    .bnav { font-size: 13px; font-family: 'Roboto', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 7px 16px; cursor: pointer; color: var(--gray-mid); transition: all .15s; }
-    .bnav:hover { color: var(--black); border-color: var(--black); }
-    .bnav.pri { background: var(--black); color: var(--white); border-color: var(--black); }
-    .bnav.pri:hover { background: var(--gray-dark); }
-
-    /* OVERLAYS */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 400; align-items: center; justify-content: center; }
+    /* ── OVERLAYS (review / score / reference / exit) ── */
+    .overlay { display: none; position: fixed; inset: 0; z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
     .overlay.open { display: flex; }
-    .obox { background: var(--white); border-radius: 6px; width: 100%; max-width: 520px; max-height: 84vh; overflow-y: auto; padding: 2.5rem; animation: up .2s ease; }
-    @keyframes up { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .o-title { font-family: 'Roboto', sans-serif; font-size: 26px; font-weight: 300; margin-bottom: .4rem; }
-    .o-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
-    .score-big { font-family: 'Roboto', sans-serif; font-size: 52px; font-weight: 300; line-height: 1; }
-    .score-pct { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
-    .score-row { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
-    .sstat .n { font-family: 'DM Mono', monospace; font-size: 22px; }
-    .sstat .l { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: .08em; font-family: 'DM Mono', monospace; }
-    .dom-break { margin-bottom: 2rem; }
-    .dom-row { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; border-bottom: 1px solid var(--gray-border); font-size: 12px; }
-    .dom-name { flex: 1; }
-    .bar-wrap { width: 80px; height: 4px; background: var(--gray-border); border-radius: 2px; }
-    .bar-fill { height: 4px; background: var(--black); border-radius: 2px; }
-    .dom-sc { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); }
-    .rev-list { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
-    .rev-item { display: flex; align-items: center; gap: .75rem; padding: .6rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; }
-    .rev-item:hover { background: var(--gray-bg); }
-    .rev-num { font-family: 'DM Mono', monospace; width: 24px; color: var(--gray-mid); font-size: 11px; flex-shrink: 0; }
-    .rev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .rd-ok { background: var(--correct); }
-    .rd-bad { background: var(--incorrect); }
-    .rd-skip { background: var(--gray-light); }
-    .o-btns { display: flex; gap: .75rem; }
-    .obtn { flex: 1; font-size: 13px; font-family: 'Roboto', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: all .15s; }
-    .obtn:hover { color: var(--black); border-color: var(--black); }
-    .obtn.pri { background: var(--black); color: var(--white); border-color: var(--black); }
-    .obtn.pri:hover { background: var(--gray-dark); }
-    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-    .ref-item { border: 1px solid var(--gray-border); border-radius: 4px; padding: 1rem; }
-    .ref-ttl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: .5rem; }
-    .ref-f { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.6; }
+    .overlay-box { width: 100%; max-width: 560px; max-height: 84vh; overflow-y: auto; padding: 2rem 2.25rem; animation: fadeSlide .2s ease; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .overlay-title { margin-bottom: .4rem; }
+    .overlay-sub { font-size: 14px; color: var(--ex-muted); margin-bottom: 1.25rem; }
+    .score-big { font-size: 56px; font-weight: 700; line-height: 1; }
+    .score-label { font-size: 14px; color: var(--ex-muted); margin-bottom: 1.5rem; }
+    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--ex-line); }
+    .score-stat .num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .score-stat .lbl { font-size: 11px; color: var(--ex-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+    .domain-breakdown { margin-bottom: 1.75rem; }
+    .domain-row { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; border-bottom: 1px solid var(--ex-line); font-size: 13px; }
+    .domain-name { flex: 1; }
+    .domain-score { font-size: 13px; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
+    .domain-bar-wrap { width: 80px; height: 5px; background: var(--ex-band); border-radius: 3px; }
+    .domain-bar { height: 5px; background: var(--ex-blue) !important; border-radius: 3px; }
+    .review-grid { padding: .5rem 0 .75rem; }
+    .review-list { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+    .review-item { display: flex; align-items: center; gap: .75rem; padding: .6rem .25rem; border-bottom: 1px solid var(--ex-line); font-size: 13px; cursor: pointer; border-radius: 4px; }
+    .review-item:hover { background: var(--ex-band); }
+    .review-num { width: 28px; font-weight: 700; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
+    .review-q { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .review-fr { font-size: 11px; font-weight: 700; color: var(--ex-muted); border: 1px solid var(--ex-line); border-radius: 4px; padding: 0 5px; margin-left: 4px; }
+    .review-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-correct { background: var(--ex-correct); } .status-incorrect { background: var(--ex-incorrect); } .status-unanswered { background: var(--ex-line); }
+    .review-flag { color: var(--ex-red); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
+    .overlay-btn-row { display: flex; gap: .75rem; }
+    .overlay-btn { flex: 1; font-size: 14px; padding: 10px 0; cursor: pointer; }
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+    .exam .ref-item { border: 1px solid var(--ex-line); border-radius: 8px; padding: .85rem 1rem; background: var(--ex-bg); box-shadow: none; }
+    .ref-ttl { font-size: 12px; font-weight: 700; color: var(--ex-muted); margin-bottom: .35rem; }
+    .ref-f { font-family: var(--ex-serif); font-size: 16px; line-height: 1.6; color: var(--ex-fg); }
+    .ref-foot { font-size: 13px; color: var(--ex-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+
+    /* ── PHONES ── */
+    @media (max-width: 760px) {
+      .mx-main { flex: none; flex-direction: column; overflow: visible; }
+      .mx-main.is-mc .ex-question { padding: 1rem 1rem 1.5rem; }
+      .mx-dir { padding: .8rem 1rem; font-size: 14px; }
+      .mx-dir summary { cursor: pointer; font-size: 15px; margin: 0; }
+      .mx-dir details[open] summary { margin-bottom: .6rem; }
+      .mx-dir summary .ex-ico { display: inline-flex !important; transition: transform .15s; }
+      .mx-dir details[open] summary .ex-ico { transform: rotate(180deg); }
+      /* keep the question image readable: it scrolls sideways inside its box, never the page */
+      .q-img-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .q-img-crop { min-width: 640px; }
+      .tool-pane:not(.closed) { position: fixed; top: var(--ex-head-h); bottom: var(--ex-foot-h); left: 0; right: 0; width: auto; z-index: 190; border-left: none; }
+      .overlay-box { padding: 1.5rem 1.25rem; }
+      .score-breakdown { gap: 1.25rem; }
+      .ref-grid { grid-template-columns: 1fr; }
+    }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css?v=5" />
+  <link rel="stylesheet" href="exam.css?v=1" />
 </head>
-<body>
+<body class="exam">
 
-<div class="loading" id="loading">
-  <div class="spinner"></div>
-  <div class="load-lbl" id="load-lbl">Loading…</div>
+<div class="loading-screen" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-label" id="load-lbl">Loading…</div>
 </div>
 
-<div class="top-bar">
-  <div class="top-bar-left">
-    <div class="tb-logo">SAT Practice</div>
-    <div class="tb-sep">|</div>
-    <div class="tb-module" id="tb-module">Math</div>
+<!-- HEADER -->
+<header class="ex-header">
+  <div class="ex-h-left">
+    <h1 class="ex-title" id="ex-title">Section 2: Math</h1>
+    <button type="button" class="ex-linkbtn" id="btn-directions" data-ex-pop="ex-directions" aria-controls="ex-directions">Directions <span class="ex-ico" data-icon="chevDown"></span></button>
   </div>
-  <div class="tb-center">
-    <div class="timer" id="timer">35:00</div>
-    <button class="timer-tog" id="tpause" onclick="togglePause()">Pause</button>
-    <div class="timer-tog" id="ttog" onclick="toggleTimer()">Hide</div>
+  <div class="ex-h-center">
+    <div class="ex-timer" id="timer" role="timer" aria-live="off">35:00</div>
+    <button type="button" class="ex-pill" id="ttog" onclick="toggleTimer()" aria-label="Hide timer">Hide</button>
   </div>
-  <div class="tb-right">
-    <button class="tbtn" onclick="openO('ref-o')">Reference</button>
-    <button class="tbtn" id="btn-calc" onclick="toggleTool('calc')">Calculator</button>
-    <button class="tbtn" id="btn-desmos" onclick="toggleTool('desmos')">Desmos</button>
-    <button class="btn-exit" onclick="confirmExit()">Exit</button>
-    <button class="btn-submit" onclick="openReview()">Review &amp; Submit</button>
+  <div class="ex-h-right">
+    <button type="button" class="ex-tool" id="btn-calc" onclick="toggleCalc()" aria-pressed="false" title="Calculator"><span class="mx-ico" data-mx-icon="calc"></span><span class="ex-tool-label">Calculator</span></button>
+    <button type="button" class="ex-tool" id="btn-ref" onclick="openO('ref-o')" title="Reference sheet"><span class="mx-ico" data-mx-icon="ref"></span><span class="ex-tool-label">Reference</span></button>
+    <button type="button" class="ex-tool" id="btn-more" data-ex-pop="ex-more" aria-controls="ex-more" aria-haspopup="menu" title="More"><span class="ex-ico" data-icon="more"></span><span class="ex-tool-label">More</span></button>
   </div>
+</header>
+
+<div class="ex-pop ex-directions" id="ex-directions" role="dialog" aria-label="Directions" hidden>
+  <h2>Directions</h2>
+  <p>The questions in this section cover a range of math skills. You may use a calculator on every question, and a reference sheet of common formulas is available from the Reference button.</p>
+  <p>Unless a question says otherwise, all variables and expressions stand for real numbers, figures are drawn to scale and lie in a plane, and the domain of a function <i>f</i> is every real number <i>x</i> for which <i>f</i>(<i>x</i>) is a real number.</p>
+  <p>For multiple-choice questions, work out the answer and pick the one best choice. For student-produced response questions, type your answer in the box; the rules for entering it are shown next to each of those questions.</p>
+  <div class="ex-pop-actions"><button type="button" class="ex-btn" onclick="Exam.closePopovers(true)" data-ex-autofocus>Close</button></div>
 </div>
 
-<div class="test-body">
-  <div class="q-pane" id="q-pane"></div>
-  <div class="tool-pane closed" id="tool-pane">
-    <div class="tool-tabs">
-      <div class="ttab on" id="ttab-calc" onclick="switchTab('calc')">Calculator</div>
-      <div class="ttab" id="ttab-desmos" onclick="switchTab('desmos')">Desmos</div>
+<div class="ex-pop ex-menu" id="ex-more" role="menu" aria-label="More" hidden>
+  <button type="button" role="menuitem" id="tpause" onclick="togglePause()"><span class="ex-ico" data-icon="pause"></span><span id="pause-label">Pause timer</span></button>
+  <button type="button" role="menuitem" id="btn-report" onclick="openReport()"><span class="ex-ico" data-icon="flag"></span>Report a problem</button>
+  <hr />
+  <button type="button" role="menuitem" onclick="confirmExit()"><span class="ex-ico" data-icon="exit"></span>Exit</button>
+</div>
+
+<!-- MAIN -->
+<main class="ex-body" id="ex-body">
+  <div class="mx-main is-mc" id="mx-main">
+    <section class="ex-pane ex-passage mx-dir" id="fr-dir" aria-label="Student-produced response directions">
+      <div class="mx-dir-inner">
+        <details id="fr-dir-details" open>
+          <summary>Student-produced response directions <span class="ex-ico" data-icon="chevDown"></span></summary>
+          <ul>
+            <li>Enter only one answer, even if you find more than one that works.</li>
+            <li>A positive answer can use up to <b>5 characters</b>; a negative answer up to <b>6</b> (the minus sign counts as one).</li>
+            <li>Fractions and decimals are both fine. If a fraction is too long for the box, enter its decimal instead.</li>
+            <li>If a decimal is too long, round it or cut it off at the fourth digit (so it fills the box).</li>
+            <li>Don't enter mixed numbers: write 3½ as 7/2 or 3.5.</li>
+            <li>Leave out symbols such as %, $, commas and units.</li>
+          </ul>
+          <div class="mx-ex-title">Examples</div>
+          <table class="mx-ex">
+            <thead><tr><th>Answer</th><th>Accepted</th><th>Not accepted</th></tr></thead>
+            <tbody>
+              <tr><td>3.5</td><td>3.5<br>3.50<br>7/2</td><td>31/2<br>3 1/2</td></tr>
+              <tr><td>2/3</td><td>2/3<br>.6666<br>.6667<br>0.666<br>0.667</td><td>0.66<br>.66<br>0.67<br>.67</td></tr>
+              <tr><td>−1/3</td><td>−1/3<br>−.3333<br>−0.333</td><td>−.33<br>−0.33</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </div>
+    </section>
+    <div class="ex-divider" id="divider"><span class="ex-divider-grip"><i></i><i></i><i></i></span></div>
+    <section class="ex-pane ex-question" id="q-pane" aria-label="Question"></section>
+  </div>
+  <aside class="tool-pane closed" id="tool-pane" aria-label="Calculator">
+    <div class="tool-tabs" role="tablist">
+      <button type="button" class="ttab on" id="ttab-desmos" role="tab" onclick="switchTab('desmos')">Graphing</button>
+      <button type="button" class="ttab" id="ttab-calc" role="tab" onclick="switchTab('calc')">Basic</button>
+      <button type="button" class="ex-iconbtn tool-x" aria-label="Close calculator" onclick="toggleCalc()"><span class="ex-ico" data-icon="close"></span></button>
     </div>
-    <div class="tcontent on" id="tc-calc">
+    <div class="tcontent" id="tc-calc">
       <div class="calc-wrap">
         <div class="calc-disp">
           <div class="c-expr" id="c-expr"></div>
@@ -274,59 +291,82 @@
         </div>
       </div>
     </div>
-    <div class="tcontent" id="tc-desmos">
+    <div class="tcontent on" id="tc-desmos">
       <div class="desmos-wrap"><div id="desmos-el"></div></div>
     </div>
-  </div>
-</div>
+  </aside>
+</main>
 
-<div class="bot-bar">
-  <div class="q-nav" id="q-nav"></div>
-  <div class="nav-btns">
-    <button class="bnav" onclick="prevQ()">← Back</button>
-    <button class="bnav pri" id="btn-next" onclick="nextQ()">Next →</button>
+<!-- FOOTER -->
+<footer class="ex-footer">
+  <div class="ex-f-left"><span class="ex-student" id="ex-student">Student</span></div>
+  <div class="ex-f-center">
+    <button type="button" class="ex-navbtn" id="ex-navbtn" data-ex-pop="ex-navpop" aria-controls="ex-navpop"><span id="ex-navbtn-label">Question 1<span class="ex-navbtn-of"> of 22</span></span> <span class="ex-ico" data-icon="chevUp"></span></button>
+    <div class="ex-pop ex-navpop" id="ex-navpop" role="dialog" aria-labelledby="ex-navpop-title" hidden>
+      <div class="ex-navpop-head">
+        <span style="width:28px"></span>
+        <div class="ex-navpop-title" id="ex-navpop-title">Questions</div>
+        <button type="button" class="ex-iconbtn" aria-label="Close" onclick="Exam.closePopovers(true)"><span class="ex-ico" data-icon="close"></span></button>
+      </div>
+      <div class="ex-legend">
+        <span><span class="ex-lg-pin ex-ico" data-icon="pin"></span>Current</span>
+        <span><span class="ex-lg-box"></span>Unanswered</span>
+        <span><span class="ex-lg-flag ex-ico" data-icon="bookmarkFill"></span>For Review</span>
+      </div>
+      <div class="ex-qgrid" id="q-nav"></div>
+      <div class="ex-navpop-foot"><button type="button" class="ex-outline-btn" id="btn-review-page" onclick="Exam.closePopovers(false);openReview()">Go to Review Page</button></div>
+    </div>
   </div>
-</div>
+  <div class="ex-f-right">
+    <button type="button" class="ex-btn" id="btn-back" onclick="prevQ()">Back</button>
+    <button type="button" class="ex-btn" id="btn-next" onclick="nextQ()">Next</button>
+  </div>
+</footer>
 
 <!-- REVIEW -->
 <div class="overlay" id="rev-o">
-  <div class="obox">
-    <div class="o-title">Review Answers</div>
-    <div class="o-sub" id="rev-sub"></div>
-    <div class="rev-list" id="rev-list"></div>
-    <div class="o-btns">
-      <button class="obtn" onclick="closeO('rev-o')">Continue</button>
-      <button class="obtn pri" onclick="submitTest()">Submit</button>
+  <div class="overlay-box">
+    <div class="overlay-title">Check Your Work</div>
+    <div class="overlay-sub" id="rev-sub"></div>
+    <div class="ex-legend">
+      <span><span class="ex-lg-box"></span>Unanswered</span>
+      <span><span class="ex-lg-flag ex-ico" data-icon="bookmarkFill"></span>For Review</span>
+    </div>
+    <div class="ex-qgrid review-grid" id="review-grid"></div>
+    <div class="review-list" id="rev-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="closeO('rev-o')">Continue Test</button>
+      <button class="overlay-btn primary" onclick="submitTest()">Submit</button>
     </div>
   </div>
 </div>
 
 <!-- SCORE -->
 <div class="overlay" id="score-o">
-  <div class="obox">
-    <div class="o-title">Module Complete</div>
-    <div class="o-sub" id="score-sub"></div>
+  <div class="overlay-box">
+    <div class="overlay-title">Module Complete</div>
+    <div class="overlay-sub" id="score-sub"></div>
     <div class="score-big" id="score-num"></div>
-    <div class="score-pct" id="score-pct"></div>
-    <div class="score-row">
-      <div class="sstat"><div class="n" id="sc-ok"></div><div class="l">Correct</div></div>
-      <div class="sstat"><div class="n" id="sc-bad"></div><div class="l">Incorrect</div></div>
-      <div class="sstat"><div class="n" id="sc-skip"></div><div class="l">Unanswered</div></div>
+    <div class="score-label" id="score-pct"></div>
+    <div class="score-breakdown">
+      <div class="score-stat"><div class="num" id="sc-ok"></div><div class="lbl">Correct</div></div>
+      <div class="score-stat"><div class="num" id="sc-bad"></div><div class="lbl">Incorrect</div></div>
+      <div class="score-stat"><div class="num" id="sc-skip"></div><div class="lbl">Unanswered</div></div>
     </div>
-    <div class="dom-break" id="dom-break"></div>
-    <div class="rev-list" id="score-rev-list"></div>
-    <div class="o-btns">
-      <button class="obtn" onclick="window.location.href='index.html'">← Back to Tests</button>
-      <button class="obtn pri" onclick="closeO('score-o')">Review Answers</button>
+    <div class="domain-breakdown" id="dom-break"></div>
+    <div class="review-list" id="score-rev-list"></div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Tests</button>
+      <button class="overlay-btn primary" onclick="closeO('score-o')">Review Answers</button>
     </div>
   </div>
 </div>
 
 <!-- REFERENCE -->
-<div class="overlay" id="ref-o">
-  <div class="obox" style="max-width:640px">
-    <div class="o-title">Formula Reference</div>
-    <div class="o-sub">Provided on the SAT Math section.</div>
+<div class="overlay" id="ref-o" role="dialog" aria-label="Reference sheet">
+  <div class="overlay-box" style="max-width:640px">
+    <div class="overlay-title">Reference</div>
+    <div class="overlay-sub">Formulas you can use on the Math section.</div>
     <div class="ref-grid">
       <div class="ref-item"><div class="ref-ttl">Circle</div><div class="ref-f">A = πr²&nbsp;&nbsp;C = 2πr</div></div>
       <div class="ref-item"><div class="ref-ttl">Rectangle</div><div class="ref-f">A = lw</div></div>
@@ -339,8 +379,20 @@
       <div class="ref-item"><div class="ref-ttl">Pyramid</div><div class="ref-f">V = (1/3)lwh</div></div>
       <div class="ref-item"><div class="ref-ttl">Rectangular Solid</div><div class="ref-f">V = lwh</div></div>
     </div>
-    <div style="font-size:12px;color:var(--gray-mid);margin-bottom:1.5rem">360° in a circle · 2π radians · 180° in a triangle</div>
-    <div class="o-btns"><button class="obtn pri" onclick="closeO('ref-o')">Close</button></div>
+    <div class="ref-foot">A circle has 360° (2π radians) of arc. The angles of a triangle add up to 180°.</div>
+    <div class="overlay-btn-row"><button class="overlay-btn primary" onclick="closeO('ref-o')">Close</button></div>
+  </div>
+</div>
+
+<!-- EXIT -->
+<div class="overlay" id="exit-o" role="dialog" aria-label="Exit">
+  <div class="overlay-box" style="max-width:420px">
+    <div class="overlay-title">Exit this module?</div>
+    <div class="overlay-sub">Your answers in this module won't be saved.</div>
+    <div class="overlay-btn-row">
+      <button class="overlay-btn" id="exit-stay" onclick="closeO('exit-o')">Stay</button>
+      <button class="overlay-btn primary" onclick="location.href='index.html'">Exit</button>
+    </div>
   </div>
 </div>
 
@@ -348,6 +400,7 @@
 <script src="math_modules.js"></script>
 <script src="math_explain.js"></script>
 <script src="hardbank.js"></script>
+<script src="exam.js?v=1"></script>
 <script>
 const P = new URLSearchParams(location.search);
 const testId    = P.get('test')   || 'mathtest01';
@@ -357,11 +410,25 @@ const modId     = P.get('module') || '1A';
 const HARD_MODE = testId === 'hard';
 const modWord   = HARD_MODE ? 'Set' : 'Module';
 const modKey    = `${testId}_${modId}`;
+// Header title, e.g. "Section 2, Module 1: Math" (practice modules are named 1A/1B/2A/2B).
+const sectionTitle = HARD_MODE ? `Math: Hard Set ${modId}`
+  : /^[12]/.test(modId) ? `Section 2, Module ${modId[0]}: Math` : 'Section 2: Math';
+const contextLabel = `Math · ${testLabel} · ${modWord} ${modId}`; // the Report form's context and the title's tooltip
+window.SATReportContext = () => ({ module: contextLabel });
 
 let QS = [], answers = [], flagged = [], frInputs = [], checked = [];
 let cur = 0, submitted = false;
 let timerSecs = 35*60, timerHidden = false, timerTick = null;
-let activeTool = null, desmosCalc = null;
+let activeTool = null, desmosCalc = null, lastTool = 'desmos';
+// Answer elimination ("ABC" toggle, multiple choice only): eliminated[i] = Set of crossed-out choices.
+let elimMode = false, eliminated = [];
+
+// Own icons for the two Math tools (the shared ones come from exam.js).
+const MX_ICON = {
+  calc: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><rect x="8" y="5.5" width="8" height="4" rx=".5"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 16.5h.01M12 16.5h.01M15.5 16.5h.01" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  ref: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h9l4 4v15H6z"/><path d="M15 2.5v4h4"/><path d="M9 12.5l2.5 4 3.5-6"/></svg>'
+};
+document.querySelectorAll('.mx-ico[data-mx-icon]').forEach(el => { el.innerHTML = MX_ICON[el.dataset.mxIcon]; el.style.display = 'inline-flex'; });
 
 window.addEventListener('load', () => {
   if (typeof MATH_MODULES === 'undefined') {
@@ -377,16 +444,22 @@ window.addEventListener('load', () => {
   // Each question image is its own file (math_img/<page>.jpg); fetch this module's ones now so they're ready.
   QS.forEach(q => { if (q.page != null) new Image().src = mathImgSrc(q); });
 
-  answers   = new Array(QS.length).fill(null);
-  flagged   = new Array(QS.length).fill(false);
-  frInputs  = new Array(QS.length).fill('');
-  checked   = new Array(QS.length).fill(false);
+  answers    = new Array(QS.length).fill(null);
+  flagged    = new Array(QS.length).fill(false);
+  frInputs   = new Array(QS.length).fill('');
+  checked    = new Array(QS.length).fill(false);
+  eliminated = QS.map(() => new Set());
   // Hard sets vary in size: keep the real pace of 35 minutes per 22 questions.
-  if (HARD_MODE) { timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22)); drawTimer(); }
-  document.getElementById('tb-module').textContent  = `Math · ${testLabel} · ${modWord} ${modId}`;
+  if (HARD_MODE) timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22));
+  const titleEl = document.getElementById('ex-title');
+  titleEl.textContent = sectionTitle; titleEl.title = contextLabel;
+  document.getElementById('ex-navpop-title').textContent = `${sectionTitle} Questions`;
+  document.getElementById('ex-student').textContent = Exam.studentName();
   document.getElementById('score-sub').textContent  = `${testLabel} · ${modWord} ${modId}`;
+  // Phones: the response directions start folded so the question is on screen first.
+  if (window.matchMedia('(max-width: 760px)').matches) document.getElementById('fr-dir-details').open = false;
   document.getElementById('loading').classList.add('gone');
-  buildNav(); renderQ(0); startTimer();
+  buildNav(); renderQ(0); drawTimer(); startTimer();
 });
 
 // ── Timer ──────────────────────────────────────────────────────
@@ -407,43 +480,51 @@ function togglePause() {
   if (!timerPaused) timerSecs = Math.max(0, Math.ceil((timerDeadline - Date.now())/1000));
   else timerDeadline = Date.now() + timerSecs*1000; // resume: push the deadline back by the paused time
   timerPaused = !timerPaused;
-  drawTimer();
-  document.getElementById('tpause').textContent = timerPaused ? 'Resume' : 'Pause';
+  document.getElementById('pause-label').textContent = timerPaused ? 'Resume timer' : 'Pause timer';
   document.getElementById('timer').classList.toggle('paused', timerPaused);
+  drawTimer();
 }
 function drawTimer() {
   const el = document.getElementById('timer');
-  if (timerHidden) { el.textContent='Hidden'; el.classList.remove('warn'); return; }
+  const tag = timerPaused && !submitted ? ' <span class="ex-paused-tag">Paused</span>' : '';
+  if (timerHidden) { el.innerHTML = Exam.icon.clock + '<span class="ex-sr">Timer hidden</span>' + tag; el.classList.remove('warning'); return; }
   const m = String(Math.floor(timerSecs/60)).padStart(2,'0');
   const s = String(timerSecs%60).padStart(2,'0');
-  el.textContent = `${m}:${s}`;
-  el.classList.toggle('warn', timerSecs<=300);
+  el.innerHTML = `${m}:${s}${tag}`;
+  el.classList.toggle('warning', timerSecs<=300);
 }
 function toggleTimer() {
   timerHidden = !timerHidden;
-  document.getElementById('ttog').textContent = timerHidden ? 'Show' : 'Hide';
+  const t = document.getElementById('ttog');
+  t.textContent = timerHidden ? 'Show' : 'Hide';
+  t.setAttribute('aria-label', timerHidden ? 'Show timer' : 'Hide timer');
   drawTimer();
 }
 
 // ── Tools ──────────────────────────────────────────────────────
+// The header's Calculator button opens the tool pane on the last tab used (graphing by default).
+function toggleCalc() { toggleTool(activeTool ? activeTool : lastTool); }
 function toggleTool(t) {
   const pane = document.getElementById('tool-pane');
   if (activeTool===t) { activeTool=null; pane.classList.add('closed'); }
-  else { activeTool=t; pane.classList.remove('closed'); switchTab(t); if(t==='desmos') initDesmos(); }
-  document.getElementById('btn-calc').classList.toggle('on', activeTool==='calc');
-  document.getElementById('btn-desmos').classList.toggle('on', activeTool==='desmos');
+  else { activeTool=t; pane.classList.remove('closed'); switchTab(t); }
+  const b = document.getElementById('btn-calc');
+  b.classList.toggle('is-open', !!activeTool); b.setAttribute('aria-pressed', !!activeTool);
+  document.getElementById('ex-body').classList.toggle('tool-open', !!activeTool);
 }
 function switchTab(t) {
   ['calc','desmos'].forEach(x => {
     document.getElementById(`ttab-${x}`).classList.toggle('on', x===t);
+    document.getElementById(`ttab-${x}`).setAttribute('aria-selected', x===t);
     document.getElementById(`tc-${x}`).classList.toggle('on', x===t);
   });
+  lastTool = t; if (activeTool) activeTool = t;
   if (t==='desmos') initDesmos();
 }
 function initDesmos() {
   if (desmosCalc) return;
   const el = document.getElementById('desmos-el');
-  if (typeof Desmos==='undefined') { el.innerHTML='<div style="padding:1rem;font-size:13px;color:var(--gray-mid)">Desmos needs internet.</div>'; return; }
+  if (typeof Desmos==='undefined') { el.innerHTML='<div style="padding:1rem;font-size:13px;color:var(--ex-muted)">The graphing calculator needs an internet connection. The Basic tab works offline.</div>'; return; }
   desmosCalc = Desmos.GraphingCalculator(el, {expressionsTopbar:true, keypad:true, border:false});
 }
 
@@ -466,39 +547,29 @@ function cEval() {
   } catch(e) { document.getElementById('c-res').textContent='Error'; }
 }
 
-// ── Nav ────────────────────────────────────────────────────────
-function buildNav() {
-  const nav = document.getElementById('q-nav');
-  nav.innerHTML = '';
-  QS.forEach((q,i) => {
-    const d = document.createElement('div');
-    d.className = 'qdot' + (q.is_mc ? '' : ' fr-dot');
-    d.textContent = i+1; d.id=`dot-${i}`;
-    d.title = q.is_mc ? 'Multiple choice' : 'Free response';
-    d.onclick = () => goTo(i);
-    nav.appendChild(d);
-  });
-  upNav();
+// ── Nav (footer "Question N of M" navigator) ───────────────────
+function navItems() {
+  return QS.map((q,i) => ({
+    answered: hasAnswer(i), flagged: flagged[i],
+    checked: checked[i] && !submitted ? (isRight(i) ? 'right' : 'wrong') : null,
+    result: submitted && hasAnswer(i) ? (isRight(i) ? 'correct' : 'incorrect') : null
+  }));
 }
+function buildNav() { document.getElementById('q-nav').innerHTML = ''; upNav(); }
 function upNav() {
-  QS.forEach((q,i) => {
-    const d = document.getElementById(`dot-${i}`);
-    d.className = 'qdot' + (q.is_mc ? '' : ' fr-dot');
-    if (i===cur) d.classList.add('cur');
-    const hasAns = q.is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
-    if (hasAns) d.classList.add('ans');
-    if (flagged[i]) d.classList.add('flag');
-    if (checked[i] && !submitted) { const ok = isRight(i); d.classList.add(ok ? 'chk-ok' : 'chk-bad'); d.title += ok ? ' · checked: correct' : ' · checked: incorrect'; }
-  });
-  // Keep the current dot visible in the sideways-scrolling nav (only the nav scrolls, never the page).
-  const nav = document.getElementById('q-nav'), curDot = document.getElementById(`dot-${cur}`);
-  if (nav && curDot) {
-    const nr = nav.getBoundingClientRect(), dr = curDot.getBoundingClientRect();
-    if (dr.left < nr.left) nav.scrollLeft -= nr.left - dr.left;
-    else if (dr.right > nr.right) nav.scrollLeft += dr.right - nr.right;
-  }
+  Exam.renderNavGrid(document.getElementById('q-nav'), navItems(), cur, goTo, 'dot-');
+  QS.forEach((q,i) => { const d = document.getElementById(`dot-${i}`); if (d) d.title = q.is_mc ? 'Multiple choice' : 'Student-produced response'; });
+  const total = QS.length;
+  document.getElementById('ex-navbtn-label').innerHTML = `Question ${cur + 1}<span class="ex-navbtn-of"> of ${total}</span>`;
+  document.getElementById('ex-navbtn').setAttribute('aria-label', `Question ${cur + 1} of ${total}. Open the question navigator`);
+  document.getElementById('btn-back').hidden = cur === 0;
+  document.getElementById('btn-next').textContent = cur === total - 1 ? (submitted ? 'Results' : 'Review') : 'Next';
 }
-function goTo(i) { saveFrInput(); cur=i; renderQ(i); upNav(); }
+function goTo(i) {
+  Exam.closePopovers(false);
+  saveFrInput(); cur=i; renderQ(i); upNav();
+  ['#ex-body', '#q-pane', '#fr-dir'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
+}
 function prevQ() { if(cur>0) goTo(cur-1); }
 function nextQ() { if(cur<QS.length-1) goTo(cur+1); else openReview(); }
 
@@ -527,100 +598,198 @@ function upCheckBtn(i) {
 // Question images live in math_img/, one file per page number.
 function mathImgSrc(q) { return q && q.page != null ? `math_img/${q.page}.jpg` : ''; }
 
+// The question images are fixed-size pages with a lot of empty white space under the question.
+// Trim the box to the last non-white row (plus a margin) so the answer choices sit right under it.
+const IMG_CROP = {};
+function cropImg(img) {
+  const src = img.getAttribute('src');
+  const box = img.parentElement;
+  if (!box || !box.classList.contains('q-img-crop')) return;
+  if (!(src in IMG_CROP)) {
+    IMG_CROP[src] = '';
+    try {
+      const w = img.naturalWidth, h = img.naturalHeight, c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, w, h).data;
+      let last = 0;
+      for (let y = h - 1; y >= 0 && !last; y--) {
+        for (let x = 0, o = y * w * 4; x < w; x++, o += 4) if (d[o] + d[o + 1] + d[o + 2] < 600) { last = y; break; }
+      }
+      if (last && last < h - 40) IMG_CROP[src] = `${w} / ${Math.min(h, last + 32)}`;
+    } catch (e) {} // can't read the pixels (e.g. opened from disk): show the whole image
+  }
+  if (IMG_CROP[src]) box.style.aspectRatio = IMG_CROP[src];
+}
+
+// "Answer Preview": what the student typed, with a fraction drawn as one.
+function previewHTML(v) {
+  const s = String(v || '').trim();
+  if (!s) return '';
+  const m = /^([-−]?)([^/]+)\/([^/]+)$/.exec(s);
+  return m ? `${m[1] ? '−' : ''}<span class="mx-frac"><span>${escH(m[2])}</span><span>${escH(m[3])}</span></span>` : escH(s.replace(/^-/, '−'));
+}
+function lenNote(v) {
+  const s = String(v || '').trim().replace(/^[-−]/, '');
+  return s.length > 5 ? `The answer box holds 5 characters (6 for a negative answer); this is ${s.length}.` : '';
+}
+function frTyped(i, el) {
+  frInputs[i] = el.value; upNav(); upCheckBtn(i);
+  document.getElementById('fr-preview').innerHTML = previewHTML(el.value);
+  document.getElementById('fr-len').textContent = lenNote(el.value);
+}
+
+// Domain · skill · difficulty: only once the answer is revealed, so it isn't a hint while answering.
+function metaHTML(q) {
+  const bits = [q.domain, q.skill, q.difficulty].filter(Boolean).map(escH);
+  return bits.length ? `<div class="ex-meta">${bits.join(' · ')}</div>` : '';
+}
+
 // ── Render ─────────────────────────────────────────────────────
 function renderQ(i) {
   const q = QS[i];
   const imgSrc = mathImgSrc(q);
-  const diffCls = {Easy:'d-easy',Medium:'d-med',Hard:'d-hard'}[q.difficulty]||'';
   const rev = submitted || checked[i]; // graded view: after final Submit, or this question was checked
+  const letters = ['A','B','C','D'];
+  const main = document.getElementById('mx-main');
+  main.classList.toggle('is-mc', !!q.is_mc); main.classList.toggle('is-fr', !q.is_mc);
 
   // Build answer section
-  let ansHtml = '';
+  let ansHtml = '', resultHtml = '';
   if (q.is_mc) {
-    const letters = ['A','B','C','D'];
-    const btns = letters.map((l,li) => {
-      let cls = 'mc-btn';
+    const rows = letters.map((l,li) => {
+      let cls = 'answer-option';
       if (rev) {
-        if (!submitted) cls+=' locked';
         if (li===q.answer_idx) cls+=' correct';
-        else if (answers[i]===li && li!==q.answer_idx) cls+=' wrong';
-      } else {
-        if (answers[i]===li) cls+=' sel';
-      }
-      const label = q.question && q.choices ? `${l}.&nbsp; ${escH(q.choices[li])}` : l;
-      return `<button class="${cls}" style="${q.question ? 'width:auto;padding:0 14px;text-align:left' : ''}" onclick="selMC(${i},${li})"${rev && !submitted ? ' aria-disabled="true"' : ''}>${label}</button>`;
+        else if (answers[i]===li) cls+=' incorrect';
+      } else if (answers[i]===li) cls+=' selected';
+      const text = q.question && q.choices ? `<span class="answer-text">${escH(q.choices[li])}</span>` : `<span class="answer-text mx-choice-lbl">Choice ${l}</span>`;
+      const out = eliminated[i].has(li);
+      return `<div class="ex-choice${out ? ' eliminated' : ''}">
+        <div class="${cls}" role="radio" tabindex="0" aria-checked="${answers[i]===li}" onclick="selMC(${i},${li})"${q.question ? '' : ` aria-label="Choice ${l}"`}${rev && !submitted ? ' aria-disabled="true"' : ''}>
+          <span class="answer-letter">${l}</span>${text}
+        </div>
+        ${elimBtnHTML(i, li)}
+      </div>`;
     }).join('');
+    ansHtml = `<div class="answers${rev ? ' locked revealed' : ''}${elimMode ? ' ex-elim-on' : ''}" role="radiogroup" aria-label="Answer choices">${rows}</div>`;
 
-    let hint = '';
     if (submitted) {
-      if (answers[i]===null) hint=`<span class="ans-hint">Unanswered — correct: ${letters[q.answer_idx]}</span>`;
-      else if (answers[i]===q.answer_idx) hint=`<span class="ans-hint ok">✓ Correct</span>`;
-      else hint=`<span class="ans-hint bad">✗ Incorrect — correct: ${letters[q.answer_idx]}</span>`;
+      if (answers[i]===null) resultHtml=`<span class="mx-hint skip">Unanswered — correct: ${letters[q.answer_idx]}</span>`;
+      else if (answers[i]===q.answer_idx) resultHtml=`<span class="mx-hint ok">✓ Correct</span>`;
+      else resultHtml=`<span class="mx-hint bad">✗ Incorrect — correct: ${letters[q.answer_idx]}</span>`;
     } else if (checked[i]) {
-      hint = answers[i]===q.answer_idx
-        ? `<span class="ans-hint ok" id="chk-res" tabindex="-1">✓ Correct</span>`
-        : `<span class="ans-hint bad" id="chk-res" tabindex="-1">✗ Incorrect — the answer is ${letters[q.answer_idx]}</span>`;
+      resultHtml = answers[i]===q.answer_idx
+        ? `<span class="mx-hint ok" id="chk-res" tabindex="-1" role="status">✓ Correct</span>`
+        : `<span class="mx-hint bad" id="chk-res" tabindex="-1" role="status">✗ Incorrect — the answer is ${letters[q.answer_idx]}</span>`;
     }
-    ansHtml = `<div class="mc-btns">${btns}${hint}</div>`;
   } else {
-    // Free response
+    // Student-produced response: the answer box and a preview of what was typed
     const val = frInputs[i] || '';
     if (rev) {
       const correct = q.answer_raw ? checkFR(val, q.answer_raw) : false;
       const clsInp  = !val.trim() ? '' : correct ? ' correct' : ' wrong';
-      const resHtml = !val.trim()
-        ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`
+      const res = !val.trim()
+        ? `<div class="fr-result bad">Unanswered — correct answer: <strong>${escH(q.answer_raw||'N/A')}</strong></div>`
         : correct
           ? `<div class="fr-result ok">✓ Correct</div>`
-          : `<div class="fr-result bad">✗ Incorrect — correct answer: <strong>${q.answer_raw||'N/A'}</strong></div>`;
-      const resOut = submitted ? resHtml : resHtml.replace('<div class="fr-result', '<div id="chk-res" tabindex="-1" class="fr-result');
+          : `<div class="fr-result bad">✗ Incorrect — correct answer: <strong>${escH(q.answer_raw||'N/A')}</strong></div>`;
+      resultHtml = submitted ? res : res.replace('<div class="fr-result', '<div id="chk-res" tabindex="-1" role="status" class="fr-result');
       ansHtml = `<div class="fr-wrap">
-        <div class="fr-label">Your answer</div>
         <input class="fr-input${clsInp}" value="${escH(val)}" readonly aria-label="Your answer (locked)" />
-        ${resOut}
+        <div class="mx-preview"><span class="mx-preview-lbl">Answer Preview:</span> <span class="mx-preview-val">${previewHTML(val)}</span></div>
       </div>`;
     } else {
       ansHtml = `<div class="fr-wrap">
-        <div class="fr-label">Enter your answer</div>
-        <input id="fr-inp" class="fr-input" type="text" inputmode="text"
+        <input id="fr-inp" class="fr-input" type="text" inputmode="text" aria-label="Your answer"
           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
-          value="${escH(val)}" placeholder="e.g. 3/2"
-          oninput="frInputs[${i}]=this.value;upNav();upCheckBtn(${i})"
+          value="${escH(val)}"
+          oninput="frTyped(${i},this)"
           onkeydown="if(event.key==='Enter'&&${i}<QS.length-1)goTo(${i}+1)" />
+        <div class="mx-preview" aria-live="polite"><span class="mx-preview-lbl">Answer Preview:</span> <span class="mx-preview-val" id="fr-preview">${previewHTML(val)}</span></div>
+        <div class="mx-len-note" id="fr-len">${lenNote(val)}</div>
       </div>`;
     }
   }
 
+  const stem = q.question
+    ? `<div class="q-text-block">${escH(q.question)}</div>`
+    : imgSrc ? `<div class="q-img-wrap"><div class="q-img-crop"${IMG_CROP[imgSrc] ? ` style="aspect-ratio:${IMG_CROP[imgSrc]}"` : ''}><img src="${imgSrc}" alt="Question ${i+1}" onload="cropImg(this)" onerror="this.parentElement.innerHTML='<div class=&quot;q-img-err&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check your connection and reload the page.</div>'"/></div></div>`
+    : `<div class="q-img-err">No image for question ${escH(q.id)}.</div>`;
+
+  let checkHtml = '';
+  if (!rev) checkHtml = `<div class="check-row"><button class="btn-check" id="chk-btn" type="button" onclick="checkQ(${i})" ${hasAnswer(i)?'':'disabled'}>Check answer</button></div>`;
+  else checkHtml = `<div class="check-row">${resultHtml}${!submitted ? '<span class="chk-lock">Answer locked</span>' : ''}</div>`;
+
   document.getElementById('q-pane').innerHTML = `
-    <div class="q-meta">
-      <span>${q.domain}</span>
-      <span class="skill-tag">${q.skill}</span>
-      ${q.difficulty?`<span class="diff-tag ${diffCls}">${q.difficulty}</span>`:''}
-      ${q.is_mc?'':`<span style="font-size:10px;color:var(--gray-mid);border:1px solid var(--gray-border);border-radius:2px;padding:2px 7px;font-family:'DM Mono',monospace">Free Response</span>`}
-    </div>
-    <div class="q-num">Question ${i+1} of ${QS.length}</div>
-    ${q.question ? `<div class="q-text-block" style="font-size:16px;line-height:1.6;padding:1rem 1.25rem;border:1px solid var(--gray-border);border-radius:4px;background:var(--white)">${escH(q.question)}</div>` : imgSrc?`<div class="q-img-wrap"><img src="${imgSrc}" alt="Q${i+1}" onerror="this.parentElement.innerHTML='<div style=&quot;padding:1rem;color:var(--incorrect);font-size:13px&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check your connection and reload the page.</div>'"/></div>`
-            :`<div style="padding:1rem;color:var(--gray-mid);font-size:13px">No image for question ${q.id}.</div>`}
-    ${ansHtml}
-    ${!rev ? `<div class="check-row"><button class="btn-check" id="chk-btn" type="button" onclick="checkQ(${i})" ${hasAnswer(i)?'':'disabled'}>Check answer</button></div>`
-           : (!submitted ? `<div class="check-row"><span class="chk-lock">Checked — answer locked</span></div>` : '')}
-    ${rev && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
-    <label class="flag-row">
-      <input type="checkbox" ${flagged[i]?'checked':''} onchange="flagged[${i}]=this.checked;upNav()">
-      <span class="flag-lbl">Flag for review</span>
-    </label>`;
+    <div class="ex-question-inner">
+      <div class="ex-qhead">
+        <span class="ex-qnum" aria-label="Question ${i + 1}">${i + 1}</span>
+        <button type="button" class="ex-mark" id="flag-btn" aria-pressed="${!!flagged[i]}" onclick="toggleFlag(${i})">${flagged[i] ? Exam.icon.bookmarkFill : Exam.icon.bookmark}<span>Mark for Review</span></button>
+        ${q.is_mc ? `<button type="button" class="ex-abc" id="btn-abc" aria-pressed="${elimMode}" onclick="toggleElimMode()" title="Cross out answer choices" aria-label="Answer elimination"${rev ? ' disabled' : ''}>ABC</button>` : ''}
+      </div>
+      ${stem}
+      ${ansHtml}
+      ${checkHtml}
+      ${rev && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
+      ${rev ? metaHTML(q) : ''}
+    </div>`;
 
-  document.getElementById('btn-next').textContent = i===QS.length-1 ? 'Review →' : 'Next →';
-
-  // Auto-focus FR input
-  if (!rev && !q.is_mc) {
-    setTimeout(() => { const el=document.getElementById('fr-inp'); if(el) el.focus(); }, 50);
+  // Auto-focus the answer box (not on phones, where it would pop the keyboard over the question)
+  if (!rev && !q.is_mc && !window.matchMedia('(max-width: 760px)').matches) {
+    setTimeout(() => { const el=document.getElementById('fr-inp'); if(el) el.focus({preventScroll:true}); }, 50);
   }
 }
 
 function selMC(qi, li) {
   if (submitted || checked[qi]) return;
-  answers[qi]=li; upNav(); renderQ(qi);
+  answers[qi]=li; eliminated[qi].delete(li); // picking a crossed-out choice brings it back
+  upNav(); paintChoices(qi);
+}
+
+// Redraw the choices' selected / crossed-out state in place (keeps the image and scroll position).
+function paintChoices(qi) {
+  if (qi !== cur) return;
+  document.querySelectorAll('#q-pane .ex-choice').forEach((row, k) => {
+    row.classList.toggle('eliminated', eliminated[qi].has(k));
+    const opt = row.querySelector('.answer-option');
+    opt.classList.toggle('selected', answers[qi] === k);
+    opt.setAttribute('aria-checked', answers[qi] === k);
+    const old = row.querySelector('.ex-elim');
+    const hadFocus = old && document.activeElement === old;
+    if (old) old.outerHTML = elimBtnHTML(qi, k);
+    if (hadFocus) row.querySelector('.ex-elim').focus();
+  });
+  upCheckBtn(qi);
+}
+
+// ── Answer elimination ────────────────────────────────────────
+function elimBtnHTML(qi, ci) {
+  const L = ['A','B','C','D'][ci];
+  return eliminated[qi] && eliminated[qi].has(ci)
+    ? `<button type="button" class="ex-elim is-undo" onclick="toggleElim(${qi},${ci})" aria-label="Undo crossing out choice ${L}">Undo</button>`
+    : `<button type="button" class="ex-elim" onclick="toggleElim(${qi},${ci})" aria-label="Cross out choice ${L}">${L}</button>`;
+}
+function toggleElimMode() {
+  elimMode = !elimMode;
+  const b = document.getElementById('btn-abc');
+  if (b) b.setAttribute('aria-pressed', elimMode);
+  const box = document.querySelector('#q-pane .answers');
+  if (box) box.classList.toggle('ex-elim-on', elimMode);
+}
+function toggleElim(qi, ci) {
+  if (submitted || checked[qi]) return;
+  const set = eliminated[qi];
+  if (set.has(ci)) set.delete(ci);
+  else { set.add(ci); if (answers[qi] === ci) { answers[qi] = null; upNav(); } } // a crossed-out choice can't stay picked
+  paintChoices(qi);
+}
+
+function toggleFlag(qi) {
+  flagged[qi] = !flagged[qi];
+  const b = document.getElementById('flag-btn');
+  if (b) { b.setAttribute('aria-pressed', flagged[qi]); b.querySelector('svg').outerHTML = flagged[qi] ? Exam.icon.bookmarkFill : Exam.icon.bookmark; }
+  upNav();
 }
 
 function escH(s) {
@@ -658,24 +827,26 @@ function checkFR(input, correct) {
   });
 }
 
-// ── Review ─────────────────────────────────────────────────────
+// ── Review ("Check Your Work") ─────────────────────────────────
 function openReview() {
   saveFrInput();
+  Exam.closePopovers(false);
   if (submitted) { openO('score-o'); return; } // already graded: show the results, don't offer a second submit
-  const ua = QS.filter((q,i) => q.is_mc ? answers[i]===null : frInputs[i].trim()==='').length;
+  const ua = QS.filter((q,i) => !hasAnswer(i)).length;
   const fl = flagged.filter(Boolean).length;
-  document.getElementById('rev-sub').textContent = `${ua} unanswered · ${fl} flagged`;
+  document.getElementById('rev-sub').textContent = `${ua} unanswered · ${fl} marked for review. Select a question to go back to it, or submit when you're done.`;
+  Exam.renderNavGrid(document.getElementById('review-grid'), navItems(), -1, i => { closeO('rev-o'); goTo(i); });
   const letters = ['A','B','C','D'];
   document.getElementById('rev-list').innerHTML = QS.map((q,i) => {
-    let st, stCls;
-    if (q.is_mc) { st = answers[i]===null ? 'Not answered' : `Answer ${letters[answers[i]]}`; }
-    else { st = frInputs[i].trim()==='' ? 'Not answered' : `"${escH(frInputs[i].trim().slice(0,12))}"` ; }
-    const fl = flagged[i] ? ' <span style="color:#c0392b;font-size:11px">★</span>':''
-    const frBadge = q.is_mc ? '' : ' <span style="font-size:10px;color:var(--gray-mid)">[FR]</span>';
-    return `<div class="rev-item" onclick="closeO('rev-o');goTo(${i})">
-      <div class="rev-num">${i+1}</div>
-      <div style="flex:1;color:var(--black)">${q.domain}${frBadge}</div>
-      <div style="font-size:12px;color:var(--gray-mid)">${st}${fl}</div>
+    let st;
+    if (q.is_mc) st = answers[i]===null ? '<span style="color:var(--ex-muted)">Not answered</span>' : `<span>Answer ${letters[answers[i]]}</span>`;
+    else st = frInputs[i].trim()==='' ? '<span style="color:var(--ex-muted)">Not answered</span>' : `<span>"${escH(frInputs[i].trim().slice(0,12))}"</span>`;
+    const flagMark = flagged[i] ? ` <span class="review-flag">${Exam.icon.bookmarkFill}For review</span>` : '';
+    const frBadge = q.is_mc ? '' : '<span class="review-fr" title="Student-produced response">SPR</span>';
+    return `<div class="review-item" onclick="closeO('rev-o');goTo(${i})">
+      <div class="review-num">${i+1}</div>
+      <div class="review-q">${escH(q.domain)}${frBadge}</div>
+      <div>${st}${flagMark}</div>
     </div>`;
   }).join('');
   openO('rev-o');
@@ -698,11 +869,8 @@ async function submitTest() {
     return checkFR(frInputs[i], q.answer_raw);
   });
   const correct   = isCorrect.filter(Boolean).length;
-  const incorrect = QS.filter((_,i) => {
-    const hasAns = QS[i].is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
-    return hasAns && !isCorrect[i];
-  }).length;
-  const unanswered = QS.filter((q,i) => q.is_mc ? answers[i]===null : frInputs[i].trim()==='').length;
+  const incorrect = QS.filter((_,i) => hasAnswer(i) && !isCorrect[i]).length;
+  const unanswered = QS.filter((q,i) => !hasAnswer(i)).length;
   const pct = Math.round(correct/total*100);
 
   document.getElementById('score-num').textContent = `${correct}/${total}`;
@@ -721,30 +889,30 @@ async function submitTest() {
     if (!dqs.length) continue;
     const dc = dqs.filter(({q,i})=>isCorrect[i]).length;
     const bp = Math.round(dc/dqs.length*100);
-    dHtml += `<div class="dom-row"><div class="dom-name">${shortD[d]}</div><div class="bar-wrap"><div class="bar-fill" style="width:${bp}%"></div></div><div class="dom-sc">${dc}/${dqs.length}</div></div>`;
+    dHtml += `<div class="domain-row"><div class="domain-name">${shortD[d]}</div><div class="domain-bar-wrap"><div class="domain-bar" style="width:${bp}%"></div></div><div class="domain-score">${dc}/${dqs.length}</div></div>`;
     domainData.push({ name: shortD[d], correct: dc, total: dqs.length, pct: bp });
   }
   document.getElementById('dom-break').innerHTML = dHtml;
 
-  const letters=['A','B','C','D'];
   const reviewData = [];
   document.getElementById('score-rev-list').innerHTML = QS.map((q,i) => {
-    let cls='rd-skip', lbl='Unanswered';
-    const hasAns = q.is_mc ? answers[i]!==null : frInputs[i].trim()!=='';
-    if (hasAns) { cls=isCorrect[i]?'rd-ok':'rd-bad'; lbl=isCorrect[i]?'Correct':'Incorrect'; }
+    let cls='status-unanswered', lbl='Unanswered';
+    const hasAns = hasAnswer(i);
+    if (hasAns) { cls=isCorrect[i]?'status-correct':'status-incorrect'; lbl=isCorrect[i]?'Correct':'Incorrect'; }
     reviewData.push({ num:i+1, domain:q.domain, status: !hasAns?'unanswered':(isCorrect[i]?'correct':'incorrect') });
-    const frB = q.is_mc ? '' : ' [FR]';
-    return `<div class="rev-item" onclick="closeO('score-o');goTo(${i})">
-      <div class="rev-num">${i+1}</div>
-      <div class="rev-dot ${cls}"></div>
-      <div style="flex:1;color:var(--black)">${q.domain}${frB}</div>
-      <div style="font-size:12px;color:var(--gray-mid)">${lbl}</div>
+    const frB = q.is_mc ? '' : '<span class="review-fr" title="Student-produced response">SPR</span>';
+    return `<div class="review-item" onclick="closeO('score-o');goTo(${i})">
+      <div class="review-num">${i+1}</div>
+      <div class="review-status ${cls}"></div>
+      <div class="review-q">${escH(q.domain)}${frB}</div>
+      <div style="font-size:12px;color:var(--ex-muted)">${lbl}</div>
     </div>`;
   }).join('');
 
   // Show the results first; saving runs in the background so a slow or hung server can't block them.
-  closeO('rev-o'); openO('score-o');
-  renderQ(cur);
+  closeO('rev-o'); Exam.closePopovers(false); openO('score-o');
+  drawTimer(); renderQ(cur); upNav();
+  const pb = document.getElementById('tpause'); if (pb) pb.disabled = true;
 
   Promise.resolve().then(() => saveScoreHistory({
     type: 'math', typeLabel: 'Math',
@@ -758,18 +926,22 @@ async function submitTest() {
 
 function openO(id)  { document.getElementById(id).classList.add('open'); }
 function closeO(id) { document.getElementById(id).classList.remove('open'); }
-// Two clicks instead of a popup (native confirm dialogs are blocked in some browsers):
-// the first click arms the button, a second click within 3 seconds leaves.
-function confirmExit() {
-  const btn = document.querySelector('[onclick^="confirmExit"]');
-  if (!btn || btn.dataset.armed !== '1') {
-    if (btn) { btn.dataset.armed = '1'; btn.textContent = 'Click again to exit'; setTimeout(() => { btn.dataset.armed = ''; btn.textContent = 'Exit'; }, 3000); }
-    return;
-  }
-  location.href = 'index.html';
-}
+// A small in-page dialog instead of confirm() (native dialogs are blocked in some browsers).
+function confirmExit() { openO('exit-o'); setTimeout(() => { const b = document.getElementById('exit-stay'); if (b) b.focus(); }, 0); }
+function openReport() { if (window.SATReport) SATReport.open(); }
+// Escape closes the topmost overlay (reference, exit, review).
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  for (const id of ['exit-o', 'ref-o', 'rev-o']) { const o = document.getElementById(id); if (o.classList.contains('open')) { closeO(id); return; } }
+});
+
+// ── Header menus, navigator, divider ──────────────────────────
+Exam.initPopovers();
+Exam.initDivider(document.getElementById('divider'), document.getElementById('fr-dir'), document.getElementById('mx-main'));
+document.getElementById('divider').setAttribute('aria-label', 'Resize the directions and question panes');
 </script>
 <script src="auth.js"></script>
 <script src="report.js"></script>
+<script src="kbd.js"></script>
 </body>
 </html>

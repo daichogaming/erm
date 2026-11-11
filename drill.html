@@ -14,453 +14,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAT Practice — Topical Drill</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=DM+Mono:wght@400;500" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --black: #111111; --gray-dark: #3A3A3A; --gray-mid: #767676;
       --gray-light: #C4C4C4; --gray-border: #DCDCDC; --gray-bg: #F5F5F5;
-      --white: #f2f2f2; --answer-hover: #F0F0F0; --answer-selected: #111111;
-      --answer-selected-text: #FFFFFF; --correct: #1a7a3c; --incorrect: #c0392b;
+      --white: #f2f2f2; --correct: #1a7a3c; --incorrect: #c0392b;
     }
     :root[data-theme="dark"] {
       --black: #EDEDED; --gray-dark: #C7C7C7; --gray-mid: #9A9A9A;
-      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B;
-      --white: #121212; --answer-hover: #232323; --answer-selected: #EDEDED;
-      --answer-selected-text: #121212;
+      --gray-light: #5A5A5A; --gray-border: #333333; --gray-bg: #1B1B1B; --white: #121212;
     }
-    html, body { font-family: 'Roboto', sans-serif; background: var(--white); color: var(--black); height: 100%; font-size: 15px; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background .2s ease, color .2s ease; }
-
-    /* ── TOP BAR ── */
-    .top-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1.5rem; height: 52px;
-      border-bottom: 1px solid var(--gray-border);
-      background: var(--white); position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    }
-    .top-bar-left { display: flex; align-items: center; gap: 1rem; }
-    .top-bar-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; color: var(--black); text-transform: uppercase; }
-    .top-bar-sep { color: var(--gray-border); font-size: 18px; font-weight: 200; }
-    .top-bar-module { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.05em; }
-    .top-bar-center { display: flex; align-items: center; gap: 0.5rem; }
-    .timer {
-      font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500;
-      color: var(--black); letter-spacing: 0.06em; min-width: 68px; text-align: center;
-    }
-    .timer.warning { color: #c0392b; }
-    .timer.paused { color: var(--gray-mid); }
-    .timer-toggle {
-      font-size: 11px; color: var(--gray-mid); cursor: pointer;
-      border: 1px solid var(--gray-border); border-radius: 4px;
-      padding: 3px 8px; font-family: 'DM Mono', monospace;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .timer-toggle:hover { color: var(--black); border-color: var(--black); }
-    .top-bar-right { display: flex; align-items: center; gap: 0.75rem; }
-    .btn-exit {
-      font-size: 13px; color: var(--gray-mid); background: none;
-      border: 1px solid var(--gray-border); border-radius: 6px;
-      padding: 6px 14px; cursor: pointer; font-family: 'Roboto', sans-serif;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .btn-exit:hover { color: var(--black); border-color: var(--black); }
+    html, body { height: 100%; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    /* The exam layout (header, panes, choices, navigator, footer) lives in exam.css; only this page's overlays are here. */
 
     /* ── LOADING STATE ── */
     .loading-screen {
-      position: fixed; inset: 0; background: var(--white);
-      display: flex; align-items: center; justify-content: center;
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
       flex-direction: column; gap: 1rem; z-index: 500;
     }
     .loading-screen.hidden { display: none; }
     .loading-spinner {
-      width: 32px; height: 32px; border: 2px solid var(--gray-border);
-      border-top-color: var(--black); border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      width: 32px; height: 32px; border: 2px solid var(--ex-line, #ddd);
+      border-top-color: var(--ex-blue, #3046c5); border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); letter-spacing: 0.08em; }
-
-    /* ── MAIN LAYOUT ── */
-    .test-body {
-      position: fixed; top: 52px; bottom: 56px; left: 0; right: 0;
-      display: flex; overflow: hidden;
-    }
-
-    /* ── DRAGGABLE DIVIDER ── */
-    .divider {
-      width: 6px; flex-shrink: 0; cursor: col-resize;
-      background: var(--gray-border);
-      position: relative; z-index: 10;
-      transition: background 0.15s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .divider:hover, .divider.dragging { background: var(--gray-mid); }
-    .divider::after {
-      content: '';
-      width: 2px; height: 32px;
-      background: var(--gray-light);
-      border-radius: 2px;
-      display: block;
-    }
-    .divider:hover::after, .divider.dragging::after { background: var(--white); }
-
-    /* ── PASSAGE PANE ── */
-    .passage-pane {
-      flex: 1; overflow-y: auto; padding: 2.5rem 2rem 2.5rem 2.5rem;
-      min-width: 200px;
-    }
-    .passage-context {
-      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1.25rem;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .passage-skill-tag {
-      background: var(--gray-bg); border: 1px solid var(--gray-border);
-      border-radius: 2px; padding: 2px 8px; font-size: 10px; color: var(--gray-mid);
-      font-family: 'DM Mono', monospace; letter-spacing: 0.06em;
-    }
-    .passage-difficulty {
-      padding: 2px 8px; border-radius: 2px; font-size: 10px;
-      font-family: 'DM Mono', monospace; letter-spacing: 0.06em;
-      border: 1px solid var(--gray-border);
-    }
-    .diff-easy { color: #1a7a3c; border-color: #b7dfc7; background: #edf7f1; }
-    .diff-medium { color: #7a5c00; border-color: #e0d0a0; background: #fdf9ed; }
-    .diff-hard { color: #c0392b; border-color: #f0b0a8; background: #fdf0ee; }
-    .passage-text {
-      font-family: 'Roboto', sans-serif; font-size: 15px; line-height: 1.85;
-      color: var(--black); font-weight: 300;
-    }
-    .passage-text p + p { margin-top: 1rem; }
-    .passage-label {
-      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid);
-      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; margin-top: 1.5rem;
-    }
-    .passage-label:first-child { margin-top: 0; }
-
-    /* ── QUESTION PANE ── */
-    .question-pane {
-      width: 420px; flex-shrink: 0; overflow-y: auto;
-      padding: 2.5rem 2.5rem 2.5rem 2rem;
-      display: flex; flex-direction: column;
-      min-width: 280px;
-    }
-    .q-number {
-      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--gray-mid); margin-bottom: 1rem;
-    }
-    .q-text {
-      font-family: 'Roboto', sans-serif; font-size: 16px; font-weight: 400;
-      line-height: 1.65; color: var(--black); margin-bottom: 2rem;
-    }
-    .answers { display: flex; flex-direction: column; gap: 0.6rem; }
-    .answer-option {
-      display: flex; align-items: flex-start; gap: 0.85rem;
-      padding: 0.85rem 1rem; border: 1px solid var(--gray-border);
-      border-radius: 4px; cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      background: var(--white);
-    }
-    .answer-option:hover { border-color: var(--black); background: var(--answer-hover); }
-    .answer-option.selected { border-color: var(--black); background: var(--answer-selected); }
-    .answer-option.selected .answer-letter,
-    .answer-option.selected .answer-text { color: var(--white); }
-    .answer-option.correct { border-color: var(--correct); background: #edf7f1; }
-    .answer-option.correct .answer-letter,
-    .answer-option.correct .answer-text { color: var(--correct); }
-    .answer-option.incorrect { border-color: var(--incorrect); background: #fdf0ee; }
-    .answer-option.incorrect .answer-letter,
-    .answer-option.incorrect .answer-text { color: var(--incorrect); }
-    .answer-letter {
-      font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500;
-      color: var(--gray-mid); min-width: 18px; padding-top: 1px;
-      transition: color 0.15s;
-    }
-    .answer-text { font-size: 14px; color: var(--black); line-height: 1.5; transition: color 0.15s; }
-    .flag-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; cursor: pointer; width: fit-content; }
-    .flag-row input[type="checkbox"] { accent-color: var(--black); width: 14px; height: 14px; cursor: pointer; }
-    .flag-label { font-size: 12px; color: var(--gray-mid); cursor: pointer; user-select: none; }
-
-    /* ── RATIONALE BOX (post-submit) ── */
-    .rationale-box {
-      margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--gray-border);
-      border-radius: 4px; background: var(--gray-bg);
-      font-size: 13px; color: var(--gray-dark); line-height: 1.6;
-    }
-    .rationale-label {
-      font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-      letter-spacing: 0.1em; color: var(--gray-mid); margin-bottom: 0.5rem;
-    }
-
-    /* ── CHECK ANSWER (one question at a time, before the final Submit) ── */
-    .check-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 0.85rem; margin-top: 1.25rem; }
-    .btn-check {
-      font-size: 13px; font-family: inherit; font-weight: 500;
-      border: 1px solid var(--black); background: var(--card, var(--white)); color: var(--black);
-      border-radius: 6px; padding: 7px 18px; cursor: pointer;
-      transition: color 0.15s, border-color 0.15s, background 0.15s;
-    }
-    .btn-check:hover:not(:disabled) { border-color: var(--gold, var(--black)); color: var(--gold-deep, var(--black)); }
-    .btn-check:disabled { border-color: var(--gray-border); color: var(--gray-mid); cursor: not-allowed; opacity: 0.7; }
-    .check-result { font-size: 14px; font-weight: 500; line-height: 1.4; }
-    .check-result:focus { outline: none; }
-    .check-result.is-correct { color: var(--correct); }
-    .check-result.is-incorrect { color: var(--incorrect); }
-    .check-result.is-error { font-size: 13px; font-weight: 400; color: var(--gray-mid); }
-    :root[data-theme="dark"] .check-result.is-correct { color: #5fd08e; }
-    :root[data-theme="dark"] .check-result.is-incorrect { color: #ff8a7a; }
-    /* A checked question is locked: its choices no longer react to the pointer. */
-    .answers.locked .answer-option { cursor: default; }
-    .answers.locked .answer-option:not(.correct):not(.incorrect):hover { border-color: var(--gray-border); background: var(--card, var(--white)); }
-    .answers.locked .answer-option:not(.correct):not(.incorrect):hover .answer-letter { background: var(--gray-bg); color: var(--gray-dark); }
-    /* Nav dot of a checked question: small green / red corner mark. */
-    .q-dot { position: relative; }
-    .q-dot.checked::after {
-      content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px;
-      border-radius: 50%; border: 2px solid var(--white); background: var(--correct);
-    }
-    .q-dot.checked.checked-wrong::after { background: var(--incorrect); }
-
-    /* ── BOTTOM BAR ── */
-    .bottom-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
-      border-top: 1px solid var(--gray-border); background: var(--white);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1.5rem; gap: 1rem;
-    }
-    .q-nav { display: flex; align-items: center; gap: 6px; flex: 1; overflow-x: auto; padding: 4px 0; }
-    .q-dot {
-      width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--gray-border);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-mid);
-      cursor: pointer; flex-shrink: 0; transition: border-color 0.15s, background 0.15s, color 0.15s;
-    }
-    .q-dot:hover { border-color: var(--black); color: var(--black); }
-    .q-dot.active { border-color: var(--black); background: var(--black); color: var(--white); }
-    .q-dot.answered { border-color: var(--black); color: var(--black); }
-    .q-dot.flagged { border-color: #c0392b; color: #c0392b; }
-    .q-dot.flagged.answered { background: #fff5f5; }
-    .nav-buttons { display: flex; gap: 0.6rem; flex-shrink: 0; }
-    .btn-nav {
-      font-size: 13px; font-family: 'Roboto', sans-serif;
-      border: 1px solid var(--gray-border); background: var(--white);
-      border-radius: 6px; padding: 7px 18px; cursor: pointer;
-      color: var(--gray-mid); transition: color 0.15s, border-color 0.15s, background 0.15s;
-    }
-    .btn-nav:hover { color: var(--black); border-color: var(--black); }
-    .btn-nav.primary { background: var(--black); color: var(--white); border-color: var(--black); }
-    .btn-nav.primary:hover { background: var(--gray-dark); border-color: var(--gray-dark); }
+    .loading-label { font-size: 13px; color: var(--ex-muted, #666); }
+    .loading-error { font-size: 14px; color: #c0392b; max-width: 32rem; text-align: center; padding: 0 1rem; }
 
     /* ── REVIEW / SCORE OVERLAY ── */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
+    .overlay { display: none; position: fixed; inset: 0; z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
     .overlay.active { display: flex; }
-    .overlay-box {
-      background: var(--white); border-radius: 6px; width: 100%; max-width: 520px;
-      max-height: 80vh; overflow-y: auto; padding: 2.5rem; animation: fadeSlide 0.2s ease;
-    }
+    .overlay-box { width: 100%; max-width: 560px; max-height: 84vh; overflow-y: auto; padding: 2rem 2.25rem; animation: fadeSlide 0.2s ease; }
     @keyframes fadeSlide { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .overlay-title { font-family: 'Roboto', sans-serif; font-size: 26px; font-weight: 300; color: var(--black); margin-bottom: 0.5rem; }
-    .overlay-sub { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
-    .score-big { font-family: 'Roboto', sans-serif; font-size: 56px; font-weight: 300; color: var(--black); line-height: 1; }
-    .score-label { font-size: 13px; color: var(--gray-mid); margin-bottom: 1.5rem; }
-    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-border); }
-    .score-stat .num { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--black); }
-    .score-stat .lbl { font-size: 11px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
-    .domain-breakdown { margin-bottom: 2rem; }
-    .domain-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-border); font-size: 12px; }
-    .domain-name { flex: 1; color: var(--black); }
-    .domain-score { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-mid); }
-    .domain-bar-wrap { width: 80px; height: 4px; background: var(--gray-border); border-radius: 2px; }
-    .domain-bar { height: 4px; background: var(--black); border-radius: 2px; }
-    .review-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
-    .review-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--gray-border); font-size: 13px; cursor: pointer; }
-    .review-item:hover { color: var(--gray-mid); }
-    .review-num { font-family: 'DM Mono', monospace; width: 28px; color: var(--gray-mid); }
+    .overlay-title { margin-bottom: 0.4rem; }
+    .overlay-sub { font-size: 14px; color: var(--ex-muted); margin-bottom: 1.25rem; }
+    .score-big { font-size: 56px; font-weight: 700; line-height: 1; }
+    .score-label { font-size: 14px; color: var(--ex-muted); margin-bottom: 1.5rem; }
+    .score-breakdown { display: flex; gap: 2rem; margin-bottom: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--ex-line); }
+    .score-stat .num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .score-stat .lbl { font-size: 11px; color: var(--ex-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+    .domain-breakdown { margin-bottom: 1.75rem; }
+    .domain-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--ex-line); font-size: 13px; }
+    .domain-name { flex: 1; }
+    .domain-score { font-size: 13px; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
+    .domain-bar-wrap { width: 80px; height: 5px; background: var(--ex-band); border-radius: 3px; }
+    .domain-bar { height: 5px; background: var(--ex-blue) !important; border-radius: 3px; }
+    .review-grid { padding: 0.5rem 0 0.75rem; }
+    .review-list { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+    .review-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.25rem; border-bottom: 1px solid var(--ex-line); font-size: 13px; cursor: pointer; border-radius: 4px; }
+    .review-item:hover { background: var(--ex-band); }
+    .review-num { width: 28px; font-weight: 700; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
+    .review-q { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .review-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .status-correct { background: var(--correct); }
-    .status-incorrect { background: var(--incorrect); }
-    .status-unanswered { background: var(--gray-light); }
+    .status-correct { background: var(--ex-correct); }
+    .status-incorrect { background: var(--ex-incorrect); }
+    .status-unanswered { background: var(--ex-line); }
+    .review-flag { color: var(--ex-red); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
     .overlay-btn-row { display: flex; gap: 0.75rem; }
-    .overlay-btn { flex: 1; font-size: 13px; font-family: 'Roboto', sans-serif; border: 1px solid var(--gray-border); background: var(--white); border-radius: 6px; padding: 10px 0; cursor: pointer; color: var(--gray-mid); transition: color 0.15s, border-color 0.15s; }
-    .overlay-btn:hover { color: var(--black); border-color: var(--black); }
-    .overlay-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
-    .overlay-btn.primary:hover { background: var(--gray-dark); }
+    .overlay-btn { flex: 1; font-size: 14px; padding: 10px 0; cursor: pointer; }
+    @media (max-width: 760px) { .overlay-box { padding: 1.5rem 1.25rem; } .score-breakdown { gap: 1.25rem; } }
 
-    /* ── HIGHLIGHT & NOTES TOOLBAR ── */
-    .passage-toolbar {
-      display: flex; align-items: center; gap: 0.5rem;
-      margin-bottom: 1rem; flex-wrap: wrap;
-    }
-    .toolbar-label {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--gray-mid); margin-right: 0.25rem;
-    }
-    .hl-btn {
-      width: 22px; height: 22px; border-radius: 3px; border: 2px solid transparent;
-      cursor: pointer; transition: transform 0.1s, border-color 0.15s;
-      flex-shrink: 0;
-    }
-    .hl-btn:hover { transform: scale(1.15); }
-    .hl-btn.active { border-color: var(--black); }
-    .hl-btn.hl-yellow { background: #FFE066; }
-    .hl-btn.hl-green  { background: #A8E6CF; }
-    .hl-btn.hl-blue   { background: #A8D4F5; }
-    .hl-btn.hl-pink   { background: #F5A8C8; }
-    .toolbar-sep { width: 1px; height: 18px; background: var(--gray-border); margin: 0 0.25rem; }
-    .toolbar-action {
-      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--gray-mid); background: none;
-      border: 1px solid var(--gray-border); border-radius: 3px;
-      padding: 3px 8px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
-    }
-    .toolbar-action:hover { color: var(--black); border-color: var(--black); }
-    .toolbar-action.note-active { color: var(--black); border-color: var(--black); background: var(--gray-bg); }
-
-    /* Highlighted text spans */
-    .hl-yellow { background: #FFE066; color: #111; border-radius: 2px; cursor: pointer; }
-    .hl-green  { background: #A8E6CF; color: #111; border-radius: 2px; cursor: pointer; }
-    .hl-blue   { background: #A8D4F5; color: #111; border-radius: 2px; cursor: pointer; }
-    .hl-pink   { background: #F5A8C8; color: #111; border-radius: 2px; cursor: pointer; }
-    .hl-yellow:hover, .hl-green:hover, .hl-blue:hover, .hl-pink:hover {
-      filter: brightness(0.92);
-    }
-    /* Highlighted text with note indicator */
-    .has-note::after {
-      content: '✎'; font-size: 10px; vertical-align: super;
-      margin-left: 1px; opacity: 0.7;
-    }
-
-    /* ── NOTE POPUP ── */
-    .note-popup {
-      position: fixed; z-index: 350; background: var(--white);
-      border: 1px solid var(--gray-border); border-radius: 6px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      width: 260px; padding: 0.75rem;
-      animation: fadeSlide 0.15s ease;
-    }
-    .note-popup-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    .note-popup-label {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid);
-    }
-    .note-popup-close {
-      background: none; border: none; cursor: pointer;
-      font-size: 16px; color: var(--gray-mid); line-height: 1;
-      padding: 0; transition: color 0.15s;
-    }
-    .note-popup-close:hover { color: var(--black); }
-    .note-textarea {
-      width: 100%; min-height: 80px; resize: vertical;
-      border: 1px solid var(--gray-border); border-radius: 4px;
-      padding: 0.5rem; font-family: 'Roboto', sans-serif; font-size: 13px;
-      color: var(--black); outline: none; line-height: 1.5;
-      transition: border-color 0.15s;
-    }
-    .note-textarea:focus { border-color: var(--black); }
-    .note-popup-actions {
-      display: flex; gap: 0.5rem; margin-top: 0.5rem;
-    }
-    .note-save-btn {
-      flex: 1; font-size: 12px; font-family: 'Roboto', sans-serif;
-      background: var(--black); color: var(--white); border: none;
-      border-radius: 4px; padding: 6px 0; cursor: pointer;
-      transition: background 0.15s;
-    }
-    .note-save-btn:hover { background: var(--gray-dark); }
-    .note-delete-btn {
-      font-size: 12px; font-family: 'Roboto', sans-serif;
-      background: none; color: var(--incorrect);
-      border: 1px solid var(--incorrect); border-radius: 4px;
-      padding: 6px 10px; cursor: pointer; transition: background 0.15s;
-    }
-    .note-delete-btn:hover { background: #fdf0ee; }
-
-    /* ── NOTES PANEL (sidebar in question pane) ── */
-    .notes-panel {
-      margin-top: 1.5rem; border: 1px solid var(--gray-border);
-      border-radius: 4px; overflow: hidden;
-    }
-    .notes-panel-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 0.75rem; background: var(--gray-bg);
-      border-bottom: 1px solid var(--gray-border); cursor: pointer;
-    }
-    .notes-panel-title {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-mid);
-    }
-    .notes-panel-count {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      background: var(--black); color: var(--white);
-      border-radius: 10px; padding: 1px 6px;
-    }
-    .notes-panel-body { padding: 0.5rem 0.75rem; }
-    .note-entry {
-      padding: 0.5rem 0; border-bottom: 1px solid var(--gray-border);
-      font-size: 12px; line-height: 1.5;
-    }
-    .note-entry:last-child { border-bottom: none; }
-    .note-entry-quote {
-      font-style: italic; color: var(--gray-mid); margin-bottom: 0.2rem;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .note-entry-text { color: var(--black); }
-    .note-entry-edit {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      color: var(--gray-mid); cursor: pointer; margin-top: 0.2rem;
-      display: inline-block;
-    }
-    .note-entry-edit:hover { color: var(--black); }
-    .passage-text u {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    /* ── PASSAGE LAYOUT ── */
-    .passage-text { font-size: 15px; line-height: 1.75; color: var(--black); }
-    .passage-text p { margin: 0 0 1em 0; }
-    .passage-text p:last-child { margin-bottom: 0; }
-    /* Poem / structured text */
-    .passage-poem { font-size: 15px; line-height: 1.9; color: var(--black); font-family: 'Roboto', sans-serif; }
-    .passage-poem .pline { display: block; }
-    .passage-poem .pline-blank { display: block; height: 0.6em; }
-    .passage-poem .indent-0 { padding-left: 0; }
-    .passage-poem .indent-1 { padding-left: 1.2em; }
-    .passage-poem .indent-2 { padding-left: 2.4em; }
-    .passage-poem .indent-3 { padding-left: 3.6em; }
-    .passage-poem .indent-4 { padding-left: 4.8em; }
-    /* Table rendering */
-    .passage-table { width: 100%; border-collapse: collapse; margin: 0 0 1.2em 0; font-size: 13.5px; font-family: 'DM Mono', monospace; }
-    .passage-table-wrap { overflow-x: auto; margin-bottom: 1.2em; }
-    .passage-table-title { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 0.5em; color: var(--black); font-family: 'Roboto', sans-serif; line-height: 1.4; }
-    .passage-table th { background: var(--gray-border); font-weight: 600; padding: 6px 10px; border: 1px solid #bbb; text-align: center; font-size: 13px; }
-    .passage-table td { padding: 5px 10px; border: 1px solid #ccc; text-align: center; }
-    .passage-table tr:nth-child(even) td { background: var(--gray-bg); }
-    .passage-table td:first-child { text-align: left; }
-    .passage-table th:first-child { text-align: left; }
-    .passage-chart-note { font-size: 13px; color: #888; font-style: italic; border: 1px solid #ddd; padding: 8px 14px; border-radius: 4px; margin-bottom: 1em; }
-    .passage-chart-wrap { margin-bottom: 1em; text-align: center; }
-    .passage-chart-img { max-width: 100%; height: auto; border: 1px solid var(--gray-border); border-radius: 4px; }
-    .passage-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-      letter-spacing: 0.1em; color: var(--gray-mid); margin: 1.25rem 0 0.5rem 0; }
-    .passage-label:first-child { margin-top: 0; }
-
-    /* Phones: passage on top, question below, one scrolling page (the passage used to be hidden). */
-    @media (max-width: 720px) {
-      .test-body { flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-      .passage-pane { flex: none; overflow: visible; min-width: 0; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--gray-border); }
-      .divider { display: none; }
-      .question-pane { flex: none; overflow: visible; min-width: 0; width: 100% !important; padding: 1.25rem; }
-    }
+    /* ── Drill only ── */
+    /* Exit asks twice (no native confirm: it's blocked in some browsers); the armed item turns red. */
+    .exam .ex-menu [role="menuitem"].is-armed, .exam .ex-menu [role="menuitem"].is-armed svg { color: var(--ex-red); }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css?v=5" />
+  <link rel="stylesheet" href="exam.css?v=1" />
 </head>
-<body>
+<body class="exam">
 
 <!-- LOADING SCREEN -->
 <div class="loading-screen" id="loading-screen">
@@ -468,48 +92,94 @@
   <div class="loading-label">Loading questions…</div>
 </div>
 
-<!-- TOP BAR -->
-<div class="top-bar">
-  <div class="top-bar-left">
-    <div class="top-bar-logo">SAT Practice</div>
-    <div class="top-bar-sep">|</div>
-    <div class="top-bar-module" id="bar-module">Topical Drill · Loading…</div>
+<!-- HEADER -->
+<header class="ex-header">
+  <div class="ex-h-left">
+    <h1 class="ex-title" id="ex-title">Topical Drill</h1>
+    <button type="button" class="ex-linkbtn" id="btn-directions" data-ex-pop="ex-directions" aria-controls="ex-directions">Directions <span class="ex-ico" data-icon="chevDown"></span></button>
   </div>
-  <div class="top-bar-center">
-    <div class="timer" id="timer">32:00</div>
-    <button class="timer-toggle" id="timer-pause-btn" onclick="togglePause()">Pause</button>
-    <div class="timer-toggle" id="timer-toggle" onclick="toggleTimer()">Hide</div>
+  <div class="ex-h-center">
+    <div class="ex-timer" id="timer" role="timer" aria-live="off">--:--</div>
+    <button type="button" class="ex-pill" id="timer-toggle" onclick="toggleTimer()" aria-label="Hide timer">Hide</button>
   </div>
-  <div class="top-bar-right">
-    <button class="btn-exit" onclick="confirmExit()">Exit</button>
-    <button class="btn-nav primary" onclick="openReview()" style="font-size:13px;">Review & Submit</button>
+  <div class="ex-h-right">
+    <button type="button" class="ex-tool" id="btn-hl" data-ex-pop="ex-hlpanel" aria-controls="ex-hlpanel" title="Highlights &amp; Notes"><span class="ex-ico" data-icon="pen"></span><span class="ex-tool-label">Highlights &amp; Notes</span></button>
+    <button type="button" class="ex-tool" id="btn-more" data-ex-pop="ex-more" aria-controls="ex-more" aria-haspopup="menu" title="More"><span class="ex-ico" data-icon="more"></span><span class="ex-tool-label">More</span></button>
   </div>
+</header>
+
+<div class="ex-pop ex-directions" id="ex-directions" role="dialog" aria-label="Directions" hidden>
+  <h2>Directions</h2>
+  <p>This topical drill practices one Reading and Writing skill: <b id="dir-skill">this topic</b>. Each question includes one or more passages, which may include a table or graph. Read each passage and question carefully, and then choose the best answer to the question based on the passage(s).</p>
+  <p>All questions are multiple-choice with four answer choices. Each question has a single best answer. Use <b>Check answer</b> to see whether you got a question right as you go; the timer is paced like the real test.</p>
+  <div class="ex-pop-actions"><button type="button" class="ex-btn" onclick="Exam.closePopovers(true)" data-ex-autofocus>Close</button></div>
+</div>
+
+<div class="ex-pop ex-hlpanel" id="ex-hlpanel" role="dialog" aria-label="Highlights and notes" hidden>
+  <h2>Highlights &amp; Notes</h2>
+  <p>Select text in the passage to highlight it. Click a highlight to add a note or remove it.</p>
+  <div class="ex-hlrow">
+    <button type="button" class="hl-btn hl-yellow" id="hl-yellow" title="Yellow" aria-label="Yellow highlighter" onclick="setHighlightColor('hl-yellow')" data-ex-autofocus></button>
+    <button type="button" class="hl-btn hl-green"  id="hl-green"  title="Green"  aria-label="Green highlighter"  onclick="setHighlightColor('hl-green')"></button>
+    <button type="button" class="hl-btn hl-blue"   id="hl-blue"   title="Blue"   aria-label="Blue highlighter"   onclick="setHighlightColor('hl-blue')"></button>
+    <button type="button" class="hl-btn hl-pink"   id="hl-pink"   title="Pink"   aria-label="Pink highlighter"   onclick="setHighlightColor('hl-pink')"></button>
+    <button type="button" class="ex-textbtn" id="btn-clear-hl" onclick="clearAllHighlights()" title="Remove all highlights on this question">Clear all</button>
+  </div>
+</div>
+
+<div class="ex-pop ex-menu" id="ex-more" role="menu" aria-label="More" hidden>
+  <button type="button" role="menuitem" id="timer-pause-btn" onclick="togglePause()"><span class="ex-ico" data-icon="pause"></span><span id="pause-label">Pause timer</span></button>
+  <button type="button" role="menuitem" id="btn-report" onclick="openReport()"><span class="ex-ico" data-icon="flag"></span>Report a problem</button>
+  <hr />
+  <button type="button" role="menuitem" id="btn-exit" onclick="confirmExit(event)"><span class="ex-ico" data-icon="exit"></span><span id="exit-label">Exit</span></button>
 </div>
 
 <!-- MAIN -->
-<div class="test-body">
-  <div class="passage-pane" id="passage-pane"></div>
-  <div class="divider" id="divider"></div>
-  <div class="question-pane" id="question-pane"></div>
-</div>
+<main class="ex-body" id="ex-body">
+  <section class="ex-pane ex-passage" id="passage-pane" aria-label="Passage"></section>
+  <div class="ex-divider" id="divider"><span class="ex-divider-grip"><i></i><i></i><i></i></span></div>
+  <section class="ex-pane ex-question" id="question-pane" aria-label="Question"></section>
+</main>
 
-<!-- BOTTOM BAR -->
-<div class="bottom-bar">
-  <div class="q-nav" id="q-nav"></div>
-  <div class="nav-buttons">
-    <button class="btn-nav" onclick="prevQuestion()">← Back</button>
-    <button class="btn-nav primary" id="btn-next" onclick="nextQuestion()">Next →</button>
+<!-- FOOTER -->
+<footer class="ex-footer">
+  <div class="ex-f-left"><span class="ex-student" id="ex-student">Student</span></div>
+  <div class="ex-f-center">
+    <button type="button" class="ex-navbtn" id="ex-navbtn" data-ex-pop="ex-navpop" aria-controls="ex-navpop"><span id="ex-navbtn-label">Question 1</span> <span class="ex-ico" data-icon="chevUp"></span></button>
+    <div class="ex-pop ex-navpop" id="ex-navpop" role="dialog" aria-labelledby="ex-navpop-title" hidden>
+      <div class="ex-navpop-head">
+        <span style="width:28px"></span>
+        <div class="ex-navpop-title" id="ex-navpop-title">Questions</div>
+        <button type="button" class="ex-iconbtn" aria-label="Close" onclick="Exam.closePopovers(true)"><span class="ex-ico" data-icon="close"></span></button>
+      </div>
+      <div class="ex-legend">
+        <span><span class="ex-lg-pin ex-ico" data-icon="pin"></span>Current</span>
+        <span><span class="ex-lg-box"></span>Unanswered</span>
+        <span><span class="ex-lg-flag ex-ico" data-icon="bookmarkFill"></span>For Review</span>
+      </div>
+      <div class="ex-qgrid" id="q-nav"></div>
+      <div class="ex-navpop-foot"><button type="button" class="ex-outline-btn" id="btn-review-page" onclick="Exam.closePopovers(false);openReview()">Go to Review Page</button></div>
+    </div>
   </div>
-</div>
+  <div class="ex-f-right">
+    <button type="button" class="ex-btn" id="btn-back" onclick="prevQuestion()">Back</button>
+    <button type="button" class="ex-btn" id="btn-next" onclick="nextQuestion()">Next</button>
+  </div>
+</footer>
 
 <!-- REVIEW OVERLAY -->
 <div class="overlay" id="review-overlay">
   <div class="overlay-box">
-    <div class="overlay-title">Review Answers</div>
+    <div class="overlay-title">Check Your Work</div>
     <div class="overlay-sub" id="review-sub">Check your answers before submitting.</div>
+    <div class="ex-legend">
+      <span><span class="ex-lg-box"></span>Unanswered</span>
+      <span><span class="ex-lg-flag ex-ico" data-icon="bookmarkFill"></span>For Review</span>
+    </div>
+    <div class="ex-qgrid review-grid" id="review-grid"></div>
     <div class="review-list" id="review-list"></div>
     <div class="overlay-btn-row">
-      <button class="overlay-btn" onclick="closeOverlay('review-overlay')">Continue Test</button>
+      <button class="overlay-btn" onclick="closeOverlay('review-overlay')">Continue Drill</button>
       <button class="overlay-btn primary" onclick="submitTest()">Submit</button>
     </div>
   </div>
@@ -518,7 +188,7 @@
 <!-- SCORE OVERLAY -->
 <div class="overlay" id="score-overlay">
   <div class="overlay-box">
-    <div class="overlay-title">Module Complete</div>
+    <div class="overlay-title">Drill Complete</div>
     <div class="overlay-sub" id="score-sub">—</div>
     <div class="score-big" id="score-num">—</div>
     <div class="score-label" id="score-pct">— correct</div>
@@ -536,6 +206,7 @@
   </div>
 </div>
 
+<script src="exam.js?v=1"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  STATE
@@ -565,6 +236,15 @@ let submittedResults = {}; // filled in after grading: { [questionId]: {status, 
 let checkedResults = {}; // { [qIndex]: {status, rationale, correctAnswer} }
 let checkPending   = {}; // { [qIndex]: true } while a check is waiting for the server
 let checkFailed    = {}; // { [qIndex]: true } after a check couldn't reach the server
+// Answer elimination ("ABC" toggle): elimMode shows the strike buttons; eliminated[qIndex] = Set of choice indexes.
+let elimMode   = false;
+let eliminated = [];
+
+// Header title, e.g. "Topical Drill: Inferences · Set 1".
+const setName      = `Set ${moduleNum}`;
+const sectionTitle = `Topical Drill: ${skillLabel} · ${setName}`;
+const contextLabel = `Topical Drill · ${skillLabel} · ${setName}`; // shown to the Report form and as the title's tooltip
+window.SATReportContext = () => ({ module: contextLabel });
 
 // ── Load questions from the API (no answers included) ───────────
 async function initTest() {
@@ -575,13 +255,13 @@ async function initTest() {
     rawQuestions = await res.json();
   } catch (e) {
     document.getElementById('loading-screen').innerHTML =
-      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:#c0392b;">Couldn\'t reach the question server. Check your internet connection and try again.</div>';
+      '<div class="loading-error">Couldn\'t reach the question server. Check your internet connection and try again.</div>';
     return;
   }
 
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
-      `<div style="font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;">No questions found for module: ${escHtml(moduleKey)}</div>`; // escaped: it comes from the URL
+      `<div class="loading-error">No questions found for module: ${escHtml(moduleKey)}</div>`; // escaped: it comes from the URL
     return;
   }
 
@@ -591,21 +271,27 @@ async function initTest() {
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
   flagged = new Array(totalQ).fill(false);
+  eliminated = Array.from({ length: totalQ }, () => new Set());
   initHighlights(totalQ);
 
   // Pace like the real RW module: ~71 seconds per question (32 min / 27 q)
   totalSecs = Math.round(totalQ * 32 * 60 / 27);
   timerSecs = totalSecs;
 
-  document.getElementById('bar-module').textContent =
-    `Topical Drill · ${skillLabel} · Module ${moduleNum}`;
+  const titleEl = document.getElementById('ex-title');
+  titleEl.textContent = sectionTitle;
+  titleEl.title = contextLabel;
+  document.title = `${skillLabel} · Topical Drill — SAT Practice`;
+  document.getElementById('dir-skill').textContent = skillLabel;
+  document.getElementById('ex-navpop-title').textContent = `${sectionTitle} Questions`;
+  document.getElementById('ex-student').textContent = Exam.studentName();
   document.getElementById('score-sub').textContent =
-    `${skillLabel} · Module ${moduleNum}`;
+    `${skillLabel} · ${setName}`;
 
   document.getElementById('loading-screen').classList.add('hidden');
   buildNav();
   renderQuestion(0);
-  updateTimerDisplay(); // show this drill's real time right away (not the 32:00 placeholder)
+  updateTimerDisplay(); // show this drill's real time right away
   startTimer();
 }
 
@@ -626,62 +312,64 @@ function startTimer() {
 function togglePause() {
   if (submitted) return;
   timerPaused = !timerPaused;
-  document.getElementById('timer-pause-btn').textContent = timerPaused ? 'Resume' : 'Pause';
+  document.getElementById('pause-label').textContent = timerPaused ? 'Resume timer' : 'Pause timer';
   document.getElementById('timer').classList.toggle('paused', timerPaused);
+  updateTimerDisplay();
 }
 
 function updateTimerDisplay() {
   const el = document.getElementById('timer');
-  if (timerHidden) { el.textContent = 'Hidden'; el.classList.remove('warning'); return; }
+  const tag = timerPaused && !submitted ? ' <span class="ex-paused-tag">Paused</span>' : '';
+  if (timerHidden) { el.innerHTML = Exam.icon.clock + '<span class="ex-sr">Timer hidden</span>' + tag; el.classList.remove('warning'); return; }
   const m = Math.floor(timerSecs / 60).toString().padStart(2, '0');
   const s = (timerSecs % 60).toString().padStart(2, '0');
-  el.textContent = `${m}:${s}`;
+  el.innerHTML = `${m}:${s}${tag}`;
   el.classList.toggle('warning', timerSecs <= 300);
 }
 
 function toggleTimer() {
   timerHidden = !timerHidden;
-  document.getElementById('timer-toggle').textContent = timerHidden ? 'Show' : 'Hide';
+  const t = document.getElementById('timer-toggle');
+  t.textContent = timerHidden ? 'Show' : 'Hide';
+  t.setAttribute('aria-label', timerHidden ? 'Show timer' : 'Hide timer');
   updateTimerDisplay();
 }
 
 // ── Navigation ────────────────────────────────────────────────
 function buildNav() {
-  const nav = document.getElementById('q-nav');
-  nav.innerHTML = '';
-  for (let i = 0; i < QUESTIONS.length; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'q-dot';
-    dot.textContent = i + 1;
-    dot.id = `dot-${i}`;
-    dot.onclick = () => goToQuestion(i);
-    nav.appendChild(dot);
-  }
+  document.getElementById('q-nav').innerHTML = '';
   updateNav();
 }
 
-function updateNav() {
-  for (let i = 0; i < QUESTIONS.length; i++) {
-    const dot = document.getElementById(`dot-${i}`);
-    dot.className = 'q-dot';
-    if (i === currentQ) dot.classList.add('active');
-    if (answers[i] !== null) dot.classList.add('answered');
-    if (flagged[i]) dot.classList.add('flagged');
+// The navigator grid (footer pop-up), the "Question 3 of 16" button and Back/Next.
+function navItems() {
+  return QUESTIONS.map((q, i) => {
     const chk = !submitted && checkedResults[i];
-    if (chk) dot.classList.add('checked', chk.status === 'correct' ? 'checked-right' : 'checked-wrong');
-    dot.title = chk ? `Checked: ${chk.status === 'correct' ? 'correct' : 'incorrect'}` : '';
-  }
-  // On narrow screens the dot row scrolls sideways: keep the current dot in view ('nearest' only moves what it must)
-  const cur = document.getElementById(`dot-${currentQ}`);
-  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const res = submitted && submittedResults[q.id] ? submittedResults[q.id].status : null;
+    return {
+      answered: answers[i] !== null, flagged: flagged[i],
+      checked: chk ? (chk.status === 'correct' ? 'right' : 'wrong') : null,
+      result: res === 'correct' || res === 'incorrect' ? res : null
+    };
+  });
+}
+
+function updateNav() {
+  Exam.renderNavGrid(document.getElementById('q-nav'), navItems(), currentQ, goToQuestion, 'dot-');
+  const total = QUESTIONS.length;
+  document.getElementById('ex-navbtn-label').innerHTML = `Question ${currentQ + 1}<span class="ex-navbtn-of"> of ${total}</span>`;
+  document.getElementById('ex-navbtn').setAttribute('aria-label', `Question ${currentQ + 1} of ${total}. Open the question navigator`);
+  document.getElementById('btn-back').hidden = currentQ === 0;
+  document.getElementById('btn-next').textContent = currentQ === total - 1 ? (submitted ? 'Results' : 'Review') : 'Next';
 }
 
 function goToQuestion(i) {
+  Exam.closePopovers(false);
   currentQ = i;
   renderQuestion(i);
   updateNav();
   // A new question starts at the top (on phones the passage and question share one scroll).
-  ['.test-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
+  ['#ex-body', '#passage-pane', '#question-pane'].forEach(sel => { const el = document.querySelector(sel); if (el) el.scrollTop = 0; });
 }
 
 function prevQuestion() {
@@ -700,8 +388,6 @@ function renderQuestion(i) {
 
   // Passage pane
   const pp = document.getElementById('passage-pane');
-  const diffClass = { Easy: 'diff-easy', Medium: 'diff-medium', Hard: 'diff-hard' }[q.difficulty] || '';
-  const diffLabel = q.difficulty || '';
 
   // Build passage HTML from structured passage_lines (preserves indentation, blank lines, poems)
   function buildPassageHTML(q) {
@@ -798,6 +484,7 @@ function renderQuestion(i) {
     }
     return `<div class="passage-text">${raw.split('\n\n').map(p=>`<p>${escHtml(p)}</p>`).join('')}</div>`;
   }
+
   let passageHTML = buildPassageHTML(q);
 
   // Apply underline formatting using precise PDF-extracted segments
@@ -878,22 +565,8 @@ function renderQuestion(i) {
     return result;
   }
 
-  pp.innerHTML = `
-    <div class="passage-context">
-      <span>${escHtml(q.domain || 'Reading and Writing')}</span>
-      <span class="passage-skill-tag">${escHtml(q.skill || '')}</span>
-      ${diffLabel ? `<span class="passage-difficulty ${diffClass}">${diffLabel}</span>` : ''}
-    </div>
-    <div class="passage-toolbar">
-      <span class="toolbar-label">Highlight</span>
-      <div class="hl-btn hl-yellow" id="hl-yellow" title="Yellow" onclick="setHighlightColor('hl-yellow')"></div>
-      <div class="hl-btn hl-green"  id="hl-green"  title="Green"  onclick="setHighlightColor('hl-green')"></div>
-      <div class="hl-btn hl-blue"   id="hl-blue"   title="Blue"   onclick="setHighlightColor('hl-blue')"></div>
-      <div class="hl-btn hl-pink"   id="hl-pink"   title="Pink"   onclick="setHighlightColor('hl-pink')"></div>
-      <div class="toolbar-sep"></div>
-      <button class="toolbar-action" id="btn-clear-hl" onclick="clearAllHighlights()" title="Remove all highlights">Clear</button>
-    </div>
-    <div id="passage-content">${applyUnderline(passageHTML, q)}</div>`;
+  // The highlighter colours live in the header's "Highlights & Notes" panel; the passage is just the text.
+  pp.innerHTML = `<div class="ex-passage-inner"><div id="passage-content">${applyUnderline(passageHTML, q)}</div></div>`;
 
   // Question pane
   const qp = document.getElementById('question-pane');
@@ -908,37 +581,95 @@ function renderQuestion(i) {
     } else if (!submitted) {
       if (answers[i] === ci) cls += ' selected';
     }
-    return `<div class="${cls}" onclick="selectAnswer(${i},${ci})">
-      <div class="answer-letter">${letters[ci]}</div>
-      <div class="answer-text">${escHtml(c)}</div>
+    const out = eliminated[i] && eliminated[i].has(ci);
+    return `<div class="ex-choice${out ? ' eliminated' : ''}">
+      <div class="${cls}" role="radio" tabindex="0" aria-checked="${answers[i] === ci}" onclick="selectAnswer(${i},${ci})">
+        <span class="answer-letter">${letters[ci]}</span>
+        <span class="answer-text">${escHtml(c)}</span>
+      </div>
+      ${elimBtnHTML(i, ci)}
     </div>`;
   }).join('');
 
-  const rationaleHTML = submitted && result && result.rationale ? `
+  const rationaleHTML = submitted && result ? `${result.rationale ? `
     <div class="rationale-box">
       <div class="rationale-label">Explanation</div>
       ${escHtml(result.rationale)}
-    </div>` : '';
+    </div>` : ''}${metaHTML(q)}` : '';
 
+  const reveal = submitted || !!checkedResults[i];
   qp.innerHTML = `
-    <div class="q-number">Question ${i + 1} of ${totalQ}</div>
-    <div class="q-text">${escHtml(q.question)}</div>
-    <div class="answers${isLocked(i) ? ' locked' : ''}">${choicesHTML}</div>
-    <div id="check-area">${checkAreaHTML(i)}</div>
-    <label class="flag-row">
-      <input type="checkbox" id="flag-cb" ${flagged[i] ? 'checked' : ''} onchange="toggleFlag(${i})">
-      <span class="flag-label">Flag for review</span>
-    </label>
-    ${rationaleHTML}
-    <div id="notes-panel"></div>`;
+    <div class="ex-question-inner">
+      <div class="ex-qhead">
+        <span class="ex-qnum" aria-label="Question ${i + 1}">${i + 1}</span>
+        <button type="button" class="ex-mark" id="flag-btn" aria-pressed="${!!flagged[i]}" onclick="toggleFlag(${i})">${flagged[i] ? Exam.icon.bookmarkFill : Exam.icon.bookmark}<span>Mark for Review</span></button>
+        <button type="button" class="ex-abc" id="btn-abc" aria-pressed="${elimMode}" onclick="toggleElimMode()" title="Cross out answer choices" aria-label="Answer elimination"${reveal ? ' disabled' : ''}>ABC</button>
+      </div>
+      <div class="q-text">${escHtml(q.question)}</div>
+      <div class="answers${isLocked(i) ? ' locked' : ''}${reveal ? ' revealed' : ''}${elimMode ? ' ex-elim-on' : ''}" role="radiogroup" aria-label="Answer choices">${choicesHTML}</div>
+      <div id="check-area">${checkAreaHTML(i)}</div>
+      ${rationaleHTML}
+      <div id="notes-panel"></div>
+    </div>`;
 
   renderNotesPanel(i);
   restoreHighlights(i);
   updateHighlightButtons();
   attachPassageListener(i);
+}
 
-  document.getElementById('btn-next').textContent =
-    i === totalQ - 1 ? 'Review →' : 'Next →';
+// Domain · skill · difficulty: shown once the answer is revealed, so it isn't a hint while answering.
+function metaHTML(q) {
+  const bits = [q.domain, q.skill, q.difficulty].filter(Boolean).map(escHtml);
+  return bits.length ? `<div class="ex-meta">${bits.join(' · ')}</div>` : '';
+}
+
+// ── Answer elimination ────────────────────────────────────────
+function elimBtnHTML(qi, ci) {
+  const L = ['A','B','C','D'][ci];
+  return eliminated[qi] && eliminated[qi].has(ci)
+    ? `<button type="button" class="ex-elim is-undo" onclick="toggleElim(${qi},${ci})" aria-label="Undo crossing out choice ${L}">Undo</button>`
+    : `<button type="button" class="ex-elim" onclick="toggleElim(${qi},${ci})" aria-label="Cross out choice ${L}">${L}</button>`;
+}
+
+function toggleElimMode() {
+  elimMode = !elimMode;
+  const b = document.getElementById('btn-abc');
+  if (b) b.setAttribute('aria-pressed', elimMode);
+  const box = document.querySelector('#question-pane .answers');
+  if (box) box.classList.toggle('ex-elim-on', elimMode);
+}
+
+function toggleElim(qi, ci) {
+  if (submitted || isLocked(qi)) return;
+  const set = eliminated[qi];
+  if (set.has(ci)) set.delete(ci);
+  else {
+    set.add(ci);
+    if (answers[qi] === ci) { answers[qi] = null; checkFailed[qi] = false; updateNav(); } // a crossed-out choice can't stay picked
+  }
+  paintChoices(qi);
+  // keep keyboard focus on the same choice's button (it was just redrawn)
+  const btn = document.querySelectorAll('#question-pane .ex-elim')[ci];
+  if (btn && document.activeElement === document.body) btn.focus();
+}
+
+// Redraw the choices' selected / crossed-out state in place (no full re-render: see selectAnswer).
+function paintChoices(qi) {
+  if (qi !== currentQ) return;
+  document.querySelectorAll('#question-pane .ex-choice').forEach((row, k) => {
+    const out = eliminated[qi].has(k);
+    row.classList.toggle('eliminated', out);
+    const opt = row.querySelector('.answer-option');
+    opt.classList.toggle('selected', !submitted && !checkedResults[qi] && answers[qi] === k);
+    opt.setAttribute('aria-checked', answers[qi] === k);
+    const old = row.querySelector('.ex-elim');
+    const hadFocus = old && document.activeElement === old;
+    if (old) old.outerHTML = elimBtnHTML(qi, k);
+    if (hadFocus) row.querySelector('.ex-elim').focus();
+  });
+  const area = document.getElementById('check-area');
+  if (area) area.innerHTML = checkAreaHTML(qi);
 }
 
 function escHtml(str) {
@@ -950,12 +681,11 @@ function selectAnswer(qi, ci) {
   if (submitted || isLocked(qi)) return; // a checked question keeps its answer
   answers[qi] = ci;
   checkFailed[qi] = false;
+  eliminated[qi].delete(ci); // picking a crossed-out choice brings it back
   updateNav();
   // Update the choices in place. Re-rendering the whole question would rebuild the passage
   // and re-apply highlights by searching for their text, which can move or drop them.
-  document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => el.classList.toggle('selected', k === ci));
-  const area = document.getElementById('check-area');
-  if (area && qi === currentQ) area.innerHTML = checkAreaHTML(qi);
+  paintChoices(qi);
 }
 
 // ── Check answer (one question, before the final Submit) ──────
@@ -973,7 +703,7 @@ function checkAreaHTML(i) {
       <div class="rationale-label">Explanation</div>
       ${escHtml(r.rationale)}
     </div>` : '';
-    return `<div class="check-row">${line}</div>${expl}`;
+    return `<div class="check-row">${line}</div>${expl}${metaHTML(QUESTIONS[i])}`;
   }
   const pending = !!checkPending[i];
   return `<div class="check-row">
@@ -990,7 +720,9 @@ function refreshCheck(i, focus) {
   const area = document.getElementById('check-area');
   if (area) area.innerHTML = checkAreaHTML(i);
   const box = document.querySelector('#question-pane .answers');
-  if (box) box.classList.toggle('locked', isLocked(i));
+  if (box) { box.classList.toggle('locked', isLocked(i)); box.classList.toggle('revealed', !!checkedResults[i]); }
+  const abc = document.getElementById('btn-abc');
+  if (abc) abc.disabled = !!checkedResults[i];
   const r = checkedResults[i];
   if (r) document.querySelectorAll('#question-pane .answer-option').forEach((el, k) => {
     el.classList.remove('selected');
@@ -1031,7 +763,12 @@ async function checkAnswer(qi) {
 }
 
 function toggleFlag(qi) {
-  flagged[qi] = document.getElementById('flag-cb').checked;
+  flagged[qi] = !flagged[qi];
+  const b = document.getElementById('flag-btn');
+  if (b) {
+    b.setAttribute('aria-pressed', flagged[qi]);
+    b.querySelector('svg').outerHTML = flagged[qi] ? Exam.icon.bookmarkFill : Exam.icon.bookmark;
+  }
   updateNav();
 }
 
@@ -1041,16 +778,17 @@ function openReview() {
   const unanswered = answers.filter(a => a === null).length;
   const flagCount  = flagged.filter(Boolean).length;
   document.getElementById('review-sub').textContent =
-    `${unanswered} unanswered · ${flagCount} flagged`;
+    `${unanswered} unanswered · ${flagCount} marked for review. Select a question to go back to it, or submit when you're done.`;
+  Exam.renderNavGrid(document.getElementById('review-grid'), navItems(), -1, i => { closeOverlay('review-overlay'); goToQuestion(i); });
 
   document.getElementById('review-list').innerHTML = QUESTIONS.map((q, i) => {
     const status = answers[i] === null
-      ? '<span style="color:var(--gray-mid)">Not answered</span>'
-      : `<span style="color:var(--black)">Answer ${['A','B','C','D'][answers[i]]}</span>`;
-    const flagMark = flagged[i] ? ' <span style="color:#c0392b;font-size:11px;">★ Flagged</span>' : '';
+      ? '<span style="color:var(--ex-muted)">Not answered</span>'
+      : `<span>Answer ${['A','B','C','D'][answers[i]]}</span>`;
+    const flagMark = flagged[i] ? ` <span class="review-flag">${Exam.icon.bookmarkFill}For review</span>` : '';
     return `<div class="review-item" onclick="closeOverlay('review-overlay');goToQuestion(${i})">
       <div class="review-num">${i+1}</div>
-      <div style="flex:1;font-size:13px;color:var(--black);">${escHtml(q.question.substring(0,60))}…</div>
+      <div class="review-q">${escHtml(q.question)}</div>
       <div>${status}${flagMark}</div>
     </div>`;
   }).join('');
@@ -1134,8 +872,8 @@ async function submitTest() {
     return `<div class="review-item" onclick="closeOverlay('score-overlay');goToQuestion(${i})">
       <div class="review-num">${i+1}</div>
       <div class="review-status ${statusClass}"></div>
-      <div style="flex:1;font-size:13px;color:var(--black);">${escHtml(q.question.substring(0,55))}…</div>
-      <div style="font-size:12px;color:var(--gray-mid);">${statusLabel}</div>
+      <div class="review-q">${escHtml(q.question)}</div>
+      <div style="font-size:12px;color:var(--ex-muted);">${statusLabel}</div>
     </div>`;
   }).join('');
 
@@ -1151,6 +889,8 @@ async function submitTest() {
   closeOverlay('review-overlay');
   document.getElementById('score-overlay').classList.add('active');
   renderQuestion(currentQ);
+  updateNav();
+  updateTimerDisplay();
 }
 
 // ── Highlights & Notes ────────────────────────────────────────
@@ -1414,92 +1154,33 @@ function attachPassageListener(qi) {
 
 // ── Exit ──────────────────────────────────────────────────────
 // Two clicks instead of a popup (native confirm dialogs are blocked in some browsers):
-// the first click arms the button, a second click within 3 seconds leaves.
-function confirmExit() {
-  const btn = document.querySelector('[onclick^="confirmExit"]');
+// the first click arms the More menu's Exit item (the menu stays open), a second click within 3 seconds leaves.
+let exitTimer = null;
+function confirmExit(ev) {
+  const btn = document.getElementById('btn-exit');
+  const lbl = document.getElementById('exit-label');
   if (!btn || btn.dataset.armed !== '1') {
-    if (btn) { btn.dataset.armed = '1'; btn.textContent = 'Click again to exit'; setTimeout(() => { btn.dataset.armed = ''; btn.textContent = 'Exit'; }, 3000); }
+    if (ev) ev.stopPropagation(); // keep the menu open for the second click
+    if (btn) {
+      btn.dataset.armed = '1'; btn.classList.add('is-armed'); lbl.textContent = 'Click again to exit';
+      clearTimeout(exitTimer);
+      exitTimer = setTimeout(() => { btn.dataset.armed = ''; btn.classList.remove('is-armed'); lbl.textContent = 'Exit'; }, 3000);
+    }
     return;
   }
   window.location.href = 'index.html';
 }
 
-// ── Draggable Divider ─────────────────────────────────────────
-(function() {
-  const divider   = document.getElementById('divider');
-  const passPane  = document.getElementById('passage-pane');
-  const qPane     = document.getElementById('question-pane');
-  const container = document.querySelector('.test-body');
+// ── Header menus, navigator, divider ──────────────────────────
+Exam.initPopovers();
+Exam.initDivider(document.getElementById('divider'), document.getElementById('passage-pane'), document.getElementById('ex-body'));
 
-  let isDragging = false;
-  let startX = 0;
-  let startPassWidth = 0;
-
-  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
-
-  divider.addEventListener('mousedown', function(e) {
-    isDragging = true;
-    startX = e.clientX;
-    startPassWidth = passPane.getBoundingClientRect().width;
-    divider.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', function(e) {
-    if (!isDragging) return;
-    const containerWidth = container.getBoundingClientRect().width;
-    const dividerWidth   = divider.getBoundingClientRect().width;
-    const availableWidth = containerWidth - dividerWidth;
-    const delta = e.clientX - startX;
-    const newPassWidth = clamp(startPassWidth + delta, 200, availableWidth - 280);
-    const newQWidth    = availableWidth - newPassWidth;
-    passPane.style.flex  = 'none';
-    passPane.style.width = newPassWidth + 'px';
-    qPane.style.flex     = 'none';
-    qPane.style.width    = newQWidth + 'px';
-  });
-
-  document.addEventListener('mouseup', function() {
-    if (!isDragging) return;
-    isDragging = false;
-    divider.classList.remove('dragging');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  });
-
-  // Touch support
-  divider.addEventListener('touchstart', function(e) {
-    isDragging = true;
-    startX = e.touches[0].clientX;
-    startPassWidth = passPane.getBoundingClientRect().width;
-    divider.classList.add('dragging');
-    e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
-    const containerWidth = container.getBoundingClientRect().width;
-    const dividerWidth   = divider.getBoundingClientRect().width;
-    const availableWidth = containerWidth - dividerWidth;
-    const delta = e.touches[0].clientX - startX;
-    const newPassWidth = clamp(startPassWidth + delta, 200, availableWidth - 280);
-    const newQWidth    = availableWidth - newPassWidth;
-    passPane.style.flex  = 'none';
-    passPane.style.width = newPassWidth + 'px';
-    qPane.style.flex     = 'none';
-    qPane.style.width    = newQWidth + 'px';
-    e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('touchend', function() {
-    isDragging = false;
-    divider.classList.remove('dragging');
-  });
-})();
+function openReport() {
+  if (window.SATReport) SATReport.open();
+}
 </script>
 <script src="auth.js"></script>
 <script src="report.js"></script>
+<script src="kbd.js"></script>
 </body>
 </html>
