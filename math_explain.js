@@ -122,7 +122,7 @@ const MATH_EXPLAIN = {
 "149":"Multiply both sides by 5 to get 4x = 100. Divide by 4 to get x = 25. Choice A is correct.",
 "150":"Total pressure = 14.70 + 0.44 * 105 = 14.70 + 46.20 = 60.90 psi. Choice A is correct.",
 "151":"After the 190-pound equipment, the crates can weigh at most 5,630 - 190 = 5,440 pounds. The crates weigh 25x + 62y, so 25x + 62y <= 5,440. Choice A is correct; choice C forgets the equipment and swaps the weights.",
-"152":"Write each equation in slope-intercept form: y = -(1/5)x + 1 and y = 2x + 4. You need one gently falling line crossing the y-axis at 1 and one steep rising line crossing at 4. Graph C shows both lines. Choice C is correct.",
+"152":"Solve each equation for y: x + 5y = 5 gives y = -x/5 + 1, a line falling slowly through (0, 1); 2x - y = -4 gives y = 2x + 4, a steep line rising through (0, 4). Only the graph in choice C shows both lines. Choice C is correct.",
 "153":"Distribute: 3kx + 39 = (48/17)x + 36. The equation has no solution when the x-coefficients are equal but the constants are not (39 is not equal to 36). Set 3k = 48/17, so k = 16/17. The answer is 16/17.",
 "154":"The x-intercept is where f(x) = 0: 7x - 84 = 0, so 7x = 84 and x = 12. The x-intercept is (12, 0). Choice D is correct; choice A has the wrong sign.",
 "155":"Check the ratio t/d: 8/0.32 = 25, 14/0.56 = 25, and 17/0.68 = 25. The ratio is always 25, so t = 25d. Choice C is correct; choice B flips the ratio.",

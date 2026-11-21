@@ -177,6 +177,7 @@
   </style>
   <link rel="stylesheet" href="theme.css?v=5" />
   <link rel="stylesheet" href="exam.css?v=1" />
+  <script src="math_render.js"></script>
 </head>
 <body class="exam">
 
@@ -398,6 +399,7 @@
 
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="math_modules.js"></script>
+<script src="math_text.js"></script>
 <script src="math_explain.js"></script>
 <script src="hardbank.js"></script>
 <script src="exam.js?v=1"></script>
@@ -442,7 +444,12 @@ window.addEventListener('load', () => {
   }
 
   // Each question image is its own file (math_img/<page>.jpg); fetch this module's ones now so they're ready.
-  QS.forEach(q => { if (q.page != null) new Image().src = mathImgSrc(q); });
+  // Questions shown as text (math_text.js) only need their figures; their image loads if it's ever needed.
+  QS.forEach(q => {
+    const t = window.MathText && MathText.entry(q);
+    if (t) (t.figs || []).map(f => f.src).concat((t.choices || []).map(c => c && c.fig).filter(Boolean)).forEach(s => { new Image().src = s; });
+    else if (q.page != null) new Image().src = mathImgSrc(q);
+  });
 
   answers    = new Array(QS.length).fill(null);
   flagged    = new Array(QS.length).fill(false);
@@ -460,6 +467,13 @@ window.addEventListener('load', () => {
   if (window.matchMedia('(max-width: 760px)').matches) document.getElementById('fr-dir-details').open = false;
   document.getElementById('loading').classList.add('gone');
   buildNav(); renderQ(0); drawTimer(); startTimer();
+});
+
+// Questions shown as text (math_render.js): redraw the current one when KaTeX arrives, or when one falls back to its image.
+if (window.MathText) MathText.onChange(p => {
+  const q = QS[cur];
+  if (!q || !document.querySelector('#q-pane .ex-qhead')) return;
+  if (p == null ? MathText.entry(q) : String(q.page) === String(p)) { saveFrInput(); renderQ(cur); }
 });
 
 // ── Timer ──────────────────────────────────────────────────────
@@ -649,6 +663,7 @@ function metaHTML(q) {
 function renderQ(i) {
   const q = QS[i];
   const imgSrc = mathImgSrc(q);
+  const mt = window.MathText ? MathText.use(q) : null; // the question as text (math_text.js), else its image
   const rev = submitted || checked[i]; // graded view: after final Submit, or this question was checked
   const letters = ['A','B','C','D'];
   const main = document.getElementById('mx-main');
@@ -663,10 +678,11 @@ function renderQ(i) {
         if (li===q.answer_idx) cls+=' correct';
         else if (answers[i]===li) cls+=' incorrect';
       } else if (answers[i]===li) cls+=' selected';
-      const text = q.question && q.choices ? `<span class="answer-text">${escH(q.choices[li])}</span>` : `<span class="answer-text mx-choice-lbl">Choice ${l}</span>`;
+      const text = mt ? `<span class="answer-text mt-ch">${MathText.choiceHTML(mt.choices[li], q.page)}</span>`
+        : q.question && q.choices ? `<span class="answer-text">${escH(q.choices[li])}</span>` : `<span class="answer-text mx-choice-lbl">Choice ${l}</span>`;
       const out = eliminated[i].has(li);
       return `<div class="ex-choice${out ? ' eliminated' : ''}">
-        <div class="${cls}" role="radio" tabindex="0" aria-checked="${answers[i]===li}" onclick="selMC(${i},${li})"${q.question ? '' : ` aria-label="Choice ${l}"`}${rev && !submitted ? ' aria-disabled="true"' : ''}>
+        <div class="${cls}" role="radio" tabindex="0" aria-checked="${answers[i]===li}" onclick="selMC(${i},${li})"${q.question || mt ? '' : ` aria-label="Choice ${l}"`}${rev && !submitted ? ' aria-disabled="true"' : ''}>
           <span class="answer-letter">${l}</span>${text}
         </div>
         ${elimBtnHTML(i, li)}
@@ -714,6 +730,7 @@ function renderQ(i) {
 
   const stem = q.question
     ? `<div class="q-text-block">${escH(q.question)}</div>`
+    : mt ? `<div class="mt-stem">${MathText.stemHTML(mt, q.page)}</div>`
     : imgSrc ? `<div class="q-img-wrap"><div class="q-img-crop"${IMG_CROP[imgSrc] ? ` style="aspect-ratio:${IMG_CROP[imgSrc]}"` : ''}><img src="${imgSrc}" alt="Question ${i+1}" onload="cropImg(this)" onerror="this.parentElement.innerHTML='<div class=&quot;q-img-err&quot;>Image failed to load for page ${q.page} (question ${q.id}). Check your connection and reload the page.</div>'"/></div></div>`
     : `<div class="q-img-err">No image for question ${escH(q.id)}.</div>`;
 
@@ -731,9 +748,12 @@ function renderQ(i) {
       ${stem}
       ${ansHtml}
       ${checkHtml}
+      ${mt ? MathText.origHTML(q) : ''}
       ${rev && window.mathExplainHTML ? mathExplainHTML(q, escH) : ''}
       ${rev ? metaHTML(q) : ''}
     </div>`;
+  // KaTeX typesets the text; if anything fails, this question falls back to its image.
+  if (mt && !MathText.typeset(document.getElementById('q-pane'), q.page)) { renderQ(i); return; }
 
   // Auto-focus the answer box (not on phones, where it would pop the keyboard over the question)
   if (!rev && !q.is_mc && !window.matchMedia('(max-width: 760px)').matches) {

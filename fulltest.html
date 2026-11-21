@@ -236,6 +236,7 @@
   </style>
   <link rel="stylesheet" href="theme.css?v=5" />
   <link rel="stylesheet" href="exam.css?v=1" />
+  <script src="math_render.js"></script>
 </head>
 <body class="exam">
 
@@ -621,6 +622,7 @@
 <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script src="questionbank.js"></script>
 <script src="math_modules.js"></script>
+<script src="math_text.js"></script>
 <script src="math_explain.js"></script>
 <script src="exam.js?v=1"></script>
 <script>
@@ -895,7 +897,11 @@ function initFullTest() {
   setTimeout(() => {
     const qs = [...sectionData.math1.questions, ...sectionData.math2.questions,
       ...((module2Options.math && module2Options.math.harder) || []), ...((module2Options.math && module2Options.math.easier) || [])];
-    qs.forEach(q => { if (q && q.page != null) new Image().src = mathImgSrc(q); });
+    qs.forEach(q => {
+      const t = window.MathText && MathText.entry(q); // shown as text: only its figures are needed
+      if (t) (t.figs || []).map(f => f.src).concat((t.choices || []).map(c => c && c.fig).filter(Boolean)).forEach(s => { new Image().src = s; });
+      else if (q && q.page != null) new Image().src = mathImgSrc(q);
+    });
   }, 3000);
 
   // Init per-section arrays
@@ -1892,24 +1898,34 @@ function frTyped(key, i, v) {
   if (p) p.innerHTML = frPreviewInner(v);
 }
 
+// Questions shown as text (math_render.js): redraw the current one when KaTeX arrives, or when one falls back to its image.
+if (window.MathText) MathText.onChange(p => {
+  const key = getCurrentSectionKey(), sd = sectionData[key];
+  if (!/^math/.test(key || '') || !sd || !sd.questions || !document.querySelector('#mq-main .ex-qhead')) return;
+  const q = sd.questions[currentQ];
+  if (q && (p == null ? MathText.entry(q) : String(q.page) === String(p))) { saveFrInput(key); renderQuestionMath(key, currentQ); }
+});
+
 function renderQuestionMath(key, i) {
   const sd = sectionData[key];
   const q = sd.questions[i];
   const submitted = sd.submitted;
   const imgSrc = mathImgSrc(q);
   const letters = ['A','B','C','D'];
+  const mt = window.MathText ? MathText.use(q) : null; // the question as text (math_text.js), else its image
   const pane = document.getElementById('q-pane');
   pane.classList.toggle('is-mc', !!q.is_mc);
   pane.classList.toggle('is-fr', !q.is_mc);
 
   const stem = q.question ? `<div class="mq-qtext">${escHtml(q.question)}</div>`
+    : mt ? `<div class="mt-stem">${MathText.stemHTML(mt, q.page)}</div>`
     : imgSrc ? `<div class="mq-img"><div class="mq-img-in"><img src="${imgSrc}" alt="Question ${i + 1}" onload="trimMathImg(this)" onerror="this.closest('.mq-img').outerHTML='<div class=&quot;mq-img-err&quot;>Image failed to load for page ${q.page} (question ${escHtml(q.id)}).</div>'"/></div></div><div class="mq-img-hint">Swipe the question sideways to see all of it.</div>`
     : `<div class="mq-img-err">No image found for page ${q.page} (question ${escHtml(q.id)}).</div>`;
 
   let ansHtml = '', resultLine = '';
   if (q.is_mc) {
     // Questions stored as images already show the choice text, so their boxes carry only the letter.
-    const hasText = !!(q.question && q.choices);
+    const hasText = !!(q.question && q.choices) || !!mt;
     const choices = letters.map((l, li) => {
       let cls = 'answer-option';
       if (submitted) {
@@ -1917,8 +1933,8 @@ function renderQuestionMath(key, i) {
         else if (sd.answers[i] === li) cls += ' incorrect';
       } else if (sd.answers[i] === li) cls += ' selected';
       return `<div class="ex-choice${sd.eliminated[i].has(li) ? ' eliminated' : ''}">
-        <div class="${cls}" role="radio" tabindex="0" aria-checked="${sd.answers[i] === li}" aria-label="Choice ${l}" onclick="selMC('${key}',${i},${li})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
-          <span class="answer-letter">${l}</span>${hasText ? `<span class="answer-text">${escHtml(q.choices[li])}</span>` : ''}
+        <div class="${cls}" role="radio" tabindex="0" aria-checked="${sd.answers[i] === li}"${mt ? '' : ` aria-label="Choice ${l}"`} onclick="selMC('${key}',${i},${li})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
+          <span class="answer-letter">${l}</span>${mt ? `<span class="answer-text mt-ch">${MathText.choiceHTML(mt.choices[li], q.page)}</span>` : hasText ? `<span class="answer-text">${escHtml(q.choices[li])}</span>` : ''}
         </div>
         ${elimBtnHTML(key, i, li)}
       </div>`;
@@ -1966,8 +1982,11 @@ function renderQuestionMath(key, i) {
       </div>
       ${stem}
       ${ansHtml}
+      ${mt ? MathText.origHTML(q) : ''}
       ${reveal}
     </div>`;
+  // KaTeX typesets the text; if anything fails, this question falls back to its image.
+  if (mt && !MathText.typeset(document.getElementById('mq-main'), q.page)) { renderQuestionMath(key, i); return; }
 
   if (!submitted && !q.is_mc && !(window.matchMedia && matchMedia('(pointer: coarse)').matches)) {
     setTimeout(() => { const el = document.getElementById('fr-inp'); if (el) el.focus(); }, 50);
