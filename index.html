@@ -13,171 +13,24 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SATLab</title>
+  <link rel="icon" type="image/svg+xml" href="brand/satlab-icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png" />
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0B1020" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; }
-    :root[data-theme="dark"] { --black:#EDEDED; --gray-dark:#C7C7C7; --gray-mid:#9A9A9A; --gray-light:#5A5A5A; --gray-border:#333333; --gray-bg:#1B1B1B; --white:#121212; }
-    html, body { font-family:'DM Sans',sans-serif; background:var(--white); color:var(--black); min-height:100vh; font-size:15px; -webkit-font-smoothing:antialiased; transition:background .2s ease,color .2s ease; }
-    .page { display:none; min-height:100vh; flex-direction:column; }
-    .page.active { display:flex; animation:fadeIn .22s ease; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
-
-    .site-header { display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:56px; border-bottom:1px solid var(--gray-border); background:var(--white); position:sticky; top:0; z-index:100; }
-    .logo { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; letter-spacing:.06em; color:var(--black); text-transform:uppercase; cursor:pointer; }
-    .hdr-right { display:flex; align-items:center; gap:1.5rem; }
-    .breadcrumb { font-size:13px; color:var(--gray-mid); display:flex; align-items:center; gap:8px; }
-    .breadcrumb .sep { color:var(--gray-light); }
-    .breadcrumb .crumb { cursor:pointer; transition:color .15s; }
-    .breadcrumb .crumb:hover { color:var(--black); }
-    .breadcrumb .cur { color:var(--black); font-weight:500; }
-    .back-btn { font-size:13px; color:var(--gray-mid); background:none; border:1px solid var(--gray-border); border-radius:6px; padding:6px 14px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color .15s,border-color .15s; }
-    .back-btn:hover { color:var(--black); border-color:var(--black); }
-    .settings-btn { width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:none; border:1px solid var(--gray-border); border-radius:6px; cursor:pointer; color:var(--gray-mid); transition:color .15s,border-color .15s; padding:0; }
-    .settings-btn:hover { color:var(--black); border-color:var(--black); }
-    .settings-btn svg { width:16px; height:16px; display:block; }
-
-    .home-hero { padding:5rem 2.5rem 4rem; max-width:860px; margin:0 auto; width:100%; }
-    .hero-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1.5rem; }
-    .hero-title { font-family:'Source Serif 4',serif; font-size:clamp(38px,5vw,58px); font-weight:300; line-height:1.12; color:var(--black); margin-bottom:1.25rem; }
-    .hero-sub { font-size:15px; color:var(--gray-mid); max-width:420px; line-height:1.7; font-weight:300; }
-    .countdown-widget { display:inline-flex; align-items:center; gap:1.5rem; margin-top:1.5rem; padding:.9rem 1.5rem; border:1px solid var(--gray-border); border-radius:8px; background:var(--gray-bg); flex-wrap:wrap; }
-    .countdown-label { font-size:13px; color:var(--gray-mid); }
-    .countdown-label strong { color:var(--black); font-weight:500; }
-    .countdown-nums { display:flex; gap:1.1rem; font-family:'DM Mono',monospace; }
-    .countdown-unit { text-align:center; min-width:34px; }
-    .countdown-unit .val { font-size:22px; font-weight:500; color:var(--black); line-height:1; }
-    .countdown-unit .lbl { font-size:9px; color:var(--gray-mid); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
-    @media (max-width:600px) {
-      .countdown-widget { gap:1rem; padding:.75rem 1rem; }
-      .countdown-nums { gap:.7rem; }
-      .countdown-unit .val { font-size:18px; }
-    }
-
-    /* ── Practice recommendation pop-up ── */
-    .reco-popup {
-      position: fixed; bottom: 1.5rem; right: 1.5rem; max-width: 320px;
-      background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.14); padding: 1.1rem 1.2rem 1.15rem;
-      z-index: 500; opacity: 0; transform: translateY(16px); pointer-events: none; visibility: hidden;
-      transition: opacity .25s ease, transform .25s ease, visibility .25s;
-    }
-    .reco-popup.show { opacity: 1; transform: translateY(0); pointer-events: auto; visibility: visible; }
-    .reco-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
-    .reco-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--black); font-weight: 500; }
-    .reco-close { background: none; border: none; color: var(--gray-mid); font-size: 16px; cursor: pointer; line-height: 1; padding: 2px; margin: -2px -2px 0 0; }
-    .reco-close:hover { color: var(--black); }
-    .reco-skill { font-size: 15px; font-weight: 500; color: var(--black); margin-bottom: .3rem; }
-    .reco-reason { font-size: 12.5px; color: var(--gray-mid); line-height: 1.55; margin-bottom: .9rem; }
-    .reco-cta { display: inline-block; width: 100%; text-align: center; background: var(--black); color: #fff; text-decoration: none; font-size: 13px; font-weight: 500; padding: 8px 0; border-radius: 6px; transition: background .15s; }
-    .reco-cta:hover { background: var(--gray-dark); }
-    @media (max-width: 600px) {
-      .reco-popup { left: 1rem; right: 1rem; bottom: 1rem; max-width: none; }
-    }
-    .divider { border:none; border-top:1px solid var(--gray-border); margin:0 2.5rem; }
-    .subject-row { max-width:860px; margin:0 auto; width:100%; padding:3rem 2.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
-    .subject-card { border:1px solid var(--gray-border); border-radius:4px; padding:2rem 1.75rem; cursor:pointer; transition:border-color .2s,background .2s,transform .2s; }
-    .subject-card:hover { border-color:var(--black); background:var(--gray-bg); transform:translateY(-2px); }
-    .card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; }
-    .card-tag { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--gray-mid); border:1px solid var(--gray-border); border-radius:2px; padding:3px 9px; }
-    .card-arrow { font-size:18px; color:var(--gray-light); transition:color .2s,transform .2s; }
-    .subject-card:hover .card-arrow { color:var(--black); transform:translate(2px,-2px); }
-    .card-title { font-family:'Source Serif 4',serif; font-size:28px; font-weight:400; color:var(--black); margin-bottom:.6rem; }
-    .card-desc { font-size:13px; color:var(--gray-mid); line-height:1.65; margin-bottom:1.5rem; font-weight:300; }
-    .card-tests { border-top:1px solid var(--gray-border); padding-top:1rem; }
-    .card-tests-lbl { font-size:11px; color:var(--gray-mid); text-transform:uppercase; letter-spacing:.08em; margin-bottom:.6rem; font-family:'DM Mono',monospace; }
-    .card-test-list { display:flex; flex-direction:column; gap:4px; }
-    .card-test-item { font-size:12px; color:var(--gray-dark); display:flex; align-items:center; gap:8px; }
-    .card-test-item::before { content:''; display:block; width:4px; height:4px; border-radius:50%; background:var(--gray-light); flex-shrink:0; }
-    .home-stats { max-width:860px; margin:0 auto; width:100%; padding:2rem 2.5rem 4rem; display:flex; gap:3rem; flex-wrap:wrap; }
-    .stat-item { display:flex; flex-direction:column; gap:3px; }
-    .stat-num { font-family:'Source Serif 4',serif; font-size:28px; font-weight:300; }
-    .stat-lbl { font-size:12px; color:var(--gray-mid); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.06em; }
-
-    .subj-hero { padding:3rem 2.5rem 2.5rem; max-width:860px; margin:0 auto; width:100%; border-bottom:1px solid var(--gray-border); }
-    .subj-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:.75rem; }
-    .subj-title { font-family:'Source Serif 4',serif; font-size:42px; font-weight:300; color:var(--black); margin-bottom:.5rem; }
-    .subj-meta { font-size:13px; color:var(--gray-mid); font-weight:300; }
-    .tests-section { max-width:860px; margin:0 auto; width:100%; padding:2.5rem; flex:1; }
-    .sec-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1.25rem; display:flex; align-items:center; gap:12px; }
-    .sec-label::after { content:''; flex:1; height:1px; background:var(--gray-border); }
-    .tests-list { display:flex; flex-direction:column; }
-    .test-row { display:flex; align-items:center; padding:1.1rem 0; border-bottom:1px solid var(--gray-border); cursor:pointer; transition:background .15s,padding .15s; }
-    .test-row:first-child { border-top:1px solid var(--gray-border); }
-    .test-row:hover { background:var(--gray-bg); padding-left:12px; padding-right:12px; margin:0 -12px; }
-    .test-row.disabled { cursor:default; opacity:.6; }
-    .test-row.disabled:hover { background:none; padding-left:0; padding-right:0; margin:0; }
-    .test-idx { font-family:'DM Mono',monospace; font-size:11px; color:var(--gray-light); width:36px; flex-shrink:0; }
-    .test-info { flex:1; }
-    .test-name { font-size:15px; font-weight:500; color:var(--black); margin-bottom:2px; }
-    .test-name.muted { color:var(--gray-mid); }
-    .test-detail { font-size:12px; color:var(--gray-mid); font-weight:300; }
-    .test-right { display:flex; align-items:center; gap:1.5rem; }
-    .badge { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:2px; border:1px solid; white-space:nowrap; }
-    .badge-avail { border-color:var(--black); color:var(--black); }
-    .badge-soon { border-color:var(--gray-border); color:var(--gray-mid); }
-    .test-arrow { color:var(--gray-light); font-size:16px; transition:color .15s,transform .15s; }
-    .test-row:hover .test-arrow { color:var(--black); transform:translateX(3px); }
-
-    .mod-hero { padding:3rem 2.5rem 2.5rem; max-width:860px; margin:0 auto; width:100%; border-bottom:1px solid var(--gray-border); }
-    .mod-hero-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:.5rem; }
-    .mod-hero-title { font-family:'Source Serif 4',serif; font-size:36px; font-weight:300; margin-bottom:.4rem; }
-    .mod-hero-sub { font-size:13px; color:var(--gray-mid); font-weight:300; }
-    .mod-section { max-width:860px; margin:0 auto; width:100%; padding:2.5rem; flex:1; }
-    .mod-group-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1rem; display:flex; align-items:center; gap:12px; }
-    .mod-group-label::after { content:''; flex:1; height:1px; background:var(--gray-border); }
-    .mod-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2.5rem; }
-    .mod-card { border:1px solid var(--gray-border); border-radius:4px; padding:1.5rem; cursor:pointer; transition:border-color .2s,background .2s,transform .15s; display:flex; flex-direction:column; gap:.75rem; }
-    .mod-card:hover { border-color:var(--black); background:var(--gray-bg); transform:translateY(-2px); }
-    .mod-card-top { display:flex; align-items:center; justify-content:space-between; }
-    .mod-tag { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--gray-mid); border:1px solid var(--gray-border); border-radius:2px; padding:2px 8px; }
-    .mod-arrow { color:var(--gray-light); font-size:16px; transition:color .2s,transform .2s; }
-    .mod-card:hover .mod-arrow { color:var(--black); transform:translate(2px,-2px); }
-    .mod-card-name { font-family:'Source Serif 4',serif; font-size:20px; font-weight:400; }
-    .mod-card-detail { font-size:12px; color:var(--gray-mid); font-weight:300; }
-    .chips { display:flex; flex-wrap:wrap; gap:4px; }
-    .chip { font-size:10px; font-family:'DM Mono',monospace; color:var(--gray-mid); border:1px solid var(--gray-border); border-radius:2px; padding:2px 6px; }
-
-    .site-footer { border-top:1px solid var(--gray-border); padding:1.25rem 2.5rem; display:flex; align-items:center; justify-content:space-between; margin-top:auto; }
-    .footer-copy { font-size:12px; color:var(--gray-light); font-family:'DM Mono',monospace; }
-    .footer-note { font-size:12px; color:var(--gray-mid); }
-
-    @media (max-width:600px) {
-      .subject-row, .mod-grid { grid-template-columns:1fr; }
-      .site-header,.home-hero,.subj-hero,.tests-section,.home-stats,.mod-hero,.mod-section { padding-left:1.25rem; padding-right:1.25rem; }
-      .divider { margin:0 1.25rem; }
-      .breadcrumb { display:none; }
-    }
-    /* Hard Question Bank section */
-    .hb-stats { display:flex; gap:10px; flex-wrap:wrap; margin-top:1.25rem; }
-    .hb-stats span { font-size:13px; padding:7px 14px; border-radius:999px; background:var(--card); border:1px solid var(--gray-border); }
-    .hb-stats b { color:#e5383b; }
-    #hard a.test-row { text-decoration:none; color:inherit; }
-    #hard .sec-label, #recall .sec-label, #recycles .sec-label { margin-top:1.75rem; }
-    #recycles .sec-label:first-child { margin-top:0; }
-    .rc-count { font-family:'DM Mono',monospace; font-size:11px; padding:3px 10px; border-radius:999px; background:var(--gold-soft); color:var(--gold-deep); white-space:nowrap; }
-    #recall .sec-label:first-child { margin-top:0; }
-    #hard .sec-label:first-child { margin-top:0; }
-    .hb-fade { animation:fadeIn .22s ease; }
-    .badge-hard { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:3px 10px; border-radius:999px; background:rgba(229,56,59,.12); color:#c1272d; white-space:nowrap; }
-    .hb-chips { display:flex; flex-wrap:wrap; gap:8px; margin:-.25rem 0 1rem; }
-    .hb-chip { font:500 13px 'Plus Jakarta Sans',sans-serif; padding:7px 14px; border-radius:999px; border:1px solid var(--gray-border); background:var(--card); color:var(--gray-dark); cursor:pointer; transition:all .15s; }
-    .hb-chip span { font-family:'DM Mono',monospace; font-size:11px; color:var(--gray-mid); margin-left:4px; }
-    .hb-chip:hover { border-color:var(--gold-2); }
-    .hb-chip.on { background:var(--gold-grad); border-color:transparent; color:#fff; }
-    .hb-chip.on span { color:rgba(255,255,255,.8); }
-    .hb-notice { padding:1.25rem 1.5rem; border-radius:16px; background:var(--card); border:1px dashed var(--gray-border); color:var(--gray-mid); font-size:14px; line-height:1.6; }
-    @media (max-width:600px) { .badge-hard { display:none; } }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { min-height:100vh; -webkit-font-smoothing:antialiased; }
+    /* everything else: theme.css (shared) and home.css (this page) */
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=5" />
-  <link rel="stylesheet" href="home.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=8" />
+  <link rel="stylesheet" href="home.css?v=6" />
 </head>
-<body>
+<body class="site-index">
 
 <aside class="sidebar" aria-label="Main navigation">
-  <div class="sb-brand" onclick="show('home')"><i>S</i>SATLab</div>
+  <div class="sb-brand" onclick="show('home')"><img class="wm" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="95" height="30" /></div>
   <nav class="sb-nav">
     <button class="sb-link active" data-nav="home" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <div class="sb-label">Practice</div>
@@ -200,9 +53,9 @@
 <!-- HOME -->
 <div id="home" class="page active">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
-      <span style="font-size:12px;color:var(--gray-mid);font-family:'DM Mono',monospace">Digital SAT · 2025–2026</span>
+      <span class="hdr-meta">Digital SAT · 2025–2026</span>
       <span id="account-status"></span>
       <button class="back-btn" onclick="window.location.href='weakness.html'">Weakness Profile</button>
       <button class="back-btn" onclick="window.location.href='previous-scores.html'">Previous Scores</button>
@@ -211,380 +64,312 @@
       </button>
     </div>
   </header>
-  <div class="home-hero">
-    <div class="hero-card">
-      <div class="hero-copy">
-        <div class="hero-label">College Board · Official Practice</div>
-        <h1 class="hero-title">Practice with real test,<br><mark>maximize your SAT score</mark></h1>
-        <p class="hero-sub">Work through official SAT questions by subject, skill, or full-length simulation — scored out of 1600.</p>
+  <section class="home-hero">
+    <div class="hero-grid">
+      <div>
+        <h1>Real SAT questions, timed and scored like test day.</h1>
+        <p class="lede">Work through official SAT questions by subject, by skill, or as a full-length test scored out of 1600.</p>
         <div class="hero-cta">
-          <button class="btn-primary hero-btn" onclick="show('adaptive')">Take an adaptive test →</button>
-          <button class="hero-btn ghost" onclick="show('drills')">Drill a skill</button>
+          <button class="btn-primary hero-btn" onclick="show('adaptive')">Take an adaptive test</button>
+          <button class="btn-secondary hero-btn" onclick="show('drills')">Drill a skill</button>
         </div>
-        <div class="hero-pills">
-          <span>28 practice tests</span><span>2,724 questions</span><span>10 skill drills</span>
-        </div>
+        <ul class="hero-facts"><li>28 practice tests</li><li>2,724 questions</li><li>10 skill drills</li></ul>
       </div>
-      <div class="countdown-widget" id="countdown-widget">
-        <div class="countdown-label">Time 'til SAT <strong id="cd-month">—</strong> test</div>
+      <div class="countdown-widget" id="countdown-widget" role="timer" aria-label="Time until the next SAT">
+        <img class="cd-mark" src="brand/satlab-icon-white.svg" alt="" width="92" height="92" />
+        <div class="countdown-label">Time until the <strong id="cd-month">—</strong> SAT</div>
         <div class="countdown-nums">
-          <div class="countdown-unit"><div class="val" id="cd-days">--</div><div class="lbl">Days</div></div>
-          <div class="countdown-unit"><div class="val" id="cd-hours">--</div><div class="lbl">Hours</div></div>
-          <div class="countdown-unit"><div class="val" id="cd-mins">--</div><div class="lbl">Min</div></div>
-          <div class="countdown-unit"><div class="val" id="cd-secs">--</div><div class="lbl">Sec</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-days">--</div><div class="lbl">days</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-hours">--</div><div class="lbl">hours</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-mins">--</div><div class="lbl">minutes</div></div>
+          <div class="countdown-unit"><div class="val" id="cd-secs">--</div><div class="lbl">seconds</div></div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="section-head"><h2>What do you want to practice?</h2><p>Start with an adaptive test, or pick any section and go.</p></div>
-  <div class="subject-row">
-    <div class="subject-card c-adapt" onclick="show('adaptive')">
-      <div class="card-top"><div class="card-tag">Like the Real Test</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Adaptive Test</div>
-      <div class="card-desc">Full SAT that adapts to you: how you do on Module 1 decides whether Module 2 is harder or easier.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Format</div>
-        <div class="card-test-list">
-          <div class="card-test-item">4 modules · ~2h 14m total</div>
-          <div class="card-test-item">Timer cannot be paused</div>
-          <div class="card-test-item">Only the harder route reaches 800</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-math" onclick="show('math')">
-      <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Math</div>
-      <div class="card-desc">Algebra, advanced math, problem-solving, data analysis, geometry, and trigonometry.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Practice tests</div>
-        <div class="card-test-list">
-          <div class="card-test-item">Practice Tests 1–15</div>
-          <div class="card-test-item">21–22 questions · 35 min per module</div>
-          <div class="card-test-item">MC + free response · Calculator + Desmos</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-eng" onclick="show('english')">
-      <div class="card-top"><div class="card-tag">Section 1 &amp; 2</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Writing</div>
-      <div class="card-desc">Reading comprehension, grammar, standard English conventions, and rhetoric.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Practice tests</div>
-        <div class="card-test-list">
-          <div class="card-test-item">Practice Tests 1–13</div>
-          <div class="card-test-item">27 questions · 32 min per module</div>
-          <div class="card-test-item">1,404 official questions</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-full" onclick="show('fulltests')">
-      <div class="card-top"><div class="card-tag">All Sections</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Full Test</div>
-      <div class="card-desc">Complete Digital SAT simulation: Reading &amp; Writing + Math, scored out of 1600.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Format</div>
-        <div class="card-test-list">
-          <div class="card-test-item">4 modules · ~2h 14m total</div>
-          <div class="card-test-item">Randomized from question bank</div>
-          <div class="card-test-item">Official scoring curve · /1600</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-drill" onclick="show('drills')">
-      <div class="card-top"><div class="card-tag">By Skill</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Topical Drills</div>
-      <div class="card-desc">Targeted Reading &amp; Writing practice, organized by individual skill — work each one until it's solid.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Coverage</div>
-        <div class="card-test-list">
-          <div class="card-test-item">10 skills · 94 modules</div>
-          <div class="card-test-item">~15 questions per module</div>
-          <div class="card-test-item">Every official R&amp;W question, sorted by skill</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-recall" onclick="show('recall')">
-      <div class="card-top"><div class="card-tag">Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Active Recall</div>
-      <div class="card-desc">Read a passage, watch it disappear, then write what you remember and answer from memory — like TOEFL iBT reading.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Format</div>
-        <div class="card-test-list">
-          <div class="card-test-item">60 seconds to read, then the passage hides</div>
-          <div class="card-test-item">Write what you remember and/or answer the question</div>
-          <div class="card-test-item">Compare with the passage and the answer key</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-hard" onclick="show('hard')">
-      <div class="card-top"><div class="card-tag">Math + Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Hard Question Bank</div>
-      <div class="card-desc">Every question tagged Hard across all practice tests, in sets of 20 — the questions that decide a top score.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Format</div>
-        <div class="card-test-list">
-          <div class="card-test-item">Hard-only sets for both sections</div>
-          <div class="card-test-item">Same test screen, timer and tools as the real practice tests</div>
-        </div>
-      </div>
-    </div>
-    <div class="subject-card c-recycle" onclick="show('recycles')">
-      <div class="card-top"><div class="card-tag">Reading &amp; Writing</div><div class="card-arrow">↗</div></div>
-      <div class="card-title">Recycles</div>
-      <div class="card-desc">The questions that keep coming back: 39 questions that appeared in 4 or more different tests.</div>
-      <div class="card-tests">
-        <div class="card-tests-lbl">Format</div>
-        <div class="card-test-list">
-          <div class="card-test-item">From 407 completed tests · 7,515 questions</div>
-          <div class="card-test-item">Each question seen in 4–7 different tests</div>
-          <div class="card-test-item">Same test screen, timer and tools as the practice tests</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="home-stats">
-    <div class="stat-item"><div class="stat-num">28</div><div class="stat-lbl">Practice Tests</div></div>
-    <div class="stat-item"><div class="stat-num">10</div><div class="stat-lbl">Skill Drills</div></div>
-    <div class="stat-item"><div class="stat-num">2,724</div><div class="stat-lbl">Total Questions</div></div>
-    <div class="stat-item"><div class="stat-num">800</div><div class="stat-lbl">Max Score / Section</div></div>
-  </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  </section>
+  <section class="areas" aria-label="Practice">
+    <h2>Tests</h2>
+    <ul class="area-grid">
+      <li><a class="area" data-cat="full" href="#adaptive" onclick="show('adaptive');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>
+        <span class="area-name">Adaptive Test</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">A full SAT where your Module 1 result decides whether Module 2 is harder or easier.</span>
+        <ul class="area-facts"><li>4 modules, ~2h 14m</li><li>Timer can’t be paused</li><li>Only the harder route reaches 800</li></ul>
+      </a></li>
+      <li><a class="area" data-cat="full" href="#fulltests" onclick="show('fulltests');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+        <span class="area-name">Full Test</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">A complete Digital SAT: Reading &amp; Writing, then Math, scored out of 1600.</span>
+        <ul class="area-facts"><li>4 modules, ~2h 14m</li><li>Randomized from the question bank</li><li>Official scoring curve</li></ul>
+      </a></li>
+      <li><a class="area" data-cat="math" href="#math" onclick="show('math');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+        <span class="area-name">Math</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">Algebra, advanced math, problem-solving and data analysis, geometry and trigonometry.</span>
+        <ul class="area-facts"><li>Practice Tests 1–15</li><li>21–22 questions, 35 min per module</li><li>Calculator + Desmos</li></ul>
+      </a></li>
+      <li><a class="area" data-cat="rw" href="#english" onclick="show('english');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h10M4 19h16"/></svg>
+        <span class="area-name">Writing</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">Reading comprehension, grammar, standard English conventions and rhetoric.</span>
+        <ul class="area-facts"><li>Practice Tests 1–13</li><li>27 questions, 32 min per module</li><li>1,404 official questions</li></ul>
+      </a></li>
+    </ul>
+    <h2>Skill practice</h2>
+    <ul class="area-grid">
+      <li><a class="area" data-cat="rw" href="#drills" onclick="show('drills');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+        <span class="area-name">Topical Drills</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">Every official Reading &amp; Writing question, sorted by skill. Work one skill until it’s solid.</span>
+        <ul class="area-facts"><li>10 skills, 94 modules</li><li>~15 questions per module</li></ul>
+      </a></li>
+      <li><a class="area" data-cat="rw" href="#recall" onclick="show('recall');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/></svg>
+        <span class="area-name">Active Recall</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">Read a passage, watch it disappear, then write what you remember and answer from memory.</span>
+        <ul class="area-facts"><li>60 seconds to read</li><li>Compare with the passage and answer key</li></ul>
+      </a></li>
+      <li><a class="area" data-cat="hard" href="#hard" onclick="show('hard');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+        <span class="area-name">Hard Question Bank</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">Every question tagged Hard across all practice tests, in sets of 20.</span>
+        <ul class="area-facts"><li>Math and Reading &amp; Writing</li><li>Same test screen and tools</li></ul>
+      </a></li>
+      <li><a class="area" data-cat="rw" href="#recycles" onclick="show('recycles');return false;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 19H4.5a1.5 1.5 0 0 1-1.3-2.25L5.6 12.6"/><path d="M11 19h8.5a1.5 1.5 0 0 0 1.3-2.25l-1.7-2.95"/><path d="M14 16l-3 3 3 3"/><path d="M8.6 7.5 10.7 4a1.5 1.5 0 0 1 2.6 0l2.6 4.5"/><path d="M15 4.6l.9 4-4 .9"/><path d="M3 9.5l2.6 3.1 3.1-2.6"/></svg>
+        <span class="area-name">Recycles</span><span class="test-arrow" aria-hidden="true"></span>
+        <span class="area-desc">The questions that keep coming back: 39 seen in 4 or more different tests.</span>
+        <ul class="area-facts"><li>From 407 completed tests</li><li>7,515 questions checked</li></ul>
+      </a></li>
+    </ul>
+  </section>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- MATH -->
 <div id="math" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Math</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Mathematics</div>
-    <div class="subj-title">Math</div>
+    <h1 class="subj-title">Math</h1>
     <div class="subj-meta">Module 1 &amp; 2 · Algebra, Advanced Math, Problem-Solving &amp; Data Analysis, Geometry &amp; Trig · 21–22 questions · 35 min · MC + Free Response</div>
   </div>
   <div class="tests-section">
-    <div class="sec-label">Available practice tests</div>
+    <h2 class="sec-label">Practice tests</h2>
     <div class="tests-list" id="math-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- FULL-LENGTH TESTS -->
 <div id="fulltests" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Full Test</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Full-Length Practice</div>
-    <div class="subj-title">Full Test</div>
+    <h1 class="subj-title">Full Test</h1>
     <div class="subj-meta">Reading &amp; Writing (Module 1 &amp; 2) + Math (Module 1 &amp; 2) · Randomized questions · Scored out of 1600</div>
   </div>
   <div class="tests-section">
-    <div class="sec-label">Available full-length tests</div>
+    <h2 class="sec-label">Full-length tests</h2>
     <div class="tests-list" id="full-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- ADAPTIVE -->
 <div id="adaptive" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Adaptive Test</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Adaptive Practice</div>
-    <div class="subj-title">Adaptive Test</div>
+    <h1 class="subj-title">Adaptive Test</h1>
     <div class="subj-meta">Works like the real Digital SAT: your Module 1 result decides whether Module 2 is harder or easier · Timer cannot be paused · Scored out of 1600</div>
   </div>
   <div class="tests-section">
-    <div class="sec-label">Available adaptive tests</div>
+    <h2 class="sec-label">Adaptive tests</h2>
     <div class="tests-list" id="adaptive-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- ACTIVE RECALL -->
 <div id="recall" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Active Recall</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Reading &amp; Writing Memory Training</div>
-    <div class="subj-title">Active Recall</div>
+    <h1 class="subj-title">Active Recall</h1>
     <div class="subj-meta">Read each passage for 60 seconds. Then it disappears: write what you remember and answer the question from memory, then compare with the original. Builds the habit of really taking in what you read.</div>
   </div>
   <div class="tests-section" id="recall-sets"></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- HARD QUESTION BANK -->
 <div id="hard" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Hard Question Bank</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Math &amp; Reading and Writing</div>
-    <div class="subj-title">Hard Question Bank</div>
-    <div class="subj-meta">Every question tagged <b>Hard</b> across all practice tests, gathered into sets of 20. These are the questions that separate a 1400 from a 1550 — work through them to maximize your score.</div>
+    <h1 class="subj-title">Hard Question Bank</h1>
+    <div class="subj-meta">Every question tagged <b>Hard</b> across all practice tests, gathered into sets of 20.</div>
     <div class="hb-stats" id="hb-stats"></div>
   </div>
   <div class="tests-section" id="hb-sets"><div class="hb-notice">Loading the question banks…</div></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- RECYCLES -->
 <div id="recycles" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Recycles</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Reading &amp; Writing</div>
-    <div class="subj-title">Recycles</div>
+    <h1 class="subj-title">Recycles</h1>
     <div class="subj-meta">Questions that came up again and again. Out of 407 completed tests (7,515 questions), these 39 appeared in 4 or more different tests — all of them Reading &amp; Writing; no Math question appeared more than 3 times. Set 2 adds the 17 questions from the team’s recycle doc (two of them are already in set 1).</div>
     <div class="hb-stats" id="rc-stats"></div>
   </div>
   <div class="tests-section" id="rc-sets"></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- ENGLISH -->
 <div id="english" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Writing</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Reading and Writing</div>
-    <div class="subj-title">Writing</div>
+    <h1 class="subj-title">Writing</h1>
     <div class="subj-meta">Module 1 &amp; 2 · Information &amp; Ideas, Craft &amp; Structure, Expression of Ideas, Standard English · 27 questions · 32 min per module</div>
   </div>
   <div class="tests-section">
-    <div class="sec-label">Available practice tests</div>
+    <h2 class="sec-label">Practice tests</h2>
     <div class="tests-list" id="eng-list"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- TOPICAL DRILLS — TOPIC LIST -->
 <div id="drills" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb"><span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span><span class="cur">Topical Drills</span></div>
-      <button class="back-btn" onclick="show('home')">← Back</button>
+      <button class="back-btn is-back" onclick="show('home')">Back</button>
     </div>
   </header>
   <div class="subj-hero">
-    <div class="subj-label">SAT · Reading and Writing</div>
-    <div class="subj-title">Topical Drills</div>
-    <div class="subj-meta">Every official Reading &amp; Writing question, sorted by skill into ~15-question modules · Pick a skill below to drill it directly</div>
+    <h1 class="subj-title">Topical Drills</h1>
+    <div class="subj-meta">Every official Reading &amp; Writing question, sorted by skill into modules of about 15 questions. Pick a skill to drill it.</div>
   </div>
   <div class="tests-section" id="drills-section"></div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- TOPICAL DRILLS — MODULE SELECTION -->
 <div id="drillmods" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb">
         <span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span>
         <span class="crumb" onclick="show('drills')">Topical Drills</span><span class="sep">/</span>
         <span class="cur" id="dm-bc-topic">Skill</span>
       </div>
-      <button class="back-btn" onclick="show('drills')">← Back</button>
+      <button class="back-btn is-back" onclick="show('drills')">Back</button>
     </div>
   </header>
   <div class="mod-hero">
-    <div class="mod-hero-label" id="dm-label">SAT · Reading and Writing</div>
-    <div class="mod-hero-title" id="dm-title">Skill Name</div>
+    <h1 class="mod-hero-title" id="dm-title">Skill Name</h1>
     <div class="mod-hero-sub" id="dm-sub">Select a module to begin. Each module is independently timed.</div>
   </div>
   <div class="mod-section">
-    <div class="mod-group-label">Modules</div>
+    <h2 class="mod-group-label">Modules</h2>
     <div class="mod-grid" id="dm-grid"></div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <!-- MODULE SELECTION -->
 <div id="modules" class="page">
   <header class="site-header">
-    <div class="logo" onclick="show('home')">SATLab</div>
+    <div class="logo" onclick="show('home')"><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="36" height="36" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="70" height="22" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="70" height="22" /></div>
     <div class="hdr-right">
       <div class="breadcrumb">
         <span class="crumb" onclick="show('home')">Home</span><span class="sep">/</span>
         <span class="crumb" id="bc-subj" onclick="backToSubj()">Math</span><span class="sep">/</span>
         <span class="cur" id="bc-test">Practice Test 1</span>
       </div>
-      <button class="back-btn" onclick="backToSubj()">← Back</button>
+      <button class="back-btn is-back" onclick="backToSubj()">Back</button>
     </div>
   </header>
   <div class="mod-hero">
-    <div class="mod-hero-label" id="mod-label">SAT · Mathematics</div>
-    <div class="mod-hero-title" id="mod-title">Practice Test 1</div>
-    <div class="mod-hero-sub">Select a module to begin. Each module is independently timed.</div>
+    <h1 class="mod-hero-title" id="mod-title">Practice Test 1</h1>
+    <div class="mod-hero-sub" id="mod-sub">Select a module to begin. Each module is independently timed.</div>
   </div>
   <div class="mod-section">
-    <div class="mod-group-label">Module 1</div>
+    <h2 class="mod-group-label">Module 1</h2>
     <div class="mod-grid">
       <div class="mod-card" onclick="launch('1A')">
-        <div class="mod-card-top"><div class="mod-tag">Module 1A</div><div class="mod-arrow">↗</div></div>
+        <div class="mod-card-top"><div class="mod-arrow" aria-hidden="true"></div></div>
         <div class="mod-card-name">Module 1A</div>
         <div class="mod-card-detail" id="det-1a"></div>
         <div class="chips" id="chips-1a"></div>
       </div>
       <div class="mod-card" onclick="launch('1B')">
-        <div class="mod-card-top"><div class="mod-tag">Module 1B</div><div class="mod-arrow">↗</div></div>
+        <div class="mod-card-top"><div class="mod-arrow" aria-hidden="true"></div></div>
         <div class="mod-card-name">Module 1B</div>
         <div class="mod-card-detail" id="det-1b"></div>
         <div class="chips" id="chips-1b"></div>
       </div>
     </div>
-    <div class="mod-group-label">Module 2</div>
+    <h2 class="mod-group-label">Module 2</h2>
     <div class="mod-grid">
       <div class="mod-card" onclick="launch('2A')">
-        <div class="mod-card-top"><div class="mod-tag">Module 2A</div><div class="mod-arrow">↗</div></div>
+        <div class="mod-card-top"><div class="mod-arrow" aria-hidden="true"></div></div>
         <div class="mod-card-name">Module 2A</div>
         <div class="mod-card-detail" id="det-2a"></div>
         <div class="chips" id="chips-2a"></div>
       </div>
       <div class="mod-card" onclick="launch('2B')">
-        <div class="mod-card-top"><div class="mod-tag">Module 2B</div><div class="mod-arrow">↗</div></div>
+        <div class="mod-card-top"><div class="mod-arrow" aria-hidden="true"></div></div>
         <div class="mod-card-name">Module 2B</div>
         <div class="mod-card-detail" id="det-2b"></div>
         <div class="chips" id="chips-2b"></div>
       </div>
     </div>
   </div>
-  <footer class="site-footer"><div class="footer-copy">SATLab · 2025–2026</div><div class="footer-note">Not affiliated with College Board</div></footer>
+  <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
 </div>
 
 <script src="recyclebank.js"></script>
@@ -599,26 +384,17 @@
   document.getElementById('math-list').innerHTML = Array.from({length:15},(_,i)=>{
     const n=i+1, id=`mathtest${String(n).padStart(2,'0')}`, name=`Practice Test ${n}`;
     return `<div class="test-row" onclick="showMods('math','${id}','${name}')">
-      <div class="test-idx">${String(n).padStart(2,'0')}</div>
       <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 21–22 questions each · 35 min · Multiple choice &amp; free response · Calculator &amp; Desmos</div></div>
-      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+      <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
     </div>`;
   }).join('');
-
-  // TESTER entry: tiny sample module for trying the Report button (not a real test)
-  document.getElementById('math-list').insertAdjacentHTML('afterbegin', `<div class="test-row" onclick="window.location.href='tester.html'">
-      <div class="test-idx">—</div>
-      <div class="test-info"><div class="test-name">TESTER · Sample Math Module</div><div class="test-detail">6 quick questions for trying the “Report question issue” button · not a real test</div></div>
-      <div class="test-right"><div class="badge" style="border-color:#e5383b;background:#e5383b;color:#fff">TESTER</div><div class="test-arrow">→</div></div>
-    </div>`);
 
   // Build english list (13 tests)
   document.getElementById('eng-list').innerHTML = Array.from({length:13},(_,i)=>{
     const n=i+1, id=`test${String(n).padStart(2,'0')}`, name=`Practice Test ${n}`;
     return `<div class="test-row" onclick="showMods('english','${id}','${name}')">
-      <div class="test-idx">${String(n).padStart(2,'0')}</div>
       <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">Module 1A, 1B, 2A, 2B · 27 questions each · 32 min · All 4 skill domains</div></div>
-      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+      <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
     </div>`;
   }).join('');
 
@@ -626,9 +402,8 @@
   document.getElementById('full-list').innerHTML = Array.from({length:10},(_,i)=>{
     const n=i+1, name=`Full-Length Test ${n}`;
     return `<div class="test-row" onclick="window.location.href='fulltest.html?test=${n}'">
-      <div class="test-idx">${String(n).padStart(2,'0')}</div>
       <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">R&amp;W Module 1 &amp; 2 (27 questions each) · Math Module 1 &amp; 2 (22 questions each) · ~2h 14m total</div></div>
-      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+      <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
     </div>`;
   }).join('');
 
@@ -636,9 +411,8 @@
   document.getElementById('adaptive-list').innerHTML = Array.from({length:10},(_,i)=>{
     const n=i+1, name=`Adaptive Test ${n}`;
     return `<div class="test-row" onclick="window.location.href='fulltest.html?mode=adaptive&test=${n}'">
-      <div class="test-idx">${String(n).padStart(2,'0')}</div>
       <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">R&amp;W Module 1 &amp; 2 (27 questions each) · Math Module 1 &amp; 2 (22 questions each) · Module 2 adapts to Module 1 · ~2h 14m total</div></div>
-      <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+      <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
     </div>`;
   }).join('');
 
@@ -690,10 +464,9 @@
         const q = new URLSearchParams({ test: 'hard', label: skill ? `Hard · ${skill}` : 'Hard Question Bank', module: String(i + 1) });
         if (skill) q.set('skill', skill);
         return `<a class="test-row" href="${S.file}?${q}">
-          <div class="test-idx">${String(i + 1).padStart(2, '0')}</div>
           <div class="test-info"><div class="test-name">Hard ${skill ? esc(skill) : S.subject} · Set ${i + 1}</div>
             <div class="test-detail">${set.length} questions · ~${Math.round(set.length * S.mins)} min · ${skill ? S.subject : domainMix(set)}</div></div>
-          <div class="test-right"><span class="badge-hard">Hard</span><div class="test-arrow">→</div></div>
+          <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
         </a>`;
       }).join('') + '</div>';
     }
@@ -717,7 +490,7 @@
       document.getElementById('hb-stats').innerHTML =
         `<span><b>${nRW + nMath}</b> hard questions</span><span>${nRW} Reading &amp; Writing</span><span>${nMath} Math</span>`;
       el.classList.add('hb-fade'); // the list arrives after the page: fade it in like a section
-      el.innerHTML = ['rw', 'math'].map(k => `<div class="sec-label">${SECTIONS[k].title}</div>${chips(k)}<div id="hb-rows-${k}">${rows(k)}</div>`).join('');
+      el.innerHTML = ['rw', 'math'].map(k => `<h2 class="sec-label">${SECTIONS[k].title}</h2>${chips(k)}<div id="hb-rows-${k}">${rows(k)}</div>`).join('');
     }
     document.addEventListener('click', e => {
       const b = e.target.closest('.hb-chip'); if (!b) return;
@@ -742,7 +515,7 @@
     const c = cfg[subj];
     document.getElementById('bc-subj').textContent  = c.title;
     document.getElementById('bc-test').textContent  = label;
-    document.getElementById('mod-label').textContent = c.label;
+    document.getElementById('mod-sub').textContent = `${c.title} · Select a module to begin. Each module is timed on its own.`;
     document.getElementById('mod-title').textContent = label;
     const detail = `${c.q} questions · ${c.min} minutes`;
     const chipsHtml = c.chips.map(ch=>`<span class="chip">${ch}</span>`).join('');
@@ -798,9 +571,8 @@
       : qs.every(q => q.recycle.count) ? `each seen in ${span(qs)} tests · most repeated first`
       : `set 1 seen in ${span(qs)} tests each, most repeated first · then the team doc's questions`;
     const row = (key, name, qs, i) => `<div class="test-row" onclick="window.location.href='test.html?test=recycles&module=${key}&label=Recycles'">
-        <div class="test-idx">${String(i).padStart(2,'0')}</div>
         <div class="test-info"><div class="test-name">${name}</div><div class="test-detail">${qs.length} questions · ~${Math.round(qs.length*32/27)} min · ${about(key, qs)}</div></div>
-        <div class="test-right"><div class="badge badge-avail">Practice</div><div class="test-arrow">→</div></div>
+        <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
       </div>`;
     const skillGroups = RecycleBank.groups.filter(g => g.key !== DOC_KEY);
     document.getElementById('rc-stats').innerHTML =
@@ -810,17 +582,17 @@
     const qRow = (q, idx, note) => `<div class="test-row" title="Practice this question" onclick="window.location.href='test.html?test=recycles&module=${q.recycle.code.toLowerCase()}&label=Recycles'">
           <div class="test-idx">${esc(idx)}</div>
           <div class="test-info"><div class="test-name">${esc(q.recycle.title)}</div><div class="test-detail">${esc(q.skill)} · ${note ? esc(note) + ', seen in ' + q.recycle.count + ' tests' : q.recycle.count ? esc(q.recycle.sources.join(' · ')) : "from the team's recycle doc"}</div></div>
-          <div class="test-right"><span class="rc-count">${q.recycle.count ? q.recycle.count + ' tests' : 'team doc'}</span><div class="test-arrow">→</div></div>
+          <div class="test-right"><span class="rc-count">${q.recycle.count ? q.recycle.count + ' tests' : 'team doc'}</span><div class="test-arrow" aria-hidden="true"></div></div>
         </div>`;
     el.innerHTML =
-      `<div class="sec-label">Practice</div><div class="tests-list">` +
+      `<h2 class="sec-label">Practice</h2><div class="tests-list">` +
         row('all', 'All recycled questions', all, 1) +
         skillGroups.map((g, i) => row(g.key, g.name, RecycleBank.set(g.key), i + 2)).join('') +
         (docGroup ? row(DOC_KEY, docGroup.name, docQs, skillGroups.length + 2) : '') +
-      `</div><div class="sec-label">Set 1 · every question seen in 4+ tests · tap one to practice it</div><div class="tests-list rc-list">` +
+      `</div><h2 class="sec-label">Set 1 · every question seen in 4+ tests · tap one to practice it</h2><div class="tests-list rc-list">` +
         counted.map(q => qRow(q, q.recycle.code)).join('') +
       `</div>` +
-      (docQs.length ? `<div class="sec-label">${esc(docGroup.name)} · in the doc's order · tap one to practice it</div><div class="tests-list rc-list">` +
+      (docQs.length ? `<h2 class="sec-label">${esc(docGroup.name)} · in the doc's order · tap one to practice it</h2><div class="tests-list rc-list">` +
         docQs.map(q => qRow(q, 'S2-' + (docGroup.ids.indexOf(q.id) + 1), q.recycle.group === DOC_KEY ? '' : `also set 1’s ${q.recycle.code}`)).join('') +
       `</div>` : '');
   })();
@@ -833,27 +605,25 @@
     const ORDER = ['inferences','central-ideas-and-details','command-of-evidence','text-structure-and-purpose','cross-text-connections','words-in-context'];
     document.getElementById('recall-sets').innerHTML = ORDER.map(slug => {
       const t = DRILL_TOPICS.find(x => x.slug === slug); if (!t) return '';
-      return `<div class="sec-label">${t.skill}</div><div class="tests-list">` + t.sizes.map((n, i) =>
+      return `<h2 class="sec-label">${t.skill}</h2><div class="tests-list">` + t.sizes.map((n, i) =>
         `<div class="test-row" onclick="window.location.href='recall.html?skill=${slug}&set=${i+1}'">
-          <div class="test-idx">${String(i+1).padStart(2,'0')}</div>
           <div class="test-info"><div class="test-name">${t.skill} · Set ${i+1}</div><div class="test-detail">${recallCount(t, i, n)} passages · read, recall, compare · ~${Math.round(n*2)} min</div></div>
-          <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+          <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
         </div>`).join('') + '</div>';
     }).join('');
   })();
 
   // Build topic list, grouped by domain
   (function renderDrillTopics(){
-    let html = '', n = 1;
+    let html = '';
     DOMAIN_ORDER_RW.forEach(domain => {
       const topics = DRILL_TOPICS.filter(t => t.domain === domain);
       if (!topics.length) return;
-      html += `<div class="sec-label">${domain}</div><div class="tests-list">`;
+      html += `<h2 class="sec-label">${domain}</h2><div class="tests-list">`;
       topics.forEach(t => {
         html += `<div class="test-row" onclick="showDrillMods('${t.slug}')">
-          <div class="test-idx">${String(n++).padStart(2,'0')}</div>
-          <div class="test-info"><div class="test-name">${t.skill}</div><div class="test-detail">${t.desc} · ${t.sizes.length} modules · ${t.total} questions</div></div>
-          <div class="test-right"><div class="badge badge-avail">Available</div><div class="test-arrow">→</div></div>
+          <div class="test-info"><div class="test-name">${t.skill}</div><div class="test-detail">${t.desc} ${t.sizes.length} modules, ${t.total} questions.</div></div>
+          <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
         </div>`;
       });
       html += `</div>`;
@@ -867,14 +637,13 @@
     curDrillTopic = DRILL_TOPICS.find(t => t.slug === slug);
     if (!curDrillTopic) return;
     document.getElementById('dm-bc-topic').textContent = curDrillTopic.skill;
-    document.getElementById('dm-label').textContent = `SAT · Reading and Writing · ${curDrillTopic.domain}`;
     document.getElementById('dm-title').textContent = curDrillTopic.skill;
-    document.getElementById('dm-sub').textContent = `${curDrillTopic.sizes.length} modules · ${curDrillTopic.total} questions · ${curDrillTopic.desc}`;
+    document.getElementById('dm-sub').textContent = `${curDrillTopic.domain} · ${curDrillTopic.sizes.length} modules · ${curDrillTopic.total} questions. ${curDrillTopic.desc}`;
     document.getElementById('dm-grid').innerHTML = curDrillTopic.sizes.map((size, idx) => {
       const m = idx + 1;
       const mins = Math.round(size * 32 / 27);
       return `<div class="mod-card" onclick="launchDrill(${m})">
-        <div class="mod-card-top"><div class="mod-tag">Module ${m}</div><div class="mod-arrow">↗</div></div>
+        <div class="mod-card-top"><div class="mod-arrow" aria-hidden="true"></div></div>
         <div class="mod-card-name">Module ${m}</div>
         <div class="mod-card-detail">${size} questions · ~${mins} min</div>
         <div class="chips"><span class="chip">${curDrillTopic.skill}</span></div>
@@ -929,14 +698,13 @@
   { const h = location.hash.slice(1); if (ROUTES.includes(h)) show(h, true); }
 </script>
 
-<div class="reco-popup" id="reco-popup">
+<div class="reco-popup" id="reco-popup" role="dialog" aria-labelledby="reco-skill">
   <div class="reco-top">
-    <span class="reco-eyebrow">Recommended Practice</span>
-    <button class="reco-close" onclick="dismissReco()" aria-label="Dismiss">✕</button>
+    <div class="reco-skill" id="reco-skill">—</div>
+    <button class="reco-close" onclick="dismissReco()" aria-label="Dismiss"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
-  <div class="reco-skill" id="reco-skill">—</div>
   <div class="reco-reason" id="reco-reason">—</div>
-  <a class="reco-cta" id="reco-cta" href="#">Practice Now →</a>
+  <a class="reco-cta" id="reco-cta" href="#">Start this drill</a>
 </div>
 
 <script src="auth.js"></script>
@@ -1037,7 +805,7 @@
   }
 
   function showRecoPopup(rec) {
-    document.getElementById('reco-skill').textContent = rec.topic.skill;
+    document.getElementById('reco-skill').textContent = 'Suggested drill: ' + rec.topic.skill;
     document.getElementById('reco-reason').textContent =
       `You're missing the most questions in ${rec.domain.name} (${rec.domain.pct}% correct so far). This drill targets it directly.`;
     const p = new URLSearchParams({ topic: rec.topic.slug, label: rec.topic.skill, module: 1 });

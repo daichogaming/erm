@@ -4,9 +4,13 @@
   <meta charset="UTF-8" />
   <script>(function(){try{var t=localStorage.getItem('sat-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Log In — SAT Practice</title>
+  <title>Log In — SATLab</title>
+  <link rel="icon" type="image/svg+xml" href="brand/satlab-icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png" />
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0B1020" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --black:#111111; --gray-dark:#3A3A3A; --gray-mid:#767676; --gray-light:#C4C4C4; --gray-border:#DCDCDC; --gray-bg:#F5F5F5; --white:#f2f2f2; --correct:#1a7a3c; --incorrect:#c0392b; }
@@ -15,13 +19,13 @@
     .page { display:flex; min-height:100vh; flex-direction:column; }
 
     .site-header { display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:56px; border-bottom:1px solid var(--gray-border); background:var(--white); position:sticky; top:0; z-index:100; }
-    .logo { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; letter-spacing:.06em; color:var(--black); text-transform:uppercase; cursor:pointer; }
+    .logo { font-size:14px; font-weight:500; letter-spacing:.06em; color:var(--black); text-transform:uppercase; cursor:pointer; }
     .back-btn { font-size:13px; color:var(--gray-mid); background:none; border:1px solid var(--gray-border); border-radius:6px; padding:6px 14px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color .15s,border-color .15s; }
     .back-btn:hover { color:var(--black); border-color:var(--black); }
 
     .auth-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:2.5rem; }
     .auth-box { width:100%; max-width:380px; }
-    .auth-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1rem; text-align:center; }
+    .auth-label { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-mid); margin-bottom:1rem; text-align:center; }
     .auth-title { font-family:'Source Serif 4',serif; font-size:30px; font-weight:300; color:var(--black); margin-bottom:.5rem; text-align:center; }
     .auth-sub { font-size:13px; color:var(--gray-mid); margin-bottom:2rem; text-align:center; line-height:1.6; }
 
@@ -45,26 +49,25 @@
     .guest-note { font-size:12px; color:var(--gray-mid); text-align:center; margin-top:2rem; line-height:1.6; }
     .guest-note a { color:var(--black); }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="theme.css?v=5" />
+  <link rel="stylesheet" href="theme.css?v=8" />
 </head>
 <body>
 
 <div class="page">
   <header class="site-header">
-    <div class="logo" onclick="window.location.href='index.html'">SAT Practice</div>
-    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <button class="back-btn is-back" onclick="window.location.href='index.html'">Back</button>
   </header>
 
   <div class="auth-wrap">
+    <div class="auth-col">
+    <a class="auth-brand" href="index.html"><img class="mark on-light" src="brand/satlab-icon.svg" alt="" width="60" height="60" /><img class="mark on-dark" src="brand/satlab-icon-white.svg" alt="" width="60" height="60" /><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="95" height="30" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="95" height="30" /></a>
     <div class="auth-box">
-      <div class="auth-label">Account</div>
       <h1 class="auth-title" id="auth-title">Log In</h1>
       <p class="auth-sub">Save your scores to your account so they sync across every device.</p>
 
-      <div class="tabs">
-        <div class="tab active" id="tab-login" onclick="switchTab('login')">Log In</div>
-        <div class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</div>
+      <div class="tabs" role="tablist" aria-label="Log in or sign up">
+        <div class="tab active" id="tab-login" onclick="switchTab('login')" role="tab" aria-selected="true">Log In</div>
+        <div class="tab" id="tab-signup" onclick="switchTab('signup')" role="tab" aria-selected="false">Sign Up</div>
       </div>
 
       <form id="auth-form" onsubmit="handleSubmit(event)">
@@ -79,9 +82,10 @@
         <button type="submit" class="submit-btn" id="submit-btn">Log In</button>
       </form>
 
-      <div class="msg" id="msg"></div>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
 
-      <p class="guest-note">You don't need an account to use SAT Practice — scores just save to this device only. <a href="index.html">Continue as guest →</a></p>
+      <p class="guest-note">You don’t need an account to use SATLab: without one, scores save to this device only. <a href="index.html">Continue as guest</a></p>
+    </div>
     </div>
   </div>
 </div>
@@ -95,6 +99,8 @@
     mode = m;
     document.getElementById('tab-login').classList.toggle('active', m === 'login');
     document.getElementById('tab-signup').classList.toggle('active', m === 'signup');
+    document.getElementById('tab-login').setAttribute('aria-selected', String(m === 'login'));
+    document.getElementById('tab-signup').setAttribute('aria-selected', String(m === 'signup'));
     document.getElementById('auth-title').textContent = m === 'login' ? 'Log In' : 'Sign Up';
     document.getElementById('submit-btn').textContent = m === 'login' ? 'Log In' : 'Create Account';
     document.getElementById('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';

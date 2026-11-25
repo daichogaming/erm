@@ -1,13 +1,385 @@
 /* ═══════════════════════════════════════════════════════════
-   SATLab shared theme — warm cream + gold, rounded, soft depth.
-   Loaded AFTER each page's inline <style>, so it re-skins every
-   page by redefining the colour tokens and the shared components.
+   SATLab shared theme.
+   Part 1 styles the site pages (home, lists, scores, profile, settings,
+   login, Active Recall) in the exam screen's language: white paper, ink
+   text, one blue accent, hairlines, Source Serif 4 headings over Inter,
+   and the exam's dashed rule as the single signature line under each
+   page's title. None of Part 1 matches a page with <body class="exam">.
+   Part 2 (end of file) is the older theme, kept only for the exam pages
+   (test, drill, math, fulltest), scoped to body.exam with :where() so its
+   specificity, and therefore those pages, are unchanged.
+   Loaded AFTER each page's inline <style>, so it re-skins every page.
    ═══════════════════════════════════════════════════════════ */
 
-:root {
+/* ── 1. Tokens ─────────────────────────────────────────────── */
+:root:where(:not(:has(body.exam))) {
+  /* SATLab brand: navy ink and the blue of the A's dot and the flask's liquid */
+  --brand-navy:#0B1020; --brand-blue:#0A5FE0;
+  --ground:#F3ECDF; --paper:#FBF7EF; --ink:#0B1020; --ink-2:#2E3548; --muted:#545C70; --faint:#8790A5;
+  --line:#E2D7C4; --line-strong:#C6B89F; --band:#EEE6D6; --rule:#0B1020; --choice:#3A4152;
+  --accent:#0A5FE0; --accent-hover:#0849B0; --accent-soft:#E6EFFD; --accent-ink:#0849B0; --on-accent:#ffffff;
+  /* the shell: sidebar on desktop, header on phones */
+  --shell:#0B1020; --shell-2:#161D33; --shell-line:#232B45; --shell-line-strong:#3A4466; --shell-text:#C8D0E2; --shell-muted:#8D97B0; --shell-strong:#ffffff;
+  /* categories, used for icon tiles and result badges: both sections / Math / Reading & Writing / Hard */
+  --cat-full:#0B1020; --cat-full-soft:#E4E8F1;
+  --cat-math:#0A5FE0; --cat-math-soft:#E6EFFD;
+  --cat-rw:#5B3FD0; --cat-rw-soft:#EEEAFC;
+  --warm:#A35A00; --warm-soft:#FDF0DA; --warm-on-shell:#FFB84D;
+  /* states and score bands */
+  --ok:#147A3A; --ok-soft:#E5F4EA; --ok-fill:#1E9E4E; --bad:#C0352B; --bad-soft:#FCEBE9; --bad-fill:#D9473A;
+  --warn:#9A5B00; --warn-soft:#FDF0DA; --warn-fill:#C47A00;
+  --font-ui:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-serif:'Source Serif 4','Noto Serif',Georgia,'Times New Roman',serif;
+  --col:960px; --gutter:2.5rem;
+  --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:12px;
+  --shadow-sm:0 1px 2px rgba(11,16,32,.06);
+  --shadow-md:0 8px 24px -8px rgba(11,16,32,.20),0 2px 6px rgba(11,16,32,.06);
+  --dash:repeating-linear-gradient(90deg,var(--rule) 0 12px,transparent 12px 18px);
+  /* older names the pages' own styles still use */
+  --black:var(--ink); --gray-dark:var(--ink-2); --gray-mid:var(--muted); --gray-light:var(--faint);
+  --gray-border:var(--line); --gray-bg:var(--band); --white:var(--paper); --card:var(--paper);
+  --gold:var(--accent); --gold-2:var(--accent); --gold-deep:var(--accent); --gold-grad:var(--accent); --gold-soft:var(--accent-soft);
+  --correct:var(--ok); --incorrect:var(--bad);
+  --answer-hover:var(--band); --answer-selected:var(--ink); --answer-selected-text:var(--paper);
+  color-scheme:light;
+}
+:root[data-theme="dark"]:where(:not(:has(body.exam))) {
+  --ground:#0D1222; --paper:#141A2C; --ink:#E9EDF6; --ink-2:#C5CCDC; --muted:#9AA3BA; --faint:#6F7891;
+  --line:#262E46; --line-strong:#3A4462; --band:#1A2136; --rule:#8D97B0; --choice:#8D97B0;
+  --accent:#5B9BFF; --accent-hover:#82B3FF; --accent-soft:#16284D; --accent-ink:#8CB8FF; --on-accent:#07101F;
+  --shell:#070A15; --shell-2:#121830; --shell-line:#1C2440; --shell-line-strong:#323C5E; --shell-text:#C8D0E2; --shell-muted:#8D97B0;
+  --cat-full:#C8D0E2; --cat-full-soft:#1E2640;
+  --cat-math:#7AAEFF; --cat-math-soft:#132A52;
+  --cat-rw:#B4A5FF; --cat-rw-soft:#241E4A;
+  --warm:#FFB84D; --warm-soft:#3A2A10;
+  --ok:#5BD08A; --ok-soft:#10301F; --ok-fill:#3DBA6E; --bad:#FF8A7A; --bad-soft:#3A1A1A; --bad-fill:#E8604F;
+  --warn:#F0B44C; --warn-soft:#3A2A10; --warn-fill:#E0A030;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 10px 30px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.4);
+  --black:var(--ink); --gray-dark:var(--ink-2); --gray-mid:var(--muted); --gray-light:var(--faint);
+  --gray-border:var(--line); --gray-bg:var(--band); --white:var(--paper); --card:var(--paper);
+  --gold:var(--accent); --gold-2:var(--accent); --gold-deep:var(--accent); --gold-grad:var(--accent); --gold-soft:var(--accent-soft);
+  --correct:var(--ok); --incorrect:var(--bad);
+  --answer-hover:var(--band); --answer-selected:var(--ink); --answer-selected-text:var(--paper);
+  color-scheme:dark;
+}
+
+/* tester.html (a sample module that is not body.exam) keeps the pre-brand palette, so it looks exactly as before */
+:root:has(.tester-badge) {
+  --ground:#FAF6EE; --paper:#FDFAF4; --ink:#1d1d1f; --ink-2:#3a3d44; --muted:#5b5f66; --faint:#8b9099;
+  --line:#DDD3C2; --line-strong:#BFB29C; --band:#F1EBDF; --rule:#2b2b2b; --choice:#4a4a4a;
+  --accent:#3046c5; --accent-hover:#23379f; --accent-soft:#eceffc; --on-accent:#ffffff;
+  --ok:#17803d; --ok-soft:#e8f5ec; --bad:#c0392b; --bad-soft:#fcefed; --warn:#a2640a;
+  --shadow-sm:0 1px 2px rgba(20,22,28,.06);
+  --shadow-md:0 8px 24px -8px rgba(20,22,28,.18),0 2px 6px rgba(20,22,28,.06);
+}
+:root[data-theme="dark"]:has(.tester-badge) {
+  --ground:#16181d; --paper:#16181d; --ink:#e8eaee; --ink-2:#c9ccd3; --muted:#a3a8b2; --faint:#717683;
+  --line:#30343d; --line-strong:#4a4f5a; --band:#1d2027; --rule:#8d939e; --choice:#8a909b;
+  --accent:#8b9aff; --accent-hover:#a6b1ff; --accent-soft:rgba(125,142,255,.16); --on-accent:#11131a;
+  --ok:#5fd08e; --ok-soft:rgba(70,180,110,.15); --bad:#ff8a7a; --bad-soft:rgba(230,100,85,.15); --warn:#e0b050;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 10px 30px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.4);
+}
+
+/* ── 2. Base and browser surfaces ──────────────────────────── */
+html:where(:not(:has(body.exam))), body:where(:not(.exam)) {
+  background:var(--ground); color:var(--ink); font-family:var(--font-ui); transition:none;
+}
+html:where(:not(:has(body.exam))) { scrollbar-color:var(--line-strong) var(--ground); }
+body:where(:not(.exam)) { font-size:16px; line-height:1.5; caret-color:var(--accent); font-feature-settings:'cv11'; }
+:where(body:not(.exam)) ::selection, body:where(:not(.exam))::selection { background:color-mix(in srgb, var(--accent) 24%, transparent); color:inherit; }
+:where(body:not(.exam)) :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+:where(body:not(.exam)) :focus:not(:focus-visible) { outline:none; }
+:where(body:not(.exam)) a:where(:not([class])) { color:var(--accent); text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }
+:where(body:not(.exam)) a:where(:not([class])):hover { color:var(--accent-hover); }
+:where(body:not(.exam)) input[type=checkbox] { accent-color:var(--accent); }
+:where(body:not(.exam)) h1, :where(body:not(.exam)) h2, :where(body:not(.exam)) h3 { text-wrap:balance; }
+:where(body:not(.exam)) p { text-wrap:pretty; }
+/* the pages' older inline styles set the "technical" mono face on labels and numbers: plain Inter here, numbers tabular */
+:where(body:not(.exam)) .logo, :where(body:not(.exam)) .count-lbl, :where(body:not(.exam)) .hist-type, :where(body:not(.exam)) .hist-date, :where(body:not(.exam)) .hist-score-pct, :where(body:not(.exam)) .rev-num, :where(body:not(.exam)) .dom-sc, :where(body:not(.exam)) .sstat .l, :where(body:not(.exam)) .section-score-lbl, :where(body:not(.exam)) .footer-copy,
+:where(body:not(.exam)) .ov-stat .l, :where(body:not(.exam)) .domain-sc, :where(body:not(.exam)) .domain-focus-badge, :where(body:not(.exam)) .test-idx, :where(body:not(.exam)) .badge, :where(body:not(.exam)) .chip, :where(body:not(.exam)) .rc-count, :where(body:not(.exam)) .countdown-nums, :where(body:not(.exam)) .stat-lbl, :where(body:not(.exam)) .card-tests-lbl {
+  font-family:var(--font-ui); letter-spacing:0; text-transform:none;
+}
+:where(body:not(.exam)) .hist-date, :where(body:not(.exam)) .hist-score, :where(body:not(.exam)) .rev-num, :where(body:not(.exam)) .dom-sc, :where(body:not(.exam)) .domain-sc, :where(body:not(.exam)) .count-lbl, :where(body:not(.exam)) .rc-count, :where(body:not(.exam)) .test-idx, :where(body:not(.exam)) .sstat .n, :where(body:not(.exam)) .ov-stat .n,
+:where(body:not(.exam)) .score-big, :where(body:not(.exam)) .total-score-num, :where(body:not(.exam)) .section-score-num, :where(body:not(.exam)) .module-result-score, :where(body:not(.exam)) .countdown-nums { font-variant-numeric:tabular-nums; }
+
+/* ── 3. Header, breadcrumb, footer ─────────────────────────── */
+:where(body:not(.exam)) .site-header {
+  height:60px; padding:0 var(--gutter); background:var(--paper); border-bottom:1px solid var(--line);
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+:where(body:not(.exam)) .logo { display:flex; align-items:center; gap:8px; font-size:0; line-height:0; color:var(--ink); }
+:where(body:not(.exam)) .breadcrumb { font-size:14px; color:var(--muted); gap:8px; }
+:where(body:not(.exam)) .breadcrumb .sep { color:var(--muted); }
+:where(body:not(.exam)) .breadcrumb .crumb:hover { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+:where(body:not(.exam)) .breadcrumb .cur { color:var(--ink); font-weight:500; }
+:where(body:not(.exam)) .site-footer { display:flex; align-items:center; justify-content:space-between; margin-top:auto; border-top:1px solid var(--line); background:none; padding:1.25rem var(--gutter); gap:.25rem 1rem; flex-wrap:wrap; }
+:where(body:not(.exam)) .footer-copy, :where(body:not(.exam)) .footer-note { font-size:13px; color:var(--muted); }
+
+/* ── 4. Buttons (pill, solid or outline — like the exam's Back / Next) ── */
+:where(body:not(.exam)) .back-btn, :where(body:not(.exam)) .settings-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px; height:36px; padding:0 14px;
+  font:500 14px/1 var(--font-ui); color:var(--ink); background:var(--paper);
+  border:1px solid var(--line-strong); border-radius:999px; box-shadow:none; transition:border-color .15s, background-color .15s;
+}
+:where(body:not(.exam)) .settings-btn { width:36px; padding:0; }
+:where(body:not(.exam)) .back-btn:hover, :where(body:not(.exam)) .settings-btn:hover { border-color:var(--ink); color:var(--ink); background:var(--band); box-shadow:none; }
+:where(body:not(.exam)) .back-btn.is-back::before {
+  content:''; width:14px; height:14px; background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 6l-6 6 6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 6l-6 6 6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+:where(body:not(.exam)) .btn-primary, :where(body:not(.exam)) .submit-btn, :where(body:not(.exam)) .reco-cta, :where(body:not(.exam)) .guest-block a.cta {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--accent); color:var(--on-accent); border:1px solid var(--accent); border-radius:999px;
+  font:600 15px/1 var(--font-ui); text-decoration:none; box-shadow:none; transition:background-color .15s, border-color .15s;
+}
+:where(body:not(.exam)) .btn-primary:hover, :where(body:not(.exam)) .submit-btn:hover, :where(body:not(.exam)) .reco-cta:hover, :where(body:not(.exam)) .guest-block a.cta:hover { background:var(--accent-hover); border-color:var(--accent-hover); opacity:1; filter:none; transform:none; }
+:where(body:not(.exam)) .submit-btn:disabled { opacity:.55; }
+:where(body:not(.exam)) .btn-secondary {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--paper); color:var(--ink); border:1px solid var(--line-strong); border-radius:999px;
+  font:600 15px/1 var(--font-ui); cursor:pointer; transition:border-color .15s, background-color .15s;
+}
+:where(body:not(.exam)) .btn-secondary:hover { border-color:var(--ink); background:var(--band); }
+
+/* ── 5. Page title block, closed by the dashed rule ─────────── */
+:where(body:not(.exam)) .hero, :where(body:not(.exam)) .settings-hero, :where(body:not(.exam)) .subj-hero, :where(body:not(.exam)) .mod-hero {
+  max-width:var(--col); margin:0 auto; width:100%; padding:3rem var(--gutter) 0; border-bottom:none;
+}
+:where(body:not(.exam)) .hero::after, :where(body:not(.exam)) .settings-hero::after, :where(body:not(.exam)) .subj-hero::after, :where(body:not(.exam)) .mod-hero::after {
+  content:''; display:block; height:2px; margin-top:2rem; background:var(--dash);
+}
+:where(body:not(.exam)) hr.divider { display:none; }
+:where(body:not(.exam)) .hero-title, :where(body:not(.exam)) .settings-title, :where(body:not(.exam)) .subj-title, :where(body:not(.exam)) .mod-hero-title {
+  font-family:var(--font-serif); font-weight:600; font-size:clamp(30px,3.4vw,40px); line-height:1.15;
+  letter-spacing:-.012em; color:var(--ink); margin:0 0 .6rem;
+}
+:where(body:not(.exam)) .hero-sub, :where(body:not(.exam)) .settings-sub, :where(body:not(.exam)) .subj-meta, :where(body:not(.exam)) .mod-hero-sub {
+  font-size:16px; line-height:1.6; color:var(--muted); font-weight:400; max-width:68ch;
+}
+:where(body:not(.exam)) .subj-meta b { color:var(--ink); font-weight:600; }
+
+/* ── 6. Section headings ───────────────────────────────────── */
+:where(body:not(.exam)) .sec-label, :where(body:not(.exam)) .mod-group-label, :where(body:not(.exam)) .group-label, :where(body:not(.exam)) .section-title, :where(body:not(.exam)) .report-section-title, :where(body:not(.exam)) .dom-break-title, :where(body:not(.exam)) .rev-list-title {
+  font:600 17px/1.3 var(--font-ui); letter-spacing:-.005em; text-transform:none; color:var(--ink);
+  display:block; margin:0 0 .85rem;
+}
+:where(body:not(.exam)) .sec-label::after, :where(body:not(.exam)) .mod-group-label::after, :where(body:not(.exam)) .group-label::after, :where(body:not(.exam)) .section-title::after, :where(body:not(.exam)) .report-section-title::after { display:none; }
+:where(body:not(.exam)) .section-note { font-size:15px; color:var(--muted); font-weight:400; margin:-.35rem 0 1.1rem; }
+
+/* ── 7. Lists: one hairline box, rows split by hairlines ────── */
+:where(body:not(.exam)) .tests-section, :where(body:not(.exam)) .mod-section, :where(body:not(.exam)) .list-section, :where(body:not(.exam)) .content, :where(body:not(.exam)) .settings-section { max-width:var(--col); padding:2.25rem var(--gutter) 4rem; }
+:where(body:not(.exam)) .tests-list, :where(body:not(.exam)) .history-list, :where(body:not(.exam)) .domain-list {
+  display:flex; flex-direction:column; border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper);
+}
+:where(body:not(.exam)) .test-row, :where(body:not(.exam)) .hist-row {
+  display:flex; align-items:center; gap:1rem; margin:0; padding:14px 18px; border:0; border-radius:0;
+  background:var(--paper); box-shadow:none; color:inherit; text-decoration:none; cursor:pointer;
+  transition:background-color .15s; transform:none;
+}
+:where(body:not(.exam)) .test-row + .test-row, :where(body:not(.exam)) .hist-row + .hist-row { border-top:1px solid var(--line); }
+:where(body:not(.exam)) .test-row:first-child, :where(body:not(.exam)) .hist-row:first-child { border-top:0; }
+:where(body:not(.exam)) .test-row:hover, :where(body:not(.exam)) .hist-row:hover { background:var(--band); padding:14px 18px; margin:0; box-shadow:none; transform:none; }
+:where(body:not(.exam)) .test-row:focus-visible, :where(body:not(.exam)) .hist-row:focus-visible { outline-offset:-2px; }
+:where(body:not(.exam)) .test-row:hover .test-name { color:var(--accent); }
+:where(body:not(.exam)) .test-info { flex:1; min-width:0; }
+:where(body:not(.exam)) .test-name { font-size:16px; font-weight:500; line-height:1.35; color:var(--ink); margin:0; transition:color .15s; }
+:where(body:not(.exam)) .test-detail { font-size:14px; line-height:1.5; color:var(--muted); font-weight:400; margin-top:2px; }
+:where(body:not(.exam)) .test-idx { width:auto; min-width:3.25rem; font-size:13px; font-weight:500; color:var(--muted); }
+:where(body:not(.exam)) .test-right { gap:14px; flex-shrink:0; }
+:where(body:not(.exam)) .badge-avail, :where(body:not(.exam)) .badge-soon { display:none; }
+:where(body:not(.exam)) .test-arrow, :where(body:not(.exam)) .hist-arrow, :where(body:not(.exam)) .mod-arrow {
+  display:block; width:16px; height:16px; flex-shrink:0; font-size:0; color:var(--faint); background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+  transition:color .15s, transform .15s;
+}
+:where(body:not(.exam)) .test-row:hover .test-arrow, :where(body:not(.exam)) .hist-row:hover .hist-arrow, :where(body:not(.exam)) .mod-card:hover .mod-arrow { color:var(--accent); transform:translateX(2px); }
+
+/* ── 8. Previous Scores ────────────────────────────────────── */
+:where(body:not(.exam)) .actions-bar { margin-bottom:1rem; }
+:where(body:not(.exam)) .select-all-row { font-size:14px; color:var(--ink-2); }
+:where(body:not(.exam)) .count-lbl { font-size:14px; color:var(--muted); }
+:where(body:not(.exam)) .delete-btn, :where(body:not(.exam)) .del-one-btn {
+  font:500 14px/1 var(--font-ui); height:36px; padding:0 16px; border-radius:999px; color:var(--bad); border:1px solid var(--bad); background:none;
+}
+:where(body:not(.exam)) .hist-row { gap:14px; }
+:where(body:not(.exam)) .hist-main { gap:4px; }
+:where(body:not(.exam)) .hist-top { gap:8px; }
+:where(body:not(.exam)) .hist-type { font-size:12px; font-weight:600; color:var(--cat-full); border:0; border-radius:4px; padding:2px 7px; background:var(--cat-full-soft); }
+:where(body:not(.exam)) .hist-type[data-cat="math"] { color:var(--cat-math); background:var(--cat-math-soft); }
+:where(body:not(.exam)) .hist-type[data-cat="rw"] { color:var(--cat-rw); background:var(--cat-rw-soft); }
+:where(body:not(.exam)) .hist-type:empty { display:none; }
+:where(body:not(.exam)) .hist-title { font-size:16px; font-weight:500; color:var(--ink); }
+:where(body:not(.exam)) .hist-date { font-size:13px; color:var(--muted); }
+:where(body:not(.exam)) .hist-score-num { font:600 17px/1.2 var(--font-ui); color:var(--ink); }
+/* score band: a tinted pill on the number, the percentage beside it says the same in words */
+:where(body:not(.exam)) .hist-score[data-band] .hist-score-num { display:inline-block; padding:3px 9px; border-radius:6px; }
+:where(body:not(.exam)) .hist-score[data-band="strong"] .hist-score-num { color:var(--ok); background:var(--ok-soft); }
+:where(body:not(.exam)) .hist-score[data-band="mid"] .hist-score-num { color:var(--warn); background:var(--warn-soft); }
+:where(body:not(.exam)) .hist-score[data-band="weak"] .hist-score-num { color:var(--bad); background:var(--bad-soft); }
+:where(body:not(.exam)) .hist-score-pct { margin-top:3px; }
+:where(body:not(.exam)) .hist-score-pct { font-size:13px; color:var(--muted); }
+:where(body:not(.exam)) .d-title { font-family:var(--font-serif); font-weight:600; font-size:28px; letter-spacing:-.01em; color:var(--ink); }
+:where(body:not(.exam)) .d-sub { font-size:14px; color:var(--muted); }
+:where(body:not(.exam)) .score-big { font-family:var(--font-serif); font-weight:600; font-size:56px; color:var(--ink); background:none; -webkit-text-fill-color:currentColor; }
+:where(body:not(.exam)) .score-pct { font-size:14px; }
+:where(body:not(.exam)) .score-row { border-bottom:1px solid var(--line); }
+:where(body:not(.exam)) .sstat .n { font:600 22px/1.2 var(--font-ui); color:var(--ink); }
+:where(body:not(.exam)) #m-ok { color:var(--ok); } :where(body:not(.exam)) #m-bad { color:var(--bad); }
+:where(body:not(.exam)) .sstat .l, :where(body:not(.exam)) .section-score-lbl { font-size:13px; color:var(--muted); }
+:where(body:not(.exam)) .total-score-card, :where(body:not(.exam)) .module-result-card { border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:none; background:var(--paper); }
+:where(body:not(.exam)) .total-score-num { font-family:var(--font-serif); font-weight:600; font-size:60px; color:var(--ink); }
+:where(body:not(.exam)) .section-score-num, :where(body:not(.exam)) .module-result-score { font-family:var(--font-ui); font-weight:600; color:var(--ink); }
+:where(body:not(.exam)) .module-result-name { font-weight:600; }
+:where(body:not(.exam)) .dom-name { font-size:14px; color:var(--ink-2); }
+:where(body:not(.exam)) .dom-sc { font-size:13px; color:var(--muted); }
+:where(body:not(.exam)) .rev-list { border-top:1px solid var(--line); }
+:where(body:not(.exam)) .rev-item { font-size:14px; border-bottom:1px solid var(--line); }
+:where(body:not(.exam)) .rev-num { font-size:13px; color:var(--muted); }
+:where(body:not(.exam)) .report-section-title { margin:2.25rem 0 .85rem; }
+
+/* ── 9. Progress bars (Weakness Profile, score detail) ─────── */
+:where(body:not(.exam)) .bar-wrap, :where(body:not(.exam)) .domain-bar-wrap { height:6px; border-radius:999px; background:var(--band); box-shadow:inset 0 0 0 1px var(--line); }
+:where(body:not(.exam)) .bar-fill, :where(body:not(.exam)) .domain-bar { border-radius:999px; background:var(--accent); }
+:where(body:not(.exam)) .bar-fill.weak { background:var(--bad-fill); } :where(body:not(.exam)) .bar-fill.mid { background:var(--warn-fill); } :where(body:not(.exam)) .bar-fill.strong { background:var(--ok-fill); }
+
+/* ── 10. Weakness Profile ──────────────────────────────────── */
+:where(body:not(.exam)) .overview { gap:0; padding:0; margin-bottom:2.5rem; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--paper); }
+:where(body:not(.exam)) .ov-stat { flex:1 1 160px; padding:1.1rem 1.25rem; }
+:where(body:not(.exam)) .ov-stat + .ov-stat { border-left:1px solid var(--line); }
+:where(body:not(.exam)) .ov-stat .n { font:600 26px/1.2 var(--font-ui); color:var(--ink); }
+:where(body:not(.exam)) .ov-stat .n[data-band="strong"] { color:var(--ok); } :where(body:not(.exam)) .ov-stat .n[data-band="mid"] { color:var(--warn); } :where(body:not(.exam)) .ov-stat .n[data-band="weak"] { color:var(--bad); }
+:where(body:not(.exam)) .ov-stat .l { font-size:13px; color:var(--muted); margin-top:4px; }
+:where(body:not(.exam)) .domain-list { margin-bottom:2.75rem; }
+:where(body:not(.exam)) .domain-row { gap:14px; padding:12px 18px; border:0; }
+:where(body:not(.exam)) .domain-row + .domain-row { border-top:1px solid var(--line); }
+:where(body:not(.exam)) .domain-row:first-child { border-top:0; }
+:where(body:not(.exam)) .domain-name { font-size:15px; color:var(--ink); }
+/* bars line up whether or not a row carries the Focus badge */
+@media (min-width:601px) {
+  :where(body:not(.exam)) .domain-row { display:grid; grid-template-columns:3.6rem 16rem minmax(0,1fr) 6.5rem; }
+  :where(body:not(.exam)) .domain-name { grid-column:1 / 3; width:auto; }
+  :where(body:not(.exam)) .domain-focus-badge { grid-column:1; justify-self:start; }
+  :where(body:not(.exam)) .domain-focus-badge + .domain-name { grid-column:2; }
+  :where(body:not(.exam)) .domain-sc { width:auto; }
+}
+:where(body:not(.exam)) .domain-sc { font-size:13px; color:var(--muted); }
+:where(body:not(.exam)) .domain-focus-badge { font-size:12px; font-weight:600; color:var(--bad); border:0; border-radius:4px; padding:2px 7px; background:var(--bad-soft); }
+
+/* ── 11. Empty and guest states ────────────────────────────── */
+:where(body:not(.exam)) .empty-state, :where(body:not(.exam)) .guest-block { background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); color:var(--muted); font-size:15px; line-height:1.6; }
+:where(body:not(.exam)) .empty-state { margin-top:0; padding:3rem 1.5rem; }
+:where(body:not(.exam)) .empty-state .big, :where(body:not(.exam)) .guest-block .big { font:600 18px/1.35 var(--font-ui); letter-spacing:0; color:var(--ink); margin-bottom:.35rem; }
+:where(body:not(.exam)) .guest-block a.cta { height:44px; padding:0 22px; font-size:15px; }
+
+/* ── 12. Settings ─────────────────────────────────────────── */
+:where(body:not(.exam)) .setting-row-title { font-size:16px; font-weight:600; }
+:where(body:not(.exam)) .setting-row-desc { font-size:15px; color:var(--muted); font-weight:400; }
+:where(body:not(.exam)) .theme-option {
+  display:block; width:100%; text-align:left; font:inherit; color:inherit; padding:14px; cursor:pointer;
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:none; transition:border-color .15s;
+}
+:where(body:not(.exam)) .theme-option:hover { border-color:var(--line-strong); background:var(--paper); box-shadow:none; transform:none; }
+:where(body:not(.exam)) .theme-option.active { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); background:var(--paper); }
+:where(body:not(.exam)) .theme-swatch { border-radius:var(--r-sm); border-color:var(--line); }
+:where(body:not(.exam)) .theme-option-name { font-size:15px; font-weight:500; }
+:where(body:not(.exam)) .theme-check { width:18px; height:18px; border:1.5px solid var(--line-strong); }
+:where(body:not(.exam)) .theme-option.active .theme-check { border-color:var(--accent); }
+:where(body:not(.exam)) .theme-option.active .theme-check::after { background:var(--accent); inset:3px; }
+
+/* ── 13. Login ────────────────────────────────────────────── */
+:where(body:not(.exam)) .auth-box { max-width:400px; background:var(--paper); border:1px solid var(--line); border-radius:var(--r-xl); padding:2.25rem 2rem; box-shadow:none; }
+:where(body:not(.exam)) .auth-title { font-family:var(--font-serif); font-weight:600; font-size:32px; letter-spacing:-.01em; }
+:where(body:not(.exam)) .auth-sub { font-size:15px; color:var(--muted); }
+:where(body:not(.exam)) .auth-wrap .tabs { display:flex; background:var(--band); border:1px solid var(--line); border-radius:999px; padding:3px; gap:3px; margin-bottom:1.5rem; }
+:where(body:not(.exam)) .auth-wrap .tab { flex:1; font:500 14px/1 var(--font-ui); padding:10px 0; border:0; border-radius:999px; background:none; color:var(--muted); cursor:pointer; }
+:where(body:not(.exam)) .auth-wrap .tab:hover { color:var(--ink); }
+:where(body:not(.exam)) .auth-wrap .tab.active { background:var(--paper); color:var(--ink); font-weight:600; box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--line); }
+:where(body:not(.exam)) .field label { font-size:14px; font-weight:500; color:var(--ink-2); }
+:where(body:not(.exam)) .field input { height:44px; padding:0 12px; font:16px var(--font-ui); color:var(--ink); background:var(--paper); border:1px solid var(--line-strong); border-radius:var(--r-sm); }
+:where(body:not(.exam)) .field input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+:where(body:not(.exam)) .submit-btn { width:100%; height:46px; margin-top:.75rem; }
+:where(body:not(.exam)) .msg { font-size:14px; border-radius:var(--r-sm); }
+:where(body:not(.exam)) .msg.error { background:var(--bad-soft); color:var(--bad); }
+:where(body:not(.exam)) .msg.success { background:var(--ok-soft); color:var(--ok); }
+:where(body:not(.exam)) .guest-note { font-size:14px; color:var(--muted); }
+:where(body:not(.exam)) .guest-note a, :where(body:not(.exam)) #sync-status a { color:var(--accent); text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }
+
+/* ── 14. Practice recommendation pop-up ────────────────────── */
+:where(body:not(.exam)) .reco-popup { background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-md); padding:1.1rem 1.2rem 1.2rem; }
+:where(body:not(.exam)) .reco-skill { font:600 16px/1.35 var(--font-ui); color:var(--ink); margin:0; }
+:where(body:not(.exam)) .reco-reason { font-size:14px; color:var(--muted); line-height:1.55; }
+:where(body:not(.exam)) .reco-cta { width:100%; height:40px; font-size:14px; padding:0; }
+:where(body:not(.exam)) .reco-close { width:28px; height:28px; display:grid; place-items:center; border-radius:999px; color:var(--muted); }
+:where(body:not(.exam)) .reco-close:hover { background:var(--band); color:var(--ink); }
+
+/* ── 15. Report-a-question dialog (report.js) on site pages ── */
+body:not(.exam) .rq-submit { background:var(--accent); color:var(--on-accent); }
+body:not(.exam) .rq-submit:hover { background:var(--accent-hover); }
+body:not(.exam) .rq-box { border-radius:var(--r-xl); border:1px solid var(--line); }
+body:not(.exam) .rq-ctx, body:not(.exam) .rq-count { font-family:var(--font-ui); font-variant-numeric:tabular-nums; }
+
+/* ── 16. Brand marks ───────────────────────────────────────── */
+/* Each logo is a pair of <img>s, ink (.on-light) and white (.on-dark); the ground decides which shows. */
+:where(body:not(.exam)) .wm { display:block; height:22px; width:auto; }
+:where(body:not(.exam)) .mark { display:block; width:36px; height:36px; margin:-6px -4px -6px -8px; } /* the flask sits inside a padded square */
+:where(body:not(.exam)) .on-dark { display:none; }
+:root[data-theme="dark"] :where(body:not(.exam)) .on-light { display:none; }
+:root[data-theme="dark"] :where(body:not(.exam)) .on-dark { display:block; }
+:where(body:not(.exam)) .logo { cursor:pointer; }
+:root :where(body:not(.exam)) .logo .mark.mark { display:none; } /* beats the dark-theme .on-dark rule above */
+:where(body:not(.exam)) .footer-copy { display:flex; align-items:center; gap:10px; }
+:where(body:not(.exam)) .footer-copy .wm { height:17px; }
+/* empty states carry the flask */
+:where(body:not(.exam)) .empty-state::before { content:''; display:block; width:64px; height:64px; margin:-.5rem auto .5rem; background:url("brand/satlab-icon.svg") center/contain no-repeat; }
+:root[data-theme="dark"] :where(body:not(.exam)) .empty-state::before { background-image:url("brand/satlab-icon-white.svg"); }
+/* login: flask and wordmark above the form */
+:where(body:not(.exam)) .auth-brand { display:flex; align-items:center; justify-content:center; gap:10px; margin:0 auto 1.5rem; }
+:where(body:not(.exam)) .auth-brand .mark { width:60px; height:60px; margin:-10px -6px -10px -12px; }
+:where(body:not(.exam)) .auth-brand .wm { height:30px; }
+:where(body:not(.exam)) .auth-col { width:100%; max-width:400px; }
+
+/* On phones the header is the shell (the sidebar is hidden): navy, white wordmark, flask */
+@media (max-width:900px) {
+  :where(body:not(.exam)) .site-header { background:var(--shell); border-bottom-color:var(--shell); color:var(--shell-text); }
+  :where(body:not(.exam)) .site-header .on-light { display:none; }
+  :where(body:not(.exam)) .site-header .on-dark { display:block; }
+  :where(body:not(.exam)) .site-header .logo .mark.on-dark { display:block; }
+  :where(body:not(.exam)) .site-header .wm { height:20px; }
+  :where(body:not(.exam)) .site-header .back-btn, :where(body:not(.exam)) .site-header .settings-btn { background:transparent; color:var(--shell-strong); border-color:var(--shell-line-strong); }
+  :where(body:not(.exam)) .site-header .back-btn:hover, :where(body:not(.exam)) .site-header .settings-btn:hover { background:var(--shell-2); border-color:var(--shell-text); color:var(--shell-strong); }
+  :where(body:not(.exam)) .site-header #account-status a, :where(body:not(.exam)) .site-header #account-status span { color:var(--shell-text) !important; border-color:var(--shell-line-strong) !important; }
+  :where(body:not(.exam)) .site-header #account-status a[href="login.html"] { color:var(--shell-strong) !important; }
+  :where(body:not(.exam)) .site-header #account-status a[href="login.html"]:hover { background:var(--shell-2); border-color:var(--shell-text) !important; }
+  :where(body:not(.exam)) .site-header .breadcrumb, :where(body:not(.exam)) .site-header .breadcrumb .sep { color:var(--shell-muted); }
+  :where(body:not(.exam)) .site-header .breadcrumb .cur, :where(body:not(.exam)) .site-header .breadcrumb .crumb:hover { color:var(--shell-strong); }
+  :where(body:not(.exam)) .site-header :focus-visible { outline-color:#8CB8FF; }
+}
+
+@media (max-width:600px) {
+  :root:where(:not(:has(body.exam))) { --gutter:1rem; }
+  :where(body:not(.exam)) .hero, :where(body:not(.exam)) .settings-hero, :where(body:not(.exam)) .subj-hero, :where(body:not(.exam)) .mod-hero { padding-top:2rem; }
+  :where(body:not(.exam)) .hero::after, :where(body:not(.exam)) .settings-hero::after, :where(body:not(.exam)) .subj-hero::after, :where(body:not(.exam)) .mod-hero::after { margin-top:1.5rem; }
+  :where(body:not(.exam)) .tests-section, :where(body:not(.exam)) .mod-section, :where(body:not(.exam)) .list-section, :where(body:not(.exam)) .content, :where(body:not(.exam)) .settings-section { padding-top:1.75rem; padding-bottom:3rem; }
+  :where(body:not(.exam)) .test-row, :where(body:not(.exam)) .test-row:hover, :where(body:not(.exam)) .hist-row, :where(body:not(.exam)) .hist-row:hover { padding:13px 14px; }
+  :where(body:not(.exam)) .auth-box { padding:1.75rem 1.25rem; border:0; }
+  :where(body:not(.exam)) .auth-wrap { padding:2rem var(--gutter) 2.5rem; }
+  :where(body:not(.exam)) .ov-stat + .ov-stat { border-left:0; border-top:1px solid var(--line); }
+  :where(body:not(.exam)) .overview { flex-direction:column; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Part 2 — exam pages only (body.exam). The pre-redesign theme, every
+   selector wrapped in :where(body.exam) so specificity is unchanged.
+   The site pages above never see these rules.
+   ═══════════════════════════════════════════════════════════ */
+:root:where(:has(body.exam)){
   --black:#0b1f44; --gray-dark:#344054; --gray-mid:#667085; --gray-light:#b4bccb;
-  --gray-border:#e3e8f0; --gray-bg:#edf1f7; --white:#f2f6fc;
-  --card:#ffffff;
+  --gray-border:#E5DCCB; --gray-bg:#EFE8DA; --white:#F7F2E8;
+  --card:#FCF9F3;
   --correct:#1f8a4c; --incorrect:#d1493b; --warn:#b9862b;
   --answer-hover:#eef3fa; --answer-selected:#101828; --answer-selected-text:#ffffff;
   --gold:#1c5fd4; --gold-2:#6f9cf0; --gold-deep:#154aa8;
@@ -18,7 +390,7 @@
   --shadow-md:0 4px 10px rgba(16,40,90,.06),0 14px 34px rgba(16,40,90,.09);
   --font-ui:'Plus Jakarta Sans','DM Sans',system-ui,sans-serif;
 }
-:root[data-theme="dark"] {
+:root[data-theme="dark"]:where(:has(body.exam)){
   --black:#eef2f8; --gray-dark:#cbd3e1; --gray-mid:#8f9bb0; --gray-light:#4b566b;
   --gray-border:#1f2f52; --gray-bg:#0f1a33; --white:#08122a; --card:#0d1932;
   --answer-hover:#18223a; --answer-selected:#eef2f8; --answer-selected-text:#0a0f1b;
@@ -26,194 +398,194 @@
   --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 10px 34px rgba(0,0,0,.45);
 }
 
-html, body { font-family:var(--font-ui); background:var(--white); }
-body {
+html:where(:has(body.exam)), body:where(.exam){ font-family:var(--font-ui); background:var(--white); }
+body:where(.exam){
   background:
     radial-gradient(900px 500px at 85% -10%, rgba(59,110,245,.13), transparent 60%),
     radial-gradient(700px 420px at -5% 105%, rgba(23,184,160,.09), transparent 60%),
     var(--white);
   background-attachment:fixed;
 }
-::selection { background:rgba(43,143,214,.28); }
-:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+:where(body.exam, body.exam *)::selection{ background:rgba(43,143,214,.28); }
+:where(body.exam, body.exam *):focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 
 /* ── Headings / labels ── */
-.hero-title, .settings-title, .subj-title, .mod-hero-title, .card-title, .mod-card-name,
-.auth-title, .stat-num, .ov-stat .n, .d-title, .score-big, .total-score-num, .overlay-title, .o-title {
+:where(body.exam) .hero-title, :where(body.exam) .settings-title, :where(body.exam) .subj-title, :where(body.exam) .mod-hero-title, :where(body.exam) .card-title, :where(body.exam) .mod-card-name,
+:where(body.exam) .auth-title, :where(body.exam) .stat-num, :where(body.exam) .ov-stat .n, :where(body.exam) .d-title, :where(body.exam) .score-big, :where(body.exam) .total-score-num, :where(body.exam) .overlay-title, :where(body.exam) .o-title{
   font-family:var(--font-ui) !important; letter-spacing:-.025em; font-weight:700;
 }
-.hero-label, .settings-label, .subj-label, .mod-hero-label, .auth-label {
+:where(body.exam) .hero-label, :where(body.exam) .settings-label, :where(body.exam) .subj-label, :where(body.exam) .mod-hero-label, :where(body.exam) .auth-label{
   display:inline-block; padding:5px 12px; border-radius:999px; background:var(--gold-soft);
   color:var(--gold-deep); font-weight:500; letter-spacing:.1em;
 }
-:root[data-theme="dark"] .hero-label, :root[data-theme="dark"] .settings-label,
-:root[data-theme="dark"] .subj-label, :root[data-theme="dark"] .mod-hero-label { color:var(--gold-2); }
-.sec-label, .mod-group-label, .group-label, .section-title, .report-section-title { color:var(--gold-deep); }
-.sec-label::after, .mod-group-label::after, .group-label::after, .section-title::after,
-.report-section-title::after { background:var(--gray-border); }
+:root[data-theme="dark"]:where(:has(body.exam)) .hero-label, :root[data-theme="dark"]:where(:has(body.exam)) .settings-label,
+:root[data-theme="dark"]:where(:has(body.exam)) .subj-label, :root[data-theme="dark"]:where(:has(body.exam)) .mod-hero-label{ color:var(--gold-2); }
+:where(body.exam) .sec-label, :where(body.exam) .mod-group-label, :where(body.exam) .group-label, :where(body.exam) .section-title, :where(body.exam) .report-section-title{ color:var(--gold-deep); }
+:where(body.exam) .sec-label::after, :where(body.exam) .mod-group-label::after, :where(body.exam) .group-label::after, :where(body.exam) .section-title::after,
+:where(body.exam) .report-section-title::after{ background:var(--gray-border); }
 
 /* ── Header (inner pages) ── */
-.site-header {
+:where(body.exam) .site-header{
   background:color-mix(in srgb, var(--white) 82%, transparent);
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   border-bottom:1px solid var(--gray-border); height:64px;
 }
-.logo { font-family:var(--font-ui); font-weight:800; letter-spacing:-.01em; text-transform:none; font-size:18px; display:flex; align-items:center; gap:10px; }
-.logo::before {
+:where(body.exam) .logo{ font-family:var(--font-ui); font-weight:800; letter-spacing:-.01em; text-transform:none; font-size:18px; display:flex; align-items:center; gap:10px; }
+:where(body.exam) .logo::before{
   content:'S'; display:grid; place-items:center; width:32px; height:32px; border-radius:10px;
   background:var(--gold-grad); color:#fff; font-size:16px; font-weight:800; box-shadow:var(--shadow-sm);
 }
-.breadcrumb .cur { color:var(--black); }
+:where(body.exam) .breadcrumb .cur{ color:var(--black); }
 
 /* ── Buttons ── */
-.back-btn, .btn-exit, .btn-nav, .bnav, .overlay-btn, .obtn, .tbtn, .settings-btn {
+:where(body.exam) .back-btn, :where(body.exam) .btn-exit, :where(body.exam) .btn-nav, :where(body.exam) .bnav, :where(body.exam) .overlay-btn, :where(body.exam) .obtn, :where(body.exam) .tbtn, :where(body.exam) .settings-btn{
   border-radius:999px !important; background:var(--card); border:1px solid var(--gray-border);
   color:var(--gray-dark); font-family:var(--font-ui); font-weight:500;
   transition:all .18s ease;
 }
-.back-btn:hover, .btn-exit:hover, .btn-nav:hover, .bnav:hover, .overlay-btn:hover, .obtn:hover, .tbtn:hover, .settings-btn:hover {
+:where(body.exam) .back-btn:hover, :where(body.exam) .btn-exit:hover, :where(body.exam) .btn-nav:hover, :where(body.exam) .bnav:hover, :where(body.exam) .overlay-btn:hover, :where(body.exam) .obtn:hover, :where(body.exam) .tbtn:hover, :where(body.exam) .settings-btn:hover{
   border-color:var(--gold); color:var(--gold-deep); box-shadow:var(--shadow-sm);
 }
-.btn-nav.primary, .bnav.pri, .overlay-btn.primary, .obtn.pri, .btn-submit, .submit-btn, .reco-cta,
-.guest-block a.cta, .tbtn.on, .btn-primary {
+:where(body.exam) .btn-nav.primary, :where(body.exam) .bnav.pri, :where(body.exam) .overlay-btn.primary, :where(body.exam) .obtn.pri, :where(body.exam) .btn-submit, :where(body.exam) .submit-btn, :where(body.exam) .reco-cta,
+:where(body.exam) .guest-block a.cta, :where(body.exam) .tbtn.on, :where(body.exam) .btn-primary{
   background:var(--gold-grad) !important; color:#fff !important; border:1px solid transparent !important;
   border-radius:999px !important; font-weight:600; box-shadow:0 6px 16px rgba(43,110,214,.30);
 }
-.btn-nav.primary:hover, .bnav.pri:hover, .overlay-btn.primary:hover, .obtn.pri:hover, .btn-submit:hover,
-.submit-btn:hover, .reco-cta:hover, .guest-block a.cta:hover { filter:brightness(1.07); transform:translateY(-1px); opacity:1; }
-.timer-toggle, .timer-tog, .toolbar-action { border-radius:999px; }
+:where(body.exam) .btn-nav.primary:hover, :where(body.exam) .bnav.pri:hover, :where(body.exam) .overlay-btn.primary:hover, :where(body.exam) .obtn.pri:hover, :where(body.exam) .btn-submit:hover,
+:where(body.exam) .submit-btn:hover, :where(body.exam) .reco-cta:hover, :where(body.exam) .guest-block a.cta:hover{ filter:brightness(1.07); transform:translateY(-1px); opacity:1; }
+:where(body.exam) .timer-toggle, :where(body.exam) .timer-tog, :where(body.exam) .toolbar-action{ border-radius:999px; }
 /* Pause is a <button>: without this it gets the browser's light default background (a white pill in dark mode). */
-.timer-toggle, .timer-tog { background:transparent; font-family:'DM Mono',monospace; }
+:where(body.exam) .timer-toggle, :where(body.exam) .timer-tog{ background:transparent; font-family:'DM Mono',monospace; }
 
 /* ── Cards / rows ── */
-.subject-card, .mod-card, .module-result-card, .total-score-card, .theme-option, .ref-item, .rationale-box {
+:where(body.exam) .subject-card, :where(body.exam) .mod-card, :where(body.exam) .module-result-card, :where(body.exam) .total-score-card, :where(body.exam) .theme-option, :where(body.exam) .ref-item, :where(body.exam) .rationale-box{
   background:var(--card); border:1px solid var(--gray-border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm);
 }
-.subject-card:hover, .mod-card:hover, .theme-option:hover {
+:where(body.exam) .subject-card:hover, :where(body.exam) .mod-card:hover, :where(body.exam) .theme-option:hover{
   border-color:var(--gold-2); background:var(--card); box-shadow:var(--shadow-md);
 }
-.theme-option.active { border-color:var(--gold); background:var(--gold-soft); }
-.theme-option.active .theme-check { border-color:var(--gold); }
-.theme-option.active .theme-check::after { background:var(--gold); }
-.theme-swatch { border-radius:var(--r-sm); }
-.test-row, .hist-row, .domain-row { border-radius:var(--r-md); }
-.test-row { background:var(--card); border:1px solid var(--gray-border) !important; padding:1rem 1.25rem; margin-bottom:10px; box-shadow:var(--shadow-sm); }
-.test-row:hover { background:var(--card); border-color:var(--gold-2) !important; box-shadow:var(--shadow-md); transform:translateY(-1px); padding:1rem 1.25rem; margin:0 0 10px; }
-.test-row.disabled:hover { transform:none; box-shadow:var(--shadow-sm); }
-.hist-row { background:var(--card); border:1px solid var(--gray-border) !important; padding:1rem 1.15rem; margin-bottom:10px; }
-.hist-row:hover { background:var(--card); border-color:var(--gold-2) !important; box-shadow:var(--shadow-sm); }
-.test-idx { color:var(--gold); font-weight:500; }
+:where(body.exam) .theme-option.active{ border-color:var(--gold); background:var(--gold-soft); }
+:where(body.exam) .theme-option.active .theme-check{ border-color:var(--gold); }
+:where(body.exam) .theme-option.active .theme-check::after{ background:var(--gold); }
+:where(body.exam) .theme-swatch{ border-radius:var(--r-sm); }
+:where(body.exam) .test-row, :where(body.exam) .hist-row, :where(body.exam) .domain-row{ border-radius:var(--r-md); }
+:where(body.exam) .test-row{ background:var(--card); border:1px solid var(--gray-border) !important; padding:1rem 1.25rem; margin-bottom:10px; box-shadow:var(--shadow-sm); }
+:where(body.exam) .test-row:hover{ background:var(--card); border-color:var(--gold-2) !important; box-shadow:var(--shadow-md); transform:translateY(-1px); padding:1rem 1.25rem; margin:0 0 10px; }
+:where(body.exam) .test-row.disabled:hover{ transform:none; box-shadow:var(--shadow-sm); }
+:where(body.exam) .hist-row{ background:var(--card); border:1px solid var(--gray-border) !important; padding:1rem 1.15rem; margin-bottom:10px; }
+:where(body.exam) .hist-row:hover{ background:var(--card); border-color:var(--gold-2) !important; box-shadow:var(--shadow-sm); }
+:where(body.exam) .test-idx{ color:var(--gold); font-weight:500; }
 
 /* ── Chips / tags / badges ── */
-.card-tag, .mod-tag, .chip, .badge, .hist-type, .passage-skill-tag, .skill-tag, .passage-difficulty, .diff-tag, .domain-focus-badge {
+:where(body.exam) .card-tag, :where(body.exam) .mod-tag, :where(body.exam) .chip, :where(body.exam) .badge, :where(body.exam) .hist-type, :where(body.exam) .passage-skill-tag, :where(body.exam) .skill-tag, :where(body.exam) .passage-difficulty, :where(body.exam) .diff-tag, :where(body.exam) .domain-focus-badge{
   border-radius:999px !important;
 }
-.badge-avail { border-color:transparent; background:var(--gold-soft); color:var(--gold-deep); }
-:root[data-theme="dark"] .badge-avail { color:var(--gold-2); }
-.card-tag, .mod-tag { background:var(--gold-soft); border-color:transparent; color:var(--gold-deep); }
+:where(body.exam) .badge-avail{ border-color:transparent; background:var(--gold-soft); color:var(--gold-deep); }
+:root[data-theme="dark"]:where(:has(body.exam)) .badge-avail{ color:var(--gold-2); }
+:where(body.exam) .card-tag, :where(body.exam) .mod-tag{ background:var(--gold-soft); border-color:transparent; color:var(--gold-deep); }
 
 /* ── Form fields / auth ── */
-.field input, .fr-input, .note-textarea {
+:where(body.exam) .field input, :where(body.exam) .fr-input, :where(body.exam) .note-textarea{
   background:var(--card); border:1px solid var(--gray-border); border-radius:var(--r-sm);
 }
-.field input:focus, .fr-input:focus { border-color:var(--gold); box-shadow:0 0 0 4px var(--gold-soft); }
-.tabs { background:var(--gray-bg); border-radius:999px; padding:4px; border:none; gap:4px; }
-.tab { border-radius:999px; font-weight:500; }
-.tab.active { background:var(--card); color:var(--black); box-shadow:var(--shadow-sm); }
-.auth-box { background:var(--card); border:1px solid var(--gray-border); border-radius:var(--r-xl); padding:2.5rem 2rem; box-shadow:var(--shadow-md); }
-.guest-note a { color:var(--gold-deep); font-weight:600; }
+:where(body.exam) .field input:focus, :where(body.exam) .fr-input:focus{ border-color:var(--gold); box-shadow:0 0 0 4px var(--gold-soft); }
+:where(body.exam) .tabs{ background:var(--gray-bg); border-radius:999px; padding:4px; border:none; gap:4px; }
+:where(body.exam) .tab{ border-radius:999px; font-weight:500; }
+:where(body.exam) .tab.active{ background:var(--card); color:var(--black); box-shadow:var(--shadow-sm); }
+:where(body.exam) .auth-box{ background:var(--card); border:1px solid var(--gray-border); border-radius:var(--r-xl); padding:2.5rem 2rem; box-shadow:var(--shadow-md); }
+:where(body.exam) .guest-note a{ color:var(--gold-deep); font-weight:600; }
 
 /* ── Progress bars ── */
-.bar-wrap, .domain-bar-wrap { border-radius:999px; background:var(--gray-bg); }
-.bar-fill, .domain-bar { border-radius:999px; background:var(--gold-grad); }
-.bar-fill.weak { background:var(--incorrect); } .bar-fill.mid { background:var(--warn); } .bar-fill.strong { background:var(--correct); }
+:where(body.exam) .bar-wrap, :where(body.exam) .domain-bar-wrap{ border-radius:999px; background:var(--gray-bg); }
+:where(body.exam) .bar-fill, :where(body.exam) .domain-bar{ border-radius:999px; background:var(--gold-grad); }
+:where(body.exam) .bar-fill.weak{ background:var(--incorrect); } :where(body.exam) .bar-fill.mid{ background:var(--warn); } :where(body.exam) .bar-fill.strong{ background:var(--correct); }
 
 /* ── Test-taking UI ── */
-.top-bar, .bottom-bar, .bot-bar { background:color-mix(in srgb, var(--white) 88%, transparent); backdrop-filter:blur(12px); }
-.answer-option { border-radius:var(--r-md); background:var(--card); }
-.answer-option:hover { border-color:var(--gold); background:var(--answer-hover); }
-.answer-option.selected { border-color:var(--black); }
-.mc-btn { border-radius:var(--r-md); background:var(--card); }
-.mc-btn:hover { border-color:var(--gold); color:var(--gold-deep); }
-.q-dot, .qdot, .cbtn { border-radius:10px; }
-.q-dot.active, .q-dot.answered:hover, .qdot.cur { background:var(--black); }
-.overlay { backdrop-filter:blur(6px); background:rgba(8,14,30,.55); }
-.overlay-box, .obox { border-radius:var(--r-xl); background:var(--card); box-shadow:var(--shadow-md); }
-.q-img-wrap { border-radius:var(--r-md); }
-.divider:hover, .divider.dragging { background:var(--gold); }
-.loading-spinner, .spinner { border-top-color:var(--gold); }
-.passage-pane, .q-pane, .question-pane { scrollbar-width:thin; }
-.tool-pane { border-left:1px solid var(--gray-border); }
-.ttab.on { border-bottom-color:var(--gold); color:var(--gold-deep); }
-.note-popup { border-radius:var(--r-md); }
+:where(body.exam) .top-bar, :where(body.exam) .bottom-bar, :where(body.exam) .bot-bar{ background:color-mix(in srgb, var(--white) 88%, transparent); backdrop-filter:blur(12px); }
+:where(body.exam) .answer-option{ border-radius:var(--r-md); background:var(--card); }
+:where(body.exam) .answer-option:hover{ border-color:var(--gold); background:var(--answer-hover); }
+:where(body.exam) .answer-option.selected{ border-color:var(--black); }
+:where(body.exam) .mc-btn{ border-radius:var(--r-md); background:var(--card); }
+:where(body.exam) .mc-btn:hover{ border-color:var(--gold); color:var(--gold-deep); }
+:where(body.exam) .q-dot, :where(body.exam) .qdot, :where(body.exam) .cbtn{ border-radius:10px; }
+:where(body.exam) .q-dot.active, :where(body.exam) .q-dot.answered:hover, :where(body.exam) .qdot.cur{ background:var(--black); }
+:where(body.exam) .overlay{ backdrop-filter:blur(6px); background:rgba(8,14,30,.55); }
+:where(body.exam) .overlay-box, :where(body.exam) .obox{ border-radius:var(--r-xl); background:var(--card); box-shadow:var(--shadow-md); }
+:where(body.exam) .q-img-wrap{ border-radius:var(--r-md); }
+:where(body.exam) .divider:hover, :where(body.exam) .divider.dragging{ background:var(--gold); }
+:where(body.exam) .loading-spinner, :where(body.exam) .spinner{ border-top-color:var(--gold); }
+:where(body.exam) .passage-pane, :where(body.exam) .q-pane, :where(body.exam) .question-pane{ scrollbar-width:thin; }
+:where(body.exam) .tool-pane{ border-left:1px solid var(--gray-border); }
+:where(body.exam) .ttab.on{ border-bottom-color:var(--gold); color:var(--gold-deep); }
+:where(body.exam) .note-popup{ border-radius:var(--r-md); }
 
 /* ── Footer ── */
-.site-footer { border-top:1px solid var(--gray-border); background:transparent; }
-.footer-copy { color:var(--gray-mid); }
+:where(body.exam) .site-footer{ border-top:1px solid var(--gray-border); background:transparent; }
+:where(body.exam) .footer-copy{ color:var(--gray-mid); }
 
 /* ── Empty / guest blocks ── */
-.empty-state, .guest-block { background:var(--card); border:1px dashed var(--gray-border); border-radius:var(--r-lg); }
-.empty-state { margin-top:1rem; padding:3rem 1.5rem; }
-.empty-state .big, .guest-block .big { font-family:var(--font-ui); font-weight:700; letter-spacing:-.02em; }
+:where(body.exam) .empty-state, :where(body.exam) .guest-block{ background:var(--card); border:1px dashed var(--gray-border); border-radius:var(--r-lg); }
+:where(body.exam) .empty-state{ margin-top:1rem; padding:3rem 1.5rem; }
+:where(body.exam) .empty-state .big, :where(body.exam) .guest-block .big{ font-family:var(--font-ui); font-weight:700; letter-spacing:-.02em; }
 
 /* ── Recommendation pop-up ── */
-.reco-popup { border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-md); border-color:var(--gold-2); }
-.reco-eyebrow { color:var(--gold-deep); }
+:where(body.exam) .reco-popup{ border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-md); border-color:var(--gold-2); }
+:where(body.exam) .reco-eyebrow{ color:var(--gold-deep); }
 
 /* ═══ Round 2: test-taking polish ═══ */
-.top-bar, .bottom-bar, .bot-bar { height:60px; }
-.top-bar-logo, .tb-logo { font-family:var(--font-ui); font-weight:800; text-transform:none; font-size:16px; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
-.top-bar-logo::before, .tb-logo::before { content:'S'; display:grid; place-items:center; width:26px; height:26px; border-radius:8px; background:var(--gold-grad); color:#fff; font-size:13px; }
-.timer { background:var(--gold-soft); border-radius:999px; padding:4px 16px; color:var(--gold-deep); font-family:'DM Mono',monospace; }
-:root[data-theme="dark"] .timer { color:var(--gold-2); }
-.timer.warning, .timer.warn { background:rgba(209,73,59,.12); }
-.test-body { top:60px; bottom:60px; }
+:where(body.exam) .top-bar, :where(body.exam) .bottom-bar, :where(body.exam) .bot-bar{ height:60px; }
+:where(body.exam) .top-bar-logo, :where(body.exam) .tb-logo{ font-family:var(--font-ui); font-weight:800; text-transform:none; font-size:16px; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
+:where(body.exam) .top-bar-logo::before, :where(body.exam) .tb-logo::before{ content:'S'; display:grid; place-items:center; width:26px; height:26px; border-radius:8px; background:var(--gold-grad); color:#fff; font-size:13px; }
+:where(body.exam) .timer{ background:var(--gold-soft); border-radius:999px; padding:4px 16px; color:var(--gold-deep); font-family:'DM Mono',monospace; }
+:root[data-theme="dark"]:where(:has(body.exam)) .timer{ color:var(--gold-2); }
+:where(body.exam) .timer.warning, :where(body.exam) .timer.warn{ background:rgba(209,73,59,.12); }
+:where(body.exam) .test-body{ top:60px; bottom:60px; }
 
-.passage-pane { padding:2.5rem 2.5rem 3rem 3rem; }
-.passage-text, #passage-content { font-size:16.5px; line-height:1.9; font-weight:400; color:var(--gray-dark); }
-.q-text { font-size:17px; font-weight:600; letter-spacing:-.01em; line-height:1.55; }
-.q-number, .q-num { color:var(--gold-deep); }
+:where(body.exam) .passage-pane{ padding:2.5rem 2.5rem 3rem 3rem; }
+:where(body.exam) .passage-text, :where(body.exam) #passage-content{ font-size:16.5px; line-height:1.9; font-weight:400; color:var(--gray-dark); }
+:where(body.exam) .q-text{ font-size:17px; font-weight:600; letter-spacing:-.01em; line-height:1.55; }
+:where(body.exam) .q-number, :where(body.exam) .q-num{ color:var(--gold-deep); }
 
-.divider { width:8px; background:transparent; }
-.divider::after { height:44px; width:4px; background:var(--gray-border); }
-.divider:hover::after, .divider.dragging::after { background:var(--gold); }
+:where(body.exam) .divider{ width:8px; background:transparent; }
+:where(body.exam) .divider::after{ height:44px; width:4px; background:var(--gray-border); }
+:where(body.exam) .divider:hover::after, :where(body.exam) .divider.dragging::after{ background:var(--gold); }
 
-.answer-option { padding:.95rem 1.1rem; box-shadow:var(--shadow-sm); align-items:center; }
-.answer-letter { display:grid; place-items:center; min-width:28px; width:28px; height:28px; border-radius:50%; background:var(--gray-bg); padding:0; color:var(--gray-dark); font-weight:500; }
-.answer-option:hover .answer-letter { background:var(--gold-soft); color:var(--gold-deep); }
-.answer-option.selected { background:var(--gold-soft); border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
-.answer-option.selected .answer-text { color:var(--black); font-weight:500; }
-.answer-option.selected .answer-letter { background:var(--gold-grad); color:#fff; }
-.answer-option.correct { background:#e9f6ee; border-color:var(--correct); }
-.answer-option.incorrect { background:#fcefec; border-color:var(--incorrect); }
-.answer-option.correct .answer-letter { background:var(--correct); color:#fff; }
-.answer-option.incorrect .answer-letter { background:var(--incorrect); color:#fff; }
-:root[data-theme="dark"] .answer-option.correct { background:rgba(46,160,90,.18); }
-:root[data-theme="dark"] .answer-option.incorrect { background:rgba(220,90,75,.18); }
-.mc-btn.sel { background:var(--gold-grad); border-color:transparent; color:#fff; }
+:where(body.exam) .answer-option{ padding:.95rem 1.1rem; box-shadow:var(--shadow-sm); align-items:center; }
+:where(body.exam) .answer-letter{ display:grid; place-items:center; min-width:28px; width:28px; height:28px; border-radius:50%; background:var(--gray-bg); padding:0; color:var(--gray-dark); font-weight:500; }
+:where(body.exam) .answer-option:hover .answer-letter{ background:var(--gold-soft); color:var(--gold-deep); }
+:where(body.exam) .answer-option.selected{ background:var(--gold-soft); border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
+:where(body.exam) .answer-option.selected .answer-text{ color:var(--black); font-weight:500; }
+:where(body.exam) .answer-option.selected .answer-letter{ background:var(--gold-grad); color:#fff; }
+:where(body.exam) .answer-option.correct{ background:#e9f6ee; border-color:var(--correct); }
+:where(body.exam) .answer-option.incorrect{ background:#fcefec; border-color:var(--incorrect); }
+:where(body.exam) .answer-option.correct .answer-letter{ background:var(--correct); color:#fff; }
+:where(body.exam) .answer-option.incorrect .answer-letter{ background:var(--incorrect); color:#fff; }
+:root[data-theme="dark"]:where(:has(body.exam)) .answer-option.correct{ background:rgba(46,160,90,.18); }
+:root[data-theme="dark"]:where(:has(body.exam)) .answer-option.incorrect{ background:rgba(220,90,75,.18); }
+:where(body.exam) .mc-btn.sel{ background:var(--gold-grad); border-color:transparent; color:#fff; }
 
-.q-dot, .qdot { width:32px; height:32px; background:var(--card); }
-.q-dot.active, .qdot.cur { background:var(--gold-grad) !important; border-color:transparent !important; color:#fff !important; }
-.q-dot.answered, .qdot.ans { background:var(--gold-soft); border-color:var(--gold-2); color:var(--gold-deep); }
-.q-dot.flagged, .qdot.flag { border-color:var(--incorrect); color:var(--incorrect); background:rgba(209,73,59,.08); }
+:where(body.exam) .q-dot, :where(body.exam) .qdot{ width:32px; height:32px; background:var(--card); }
+:where(body.exam) .q-dot.active, :where(body.exam) .qdot.cur{ background:var(--gold-grad) !important; border-color:transparent !important; color:#fff !important; }
+:where(body.exam) .q-dot.answered, :where(body.exam) .qdot.ans{ background:var(--gold-soft); border-color:var(--gold-2); color:var(--gold-deep); }
+:where(body.exam) .q-dot.flagged, :where(body.exam) .qdot.flag{ border-color:var(--incorrect); color:var(--incorrect); background:rgba(209,73,59,.08); }
 
-.rationale-box { background:var(--gold-soft); border-color:transparent; }
-.overlay-box, .obox { padding:2.25rem; }
-.score-big { background:var(--gold-grad); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:60px; }
-.hl-btn { border-radius:50%; }
-.loading-screen, .loading { background:var(--white); }
+:where(body.exam) .rationale-box{ background:var(--gold-soft); border-color:transparent; }
+:where(body.exam) .overlay-box, :where(body.exam) .obox{ padding:2.25rem; }
+:where(body.exam) .score-big{ background:var(--gold-grad); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:60px; }
+:where(body.exam) .hl-btn{ border-radius:50%; }
+:where(body.exam) .loading-screen, :where(body.exam) .loading{ background:var(--white); }
 
 /* Phones: hide the top-bar logo and let the top-bar buttons scroll sideways,
    so every button (including "Review & Submit") can be reached. */
 @media (max-width: 760px) {
-  .top-bar { gap:.5rem; padding-left:.75rem; padding-right:.75rem; }
-  .top-bar .top-bar-logo, .top-bar .tb-logo, .top-bar .top-bar-sep, .top-bar .tb-sep { display:none; }
-  .top-bar-left { flex:0 1 auto; min-width:0; }
-  .top-bar-center, .tb-center { flex-shrink:0; }
-  .top-bar-right, .tb-right { flex:0 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
-  .top-bar-right > *, .tb-right > * { flex-shrink:0; }
+  :where(body.exam) .top-bar{ gap:.5rem; padding-left:.75rem; padding-right:.75rem; }
+  :where(body.exam) .top-bar .top-bar-logo, :where(body.exam) .top-bar .tb-logo, :where(body.exam) .top-bar .top-bar-sep, :where(body.exam) .top-bar .tb-sep{ display:none; }
+  :where(body.exam) .top-bar-left{ flex:0 1 auto; min-width:0; }
+  :where(body.exam) .top-bar-center, :where(body.exam) .tb-center{ flex-shrink:0; }
+  :where(body.exam) .top-bar-right, :where(body.exam) .tb-right{ flex:0 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
+  :where(body.exam) .top-bar-right > *, :where(body.exam) .tb-right > *{ flex-shrink:0; }
 }
 
 /* Long test titles stay on one line in the top bar instead of wrapping out of it. */
-.top-bar-module, .tb-module { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
-.top-bar-left { min-width:0; }
+:where(body.exam) .top-bar-module, :where(body.exam) .tb-module{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+:where(body.exam) .top-bar-left{ min-width:0; }

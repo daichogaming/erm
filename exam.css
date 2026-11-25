@@ -14,21 +14,21 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .exam {
-  --ex-bg: #ffffff;
+  --ex-bg: #FAF6EE;          /* warm "soy milk" paper: easier on the eyes than pure white */
   --ex-fg: #1d1d1f;
   --ex-muted: #5b5f66;
   --ex-rule: #2b2b2b;          /* dashed header/footer rules */
-  --ex-line: #d4d6db;          /* light separators */
-  --ex-band: #f0f1f3;          /* question header band */
+  --ex-line: #DDD3C2;          /* light separators */
+  --ex-band: #F0E9DC;          /* question header band */
   --ex-choice-border: #4a4a4a;
-  --ex-choice-hover: #f6f7fb;
+  --ex-choice-hover: #F3ECDF;
   --ex-blue: #3046c5;
   --ex-blue-hover: #23379f;
   --ex-blue-soft: #eceffc;
   --ex-red: #c8102e;
   --ex-pill: #1d1d1f;          /* navigator pill */
   --ex-pill-fg: #ffffff;
-  --ex-pop-bg: #ffffff;
+  --ex-pop-bg: #FDFAF4;
   --ex-shadow: 0 8px 30px rgba(0, 0, 0, .16), 0 1px 3px rgba(0, 0, 0, .12);
   --ex-correct: #17803d;
   --ex-correct-soft: #e8f5ec;
@@ -490,3 +490,12 @@ body.ex-resizing { cursor: col-resize !important; user-select: none; -webkit-use
 @media (max-width: 380px) {
   .ex-navbtn .ex-navbtn-of { display: none; }
 }
+
+/* Question figures and images are white JPEGs: in light mode let them take on the cream paper
+   instead of showing as white boxes. Dark mode keeps them on white so the ink stays readable. */
+:root:not([data-theme="dark"]) .exam .mt-fig img, :root:not([data-theme="dark"]) .exam .mt-ch-fig img,
+:root:not([data-theme="dark"]) .exam .q-img-wrap, :root:not([data-theme="dark"]) .exam .mq-img,
+:root:not([data-theme="dark"]) .exam .passage-chart-img { background: transparent; }
+:root:not([data-theme="dark"]) .exam .mt-fig img, :root:not([data-theme="dark"]) .exam .mt-ch-fig img,
+:root:not([data-theme="dark"]) .exam .q-img-wrap img, :root:not([data-theme="dark"]) .exam .mq-img img,
+:root:not([data-theme="dark"]) .exam .passage-chart-img { mix-blend-mode: multiply; }
