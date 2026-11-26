@@ -215,3 +215,17 @@
   .reco-popup { left:1rem; right:1rem; bottom:1rem; max-width:none; }
   .test-right .rc-count { display:none; }
 }
+
+/* Hook lines: one short, coloured line above a section's description. */
+.area-hook { grid-column:2; margin-top:6px; font:600 16px/1.4 var(--font-serif, "Source Serif 4", Georgia, serif); color:var(--cat-rw); }
+.area[data-cat="math"] .area-hook { color:var(--cat-math); }
+.area[data-cat="hard"] .area-hook { color:var(--warm); }
+.area[data-cat="full"] .area-hook { color:var(--cat-full); }
+.area-hook + .area-desc { margin-top:2px; }
+
+/* Topical Drills: the two subject groups */
+.drill-group { margin:2.25rem 0 .25rem; padding-bottom:.5rem; border-bottom:2px solid currentColor; font:600 24px/1.2 var(--font-serif); color:var(--cat-rw); }
+.drill-group[data-cat="math"] { color:var(--cat-math); }
+.drill-group:first-child { margin-top:0; }
+.site-index .tests-section .drill-group + .sec-label { margin-top:1.25rem; }
+.site-index .tests-section .tests-list + .drill-group { margin-top:3.5rem; }

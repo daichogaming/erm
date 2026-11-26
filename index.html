@@ -24,8 +24,8 @@
     html, body { min-height:100vh; -webkit-font-smoothing:antialiased; }
     /* everything else: theme.css (shared) and home.css (this page) */
   </style>
-  <link rel="stylesheet" href="theme.css?v=8" />
-  <link rel="stylesheet" href="home.css?v=6" />
+  <link rel="stylesheet" href="theme.css?v=9" />
+  <link rel="stylesheet" href="home.css?v=7" />
 </head>
 <body class="site-index">
 
@@ -120,26 +120,30 @@
       <li><a class="area" data-cat="rw" href="#drills" onclick="show('drills');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
         <span class="area-name">Topical Drills</span><span class="test-arrow" aria-hidden="true"></span>
-        <span class="area-desc">Every official Reading &amp; Writing question, sorted by skill. Work one skill until it’s solid.</span>
-        <ul class="area-facts"><li>10 skills, 94 modules</li><li>~15 questions per module</li></ul>
+        <span class="area-hook">Find your weak skill. Drill it until it’s not weak anymore.</span>
+        <span class="area-desc">Every official Reading &amp; Writing question, sorted by skill. One skill at a time, until it’s solid.</span>
+        <ul class="area-facts"><li>10 skills</li><li>94 modules</li><li>~15 questions per module</li><li>+ 19 Math skills</li></ul>
       </a></li>
       <li><a class="area" data-cat="rw" href="#recall" onclick="show('recall');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-4.5 0-8 3.6-9 7 1 3.4 4.5 7 9 7s8-3.6 9-7c-1-3.4-4.5-7-9-7z"/><path d="M9.5 12a2.5 2.5 0 1 0 5 0"/></svg>
         <span class="area-name">Active Recall</span><span class="test-arrow" aria-hidden="true"></span>
-        <span class="area-desc">Read a passage, watch it disappear, then write what you remember and answer from memory.</span>
+        <span class="area-hook">Verbal Memory Training Intensive</span>
+        <span class="area-desc">Read for 60 seconds. Watch the passage vanish. Retell it from memory, then answer.</span>
         <ul class="area-facts"><li>60 seconds to read</li><li>Compare with the passage and answer key</li></ul>
       </a></li>
       <li><a class="area" data-cat="hard" href="#hard" onclick="show('hard');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
         <span class="area-name">Hard Question Bank</span><span class="test-arrow" aria-hidden="true"></span>
-        <span class="area-desc">Every question tagged Hard across all practice tests, in sets of 20.</span>
-        <ul class="area-facts"><li>Math and Reading &amp; Writing</li><li>Same test screen and tools</li></ul>
+        <span class="area-hook">The questions that separate good scores from great ones.</span>
+        <span class="area-desc">Every question tagged Hard across all practice tests, in sets of 20. Same test screen and tools.</span>
+        <ul class="area-facts"><li>Math and Reading &amp; Writing</li></ul>
       </a></li>
       <li><a class="area" data-cat="rw" href="#recycles" onclick="show('recycles');return false;">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 19H4.5a1.5 1.5 0 0 1-1.3-2.25L5.6 12.6"/><path d="M11 19h8.5a1.5 1.5 0 0 0 1.3-2.25l-1.7-2.95"/><path d="M14 16l-3 3 3 3"/><path d="M8.6 7.5 10.7 4a1.5 1.5 0 0 1 2.6 0l2.6 4.5"/><path d="M15 4.6l.9 4-4 .9"/><path d="M3 9.5l2.6 3.1 3.1-2.6"/></svg>
         <span class="area-name">Recycles</span><span class="test-arrow" aria-hidden="true"></span>
-        <span class="area-desc">The questions that keep coming back: 39 seen in 4 or more different tests.</span>
-        <ul class="area-facts"><li>From 407 completed tests</li><li>7,515 questions checked</li></ul>
+        <span class="area-hook">Some questions never retire.</span>
+        <span class="area-desc">39 questions that appeared in 4 or more different tests. Learn what the test keeps reusing.</span>
+        <ul class="area-facts"><li>Checked across 407 tests</li><li>7,515 questions</li></ul>
       </a></li>
     </ul>
   </section>
@@ -217,6 +221,7 @@
   </header>
   <div class="subj-hero">
     <h1 class="subj-title">Active Recall</h1>
+    <p class="subj-hook" data-cat="rw">Verbal Memory Training Intensive</p>
     <div class="subj-meta">Read each passage for 60 seconds. Then it disappears: write what you remember and answer the question from memory, then compare with the original. Builds the habit of really taking in what you read.</div>
   </div>
   <div class="tests-section" id="recall-sets"></div>
@@ -234,6 +239,7 @@
   </header>
   <div class="subj-hero">
     <h1 class="subj-title">Hard Question Bank</h1>
+    <p class="subj-hook" data-cat="hard">The questions that separate good scores from great ones.</p>
     <div class="subj-meta">Every question tagged <b>Hard</b> across all practice tests, gathered into sets of 20.</div>
     <div class="hb-stats" id="hb-stats"></div>
   </div>
@@ -252,6 +258,7 @@
   </header>
   <div class="subj-hero">
     <h1 class="subj-title">Recycles</h1>
+    <p class="subj-hook" data-cat="rw">Some questions never retire.</p>
     <div class="subj-meta">Questions that came up again and again. Out of 407 completed tests (7,515 questions), these 39 appeared in 4 or more different tests — all of them Reading &amp; Writing; no Math question appeared more than 3 times. Set 2 adds the 17 questions from the team’s recycle doc (two of them are already in set 1).</div>
     <div class="hb-stats" id="rc-stats"></div>
   </div>
@@ -290,7 +297,8 @@
   </header>
   <div class="subj-hero">
     <h1 class="subj-title">Topical Drills</h1>
-    <div class="subj-meta">Every official Reading &amp; Writing question, sorted by skill into modules of about 15 questions. Pick a skill to drill it.</div>
+    <p class="subj-hook" data-cat="rw">Find your weak skill. Drill it until it’s not weak anymore.</p>
+    <div class="subj-meta">Every official question, Reading &amp; Writing and Math, sorted by skill into sets of about 15. Pick a skill to drill it.</div>
   </div>
   <div class="tests-section" id="drills-section"></div>
   <footer class="site-footer"><div class="footer-copy"><img class="wm on-light" src="brand/satlab-wordmark.svg" alt="SATLab" width="54" height="17" /><img class="wm on-dark" src="brand/satlab-wordmark-white.svg" alt="SATLab" width="54" height="17" /><span>2025–2026</span></div><div class="footer-note">Not affiliated with College Board</div></footer>
@@ -554,8 +562,48 @@
       desc:"Apply correct sentence boundaries — commas, semicolons, and periods." },
     { domain:"Standard English Conventions", skill:"Form, Structure, and Sense", slug:"form-structure-and-sense",   total:160, sizes:[15,15,15,15,15,15,14,14,14,14,14],
       desc:"Apply correct grammar — verb agreement, pronouns, and modifiers." },
+    // Math (math:true): built by mathdrills.js from math_modules.js; these counts must match it.
+    { math:true, domain:"Algebra", skill:"Linear Equations in One Variable", slug:"linear-equations-in-one-variable", total:97, sizes:[17,16,16,16,16,16],
+      desc:"Solve for x: one equation, one unknown." },
+    { math:true, domain:"Algebra", skill:"Linear Functions", slug:"linear-functions", total:146, sizes:[15,15,15,15,15,15,14,14,14,14],
+      desc:"Read slope and intercept from equations, tables and graphs." },
+    { math:true, domain:"Algebra", skill:"Linear Equations in Two Variables", slug:"linear-equations-in-two-variables", total:95, sizes:[16,16,16,16,16,15],
+      desc:"Write and interpret equations like ax + by = c." },
+    { math:true, domain:"Algebra", skill:"Systems of Linear Equations", slug:"systems-of-two-linear-equations-in-two-variables", total:98, sizes:[14,14,14,14,14,14,14],
+      desc:"Solve two equations at once, and spot when there are no or infinite solutions." },
+    { math:true, domain:"Algebra", skill:"Linear Inequalities", slug:"linear-inequalities-in-one-or-two-variables", total:55, sizes:[14,14,14,13],
+      desc:"Set up and solve inequalities, and read their graphs." },
+    { math:true, domain:"Advanced Math", skill:"Equivalent Expressions", slug:"equivalent-expressions", total:121, sizes:[16,15,15,15,15,15,15,15],
+      desc:"Rewrite, factor and expand expressions." },
+    { math:true, domain:"Advanced Math", skill:"Nonlinear Equations and Systems", slug:"nonlinear-equations-in-one-variable-and-systems-of-equations-in-two-variables", total:128, sizes:[15,15,14,14,14,14,14,14,14],
+      desc:"Quadratics, radicals, rational equations and nonlinear systems." },
+    { math:true, domain:"Advanced Math", skill:"Nonlinear Functions", slug:"nonlinear-functions", total:209, sizes:[15,15,15,15,15,15,15,15,15,15,15,15,15,14],
+      desc:"Quadratic and exponential functions and their graphs." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"Ratios, Rates, and Units", slug:"ratios-rates-proportional-relationships-and-units", total:53, sizes:[14,13,13,13],
+      desc:"Proportions, unit rates and unit conversions." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"Percentages", slug:"percentages", total:43, sizes:[15,14,14],
+      desc:"Percent of, percent change, and repeated percent change." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"One-Variable Data", slug:"one-variable-data-distributions-and-measures-of-center-and-spread", total:45, sizes:[15,15,15],
+      desc:"Mean, median, range and standard deviation." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"Two-Variable Data and Scatterplots", slug:"two-variable-data-models-and-scatterplots", total:33, sizes:[17,16],
+      desc:"Lines of best fit and what a model predicts." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"Probability", slug:"probability-and-conditional-probability", total:32, sizes:[16,16],
+      desc:"Probability and conditional probability from tables." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"Sample Statistics and Margin of Error", slug:"inference-from-sample-statistics-and-margin-of-error", total:23, sizes:[12,11],
+      desc:"What a sample says about a population." },
+    { math:true, domain:"Problem-Solving and Data Analysis", skill:"Statistical Claims", slug:"evaluating-statistical-claims-observational-studies-and-experiments", total:5, sizes:[5],
+      desc:"What a study can and can’t conclude." },
+    { math:true, domain:"Geometry and Trigonometry", skill:"Area and Volume", slug:"area-and-volume", total:39, sizes:[13,13,13],
+      desc:"Areas, surface areas and volumes of shapes and solids." },
+    { math:true, domain:"Geometry and Trigonometry", skill:"Lines, Angles, and Triangles", slug:"lines-angles-and-triangles", total:39, sizes:[13,13,13],
+      desc:"Angle rules, similar triangles and congruence." },
+    { math:true, domain:"Geometry and Trigonometry", skill:"Right Triangles and Trigonometry", slug:"right-triangles-and-trigonometry", total:20, sizes:[20],
+      desc:"Pythagorean theorem, special triangles, sine and cosine." },
+    { math:true, domain:"Geometry and Trigonometry", skill:"Circles", slug:"circles", total:18, sizes:[18],
+      desc:"Arcs, sectors, radians and circle equations." },
   ];
   const DOMAIN_ORDER_RW = ['Information and Ideas','Craft and Structure','Expression of Ideas','Standard English Conventions'];
+  const DOMAIN_ORDER_MATH = ['Algebra','Advanced Math','Problem-Solving and Data Analysis','Geometry and Trigonometry'];
 
   // Recycles: questions from recyclebank.js. Set 1 appeared in 4+ different tests; set 2 comes from the team's recycle doc.
   (function renderRecycles(){
@@ -616,18 +664,23 @@
   // Build topic list, grouped by domain
   (function renderDrillTopics(){
     let html = '';
-    DOMAIN_ORDER_RW.forEach(domain => {
-      const topics = DRILL_TOPICS.filter(t => t.domain === domain);
-      if (!topics.length) return;
-      html += `<h2 class="sec-label">${domain}</h2><div class="tests-list">`;
-      topics.forEach(t => {
-        html += `<div class="test-row" onclick="showDrillMods('${t.slug}')">
-          <div class="test-info"><div class="test-name">${t.skill}</div><div class="test-detail">${t.desc} ${t.sizes.length} modules, ${t.total} questions.</div></div>
-          <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
-        </div>`;
+    const group = (title, cat, order) => {
+      html += `<h2 class="drill-group" data-cat="${cat}">${title}</h2>`;
+      order.forEach(domain => {
+        const topics = DRILL_TOPICS.filter(t => t.domain === domain);
+        if (!topics.length) return;
+        html += `<h3 class="sec-label">${domain}</h3><div class="tests-list">`;
+        topics.forEach(t => {
+          html += `<div class="test-row" onclick="showDrillMods('${t.slug}')">
+            <div class="test-info"><div class="test-name">${t.skill}</div><div class="test-detail">${t.desc} ${t.sizes.length} ${t.sizes.length === 1 ? 'set' : 'sets'}, ${t.total} questions.</div></div>
+            <div class="test-right"><div class="test-arrow" aria-hidden="true"></div></div>
+          </div>`;
+        });
+        html += `</div>`;
       });
-      html += `</div>`;
-    });
+    };
+    group('Reading &amp; Writing', 'rw', DOMAIN_ORDER_RW);
+    group('Math', 'math', DOMAIN_ORDER_MATH);
     document.getElementById('drills-section').innerHTML = html;
   })();
 
@@ -638,13 +691,14 @@
     if (!curDrillTopic) return;
     document.getElementById('dm-bc-topic').textContent = curDrillTopic.skill;
     document.getElementById('dm-title').textContent = curDrillTopic.skill;
-    document.getElementById('dm-sub').textContent = `${curDrillTopic.domain} · ${curDrillTopic.sizes.length} modules · ${curDrillTopic.total} questions. ${curDrillTopic.desc}`;
+    const isMath = !!curDrillTopic.math;
+    document.getElementById('dm-sub').textContent = `${isMath ? 'Math · ' : ''}${curDrillTopic.domain} · ${curDrillTopic.sizes.length} ${curDrillTopic.sizes.length === 1 ? 'set' : 'sets'} · ${curDrillTopic.total} questions. ${curDrillTopic.desc}`;
     document.getElementById('dm-grid').innerHTML = curDrillTopic.sizes.map((size, idx) => {
       const m = idx + 1;
-      const mins = Math.round(size * 32 / 27);
+      const mins = Math.max(1, Math.round(size * (isMath ? 35 / 22 : 32 / 27)));
       return `<div class="mod-card" onclick="launchDrill(${m})">
         <div class="mod-card-top"><div class="mod-arrow" aria-hidden="true"></div></div>
-        <div class="mod-card-name">Module ${m}</div>
+        <div class="mod-card-name">${isMath ? 'Set' : 'Module'} ${m}</div>
         <div class="mod-card-detail">${size} questions · ~${mins} min</div>
         <div class="chips"><span class="chip">${curDrillTopic.skill}</span></div>
       </div>`;
@@ -653,6 +707,11 @@
   }
 
   function launchDrill(mod) {
+    if (curDrillTopic.math) {
+      const p = new URLSearchParams({ test: 'drill', topic: curDrillTopic.slug, label: curDrillTopic.skill, module: mod });
+      window.location.href = 'math.html?' + p.toString();
+      return;
+    }
     const p = new URLSearchParams({ topic: curDrillTopic.slug, label: curDrillTopic.skill, module: mod });
     window.location.href = 'drill.html?' + p.toString();
   }
@@ -726,6 +785,8 @@
     'Information & Ideas': 'Information and Ideas',
     'Craft & Structure': 'Craft and Structure',
     'Expression of Ideas': 'Expression of Ideas',
+    'PS & Data Analysis': 'Problem-Solving and Data Analysis',
+    'Geometry & Trig': 'Geometry and Trigonometry',
   };
 
   function recoIsDismissed() {
@@ -809,7 +870,8 @@
     document.getElementById('reco-reason').textContent =
       `You're missing the most questions in ${rec.domain.name} (${rec.domain.pct}% correct so far). This drill targets it directly.`;
     const p = new URLSearchParams({ topic: rec.topic.slug, label: rec.topic.skill, module: 1 });
-    document.getElementById('reco-cta').href = 'drill.html?' + p.toString();
+    if (rec.topic.math) p.set('test', 'drill');
+    document.getElementById('reco-cta').href = (rec.topic.math ? 'math.html?' : 'drill.html?') + p.toString();
     setTimeout(() => document.getElementById('reco-popup').classList.add('show'), 900);
   }
 

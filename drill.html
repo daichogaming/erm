@@ -85,7 +85,7 @@
     /* Exit asks twice (no native confirm: it's blocked in some browsers); the armed item turns red. */
     .exam .ex-menu [role="menuitem"].is-armed, .exam .ex-menu [role="menuitem"].is-armed svg { color: var(--ex-red); }
   </style>
-  <link rel="stylesheet" href="theme.css?v=8" />
+  <link rel="stylesheet" href="theme.css?v=9" />
   <link rel="stylesheet" href="exam.css?v=2" />
 </head>
 <body class="exam">
@@ -202,6 +202,7 @@
       <div class="score-stat"><div class="num" id="sc-unanswered">—</div><div class="lbl">Unanswered</div></div>
     </div>
     <div class="domain-breakdown" id="domain-breakdown"></div>
+    <div id="coach-analysis"></div>
     <div class="review-list" id="score-review-list"></div>
     <div class="overlay-btn-row">
       <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Drills</button>
@@ -210,7 +211,10 @@
   </div>
 </div>
 
+<script src="rwfixes.js?v=5"></script>
+<script>(function(){ var p = new URLSearchParams(location.search); RWFix.load((p.get('topic') || 'words-in-context') + '_' + (p.get('module') || '1')); })();</script>
 <script src="exam.js?v=1"></script>
+<script src="coach.js?v=1"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  STATE
@@ -263,6 +267,8 @@ async function initTest() {
     return;
   }
 
+  if (rawQuestions && window.RWFix) RWFix.overlay(rawQuestions, moduleKey); // the site's repaired text (rw/)
+  if (rawQuestions && window.RWFix) rawQuestions.forEach(RWFix.apply); // repairs (missing choice D, lost apostrophes)
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
       `<div class="loading-error">No questions found for module: ${escHtml(moduleKey)}</div>`; // escaped: it comes from the URL
@@ -296,7 +302,21 @@ async function initTest() {
   buildNav();
   renderQuestion(0);
   updateTimerDisplay(); // show this drill's real time right away
-  startTimer();
+  // "Before you start": choose Stop timer / Check answer / Pace Coach; the clock starts with Start.
+  Coach.onBudgetEnd = i => {
+    if (submitted || i !== currentQ) return;
+    if (!flagged[i]) toggleFlag(i);
+    if (i < QUESTIONS.length - 1) goToQuestion(i + 1); else openReview();
+  };
+  Coach.setup({
+    kind: 'drill', title: sectionTitle, detail: `${skillLabel} · ${setName} · ${totalQ} questions · ${Math.round(timerSecs / 60)} min`,
+    count: totalQ, totalSecs: timerSecs, canPause: true, canCheck: true, current: () => currentQ,
+    onStart: s => {
+      document.getElementById('timer-pause-btn').hidden = !s.pause;
+      renderQuestion(currentQ);
+      startTimer();
+    }
+  });
 }
 
 window.addEventListener('load', initTest);
@@ -306,6 +326,7 @@ let timerPaused = false;
 
 function startTimer() {
   timerInterval = setInterval(() => {
+    Coach.tick(currentQ, !submitted && !timerPaused);
     if (submitted || timerPaused) return;
     timerSecs--;
     updateTimerDisplay();
@@ -314,7 +335,7 @@ function startTimer() {
 }
 
 function togglePause() {
-  if (submitted) return;
+  if (submitted || !Coach.settings.pause) return; // Stop timer is chosen on the "Before you start" screen
   timerPaused = !timerPaused;
   document.getElementById('pause-label').textContent = timerPaused ? 'Resume timer' : 'Pause timer';
   document.getElementById('timer').classList.toggle('paused', timerPaused);
@@ -697,6 +718,7 @@ function isLocked(i) { return !submitted && !!(checkedResults[i] || checkPending
 
 function checkAreaHTML(i) {
   if (submitted) return ''; // after Submit the page shows its normal review
+  if (!Coach.settings.check && !checkedResults[i]) return ''; // Check answer is off for this drill
   const r = checkedResults[i];
   if (r) {
     const line = r.status === 'correct'
@@ -881,13 +903,18 @@ async function submitTest() {
     </div>`;
   }).join('');
 
+  document.getElementById('coach-analysis').innerHTML = Coach.analysisHTML(
+    QUESTIONS.map((q, i) => ({ num: i + 1, skill: q.skill, domain: q.difficulty, status: (reviewById[q.id] || {}).status || 'unanswered' })),
+    { weak: false, close: "closeOverlay('score-overlay');" });
+
   await saveScoreHistory({
     type: 'drill', typeLabel: 'Topical Drill',
     title: `${skillLabel} · Module ${moduleNum}`,
     correct, total: totalQ, pct,
     stats,
     breakdownLabel: 'Difficulty', breakdown: domainData,
-    review: reviewData
+    review: reviewData,
+    coach: Coach.record()
   });
 
   closeOverlay('review-overlay');

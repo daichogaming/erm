@@ -81,7 +81,7 @@
     .overlay-btn { flex: 1; font-size: 14px; padding: 10px 0; cursor: pointer; }
     @media (max-width: 760px) { .overlay-box { padding: 1.5rem 1.25rem; } .score-breakdown { gap: 1.25rem; } }
   </style>
-  <link rel="stylesheet" href="theme.css?v=8" />
+  <link rel="stylesheet" href="theme.css?v=9" />
   <link rel="stylesheet" href="exam.css?v=2" />
 </head>
 <body class="exam">
@@ -198,6 +198,7 @@
       <div class="score-stat"><div class="num" id="sc-unanswered">—</div><div class="lbl">Unanswered</div></div>
     </div>
     <div class="domain-breakdown" id="domain-breakdown"></div>
+    <div id="coach-analysis"></div>
     <div class="review-list" id="score-review-list"></div>
     <div class="overlay-btn-row">
       <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Tests</button>
@@ -213,7 +214,11 @@ if (new URLSearchParams(location.search).get('test') === 'hard') document.write(
 </script>
 <script src="hardbank.js"></script>
 <script src="recyclebank.js"></script>
+<script src="rworder.js"></script>
+<script src="rwfixes.js?v=5"></script>
+<script>(function(){ var p = new URLSearchParams(location.search); RWFix.load((p.get('test') || 'test01') + '_' + (p.get('module') || '1A')); })();</script>
 <script src="exam.js?v=1"></script>
+<script src="coach.js?v=1"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  STATE
@@ -285,6 +290,8 @@ async function initTest() {
     return;
   }
 
+  if (rawQuestions && window.RWFix && !HARD_MODE && !RECYCLE_MODE) RWFix.overlay(rawQuestions, moduleKey); // the site's repaired text (rw/)
+  if (rawQuestions && window.RWFix) rawQuestions.forEach(RWFix.apply); // repairs (missing choice D, lost apostrophes)
   if (!rawQuestions || rawQuestions.length === 0) {
     document.getElementById('loading-screen').innerHTML =
       `<div class="loading-error">No questions found for ${escHtml(HARD_MODE ? 'hard set ' + moduleId + (hardSkill ? ' (' + hardSkill + ')' : '') : RECYCLE_MODE ? 'recycles set ' + moduleId : 'module: ' + moduleKey)}</div>`; // escaped: these come from the URL
@@ -300,7 +307,8 @@ async function initTest() {
     if (match) _grouped[match].push(q);
   });
   // Recycles sets keep their own order (most repeated first, or the team doc's order for set 2); everything else runs in domain order.
-  QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : DOMAIN_ORDER.flatMap(d => _grouped[d]);
+  // …and within that, by question type in the team's order (Words in Context first, …): rworder.js.
+  QUESTIONS = RECYCLE_MODE ? rawQuestions.slice() : RWOrder.sort(DOMAIN_ORDER.flatMap(d => _grouped[d]));
 
   const totalQ = QUESTIONS.length;
   answers = new Array(totalQ).fill(null);
@@ -320,7 +328,21 @@ async function initTest() {
   buildNav();
   renderQuestion(0);
   updateTimerDisplay(); // show the real time for this set right away (sets can be shorter than 32 min)
-  startTimer();
+  // "Before you start": choose Stop timer / Check answer / Pace Coach; the clock starts with Start.
+  Coach.onBudgetEnd = i => {
+    if (submitted || i !== currentQ) return;
+    if (!flagged[i]) toggleFlag(i);
+    if (i < QUESTIONS.length - 1) goToQuestion(i + 1); else openReview();
+  };
+  Coach.setup({
+    kind: 'rw', title: sectionTitle, detail: `${label} · ${setName} · ${totalQ} questions · ${Math.round(timerSecs / 60)} min`,
+    count: totalQ, totalSecs: timerSecs, canPause: true, canCheck: true, current: () => currentQ,
+    onStart: s => {
+      document.getElementById('timer-pause-btn').hidden = !s.pause;
+      renderQuestion(currentQ);
+      startTimer();
+    }
+  });
 }
 
 window.addEventListener('load', initTest);
@@ -330,6 +352,7 @@ let timerPaused = false;
 
 function startTimer() {
   timerInterval = setInterval(() => {
+    Coach.tick(currentQ, !submitted && !timerPaused);
     if (submitted || timerPaused) return;
     timerSecs--;
     updateTimerDisplay();
@@ -338,7 +361,7 @@ function startTimer() {
 }
 
 function togglePause() {
-  if (submitted) return;
+  if (submitted || !Coach.settings.pause) return; // Stop timer is chosen on the "Before you start" screen
   timerPaused = !timerPaused;
   document.getElementById('pause-label').textContent = timerPaused ? 'Resume timer' : 'Pause timer';
   document.getElementById('timer').classList.toggle('paused', timerPaused);
@@ -721,6 +744,7 @@ function isLocked(i) { return !submitted && !!(checkedResults[i] || checkPending
 
 function checkAreaHTML(i) {
   if (submitted) return ''; // after Submit the page shows its normal review
+  if (!Coach.settings.check && !checkedResults[i]) return ''; // Check answer is off for this module
   const r = checkedResults[i];
   if (r) {
     const line = r.status === 'correct'
@@ -929,13 +953,18 @@ async function submitTest() {
     </div>`;
   }).join('');
 
+  document.getElementById('coach-analysis').innerHTML = Coach.analysisHTML(
+    QUESTIONS.map((q, i) => ({ num: i + 1, skill: q.skill, domain: q.domain, status: (reviewById[q.id] || {}).status || 'unanswered' })),
+    { close: "closeOverlay('score-overlay');" });
+
   await saveScoreHistory({
     type: 'english', typeLabel: 'English',
     title: `${label} · ${setName}`,
     correct, total: totalQ, pct,
     stats,
     breakdownLabel: 'Domain', breakdown: domainData,
-    review: reviewData
+    review: reviewData,
+    coach: Coach.record()
   });
 
   closeOverlay('review-overlay');

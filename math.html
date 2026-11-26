@@ -179,7 +179,7 @@
       .ref-grid { grid-template-columns: 1fr; }
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=8" />
+  <link rel="stylesheet" href="theme.css?v=9" />
   <link rel="stylesheet" href="exam.css?v=2" />
   <script src="math_render.js"></script>
 </head>
@@ -359,6 +359,7 @@
       <div class="score-stat"><div class="num" id="sc-skip"></div><div class="lbl">Unanswered</div></div>
     </div>
     <div class="domain-breakdown" id="dom-break"></div>
+    <div id="coach-analysis"></div>
     <div class="review-list" id="score-rev-list"></div>
     <div class="overlay-btn-row">
       <button class="overlay-btn" onclick="window.location.href='index.html'">← Back to Tests</button>
@@ -406,7 +407,9 @@
 <script src="math_text.js"></script>
 <script src="math_explain.js"></script>
 <script src="hardbank.js"></script>
+<script src="mathdrills.js"></script>
 <script src="exam.js?v=1"></script>
+<script src="coach.js?v=1"></script>
 <script>
 const P = new URLSearchParams(location.search);
 const testId    = P.get('test')   || 'mathtest01';
@@ -414,10 +417,14 @@ const testLabel = P.get('label')  || 'Practice Test 1';
 const modId     = P.get('module') || '1A';
 // Hard Question Bank sets (test=hard) are built from every Hard question in math_modules.js.
 const HARD_MODE = testId === 'hard';
-const modWord   = HARD_MODE ? 'Set' : 'Module';
+// Math Topical Drills (test=drill&topic=<skill slug>) are built from math_modules.js by mathdrills.js.
+const DRILL_MODE = testId === 'drill';
+const drillTopic = DRILL_MODE ? (P.get('topic') || '') : '';
+const modWord   = (HARD_MODE || DRILL_MODE) ? 'Set' : 'Module';
 const modKey    = `${testId}_${modId}`;
 // Header title, e.g. "Section 2, Module 1: Math" (practice modules are named 1A/1B/2A/2B).
 const sectionTitle = HARD_MODE ? `Math: Hard Set ${modId}`
+  : DRILL_MODE ? `Math Drill: Set ${modId}`
   : /^[12]/.test(modId) ? `Section 2, Module ${modId[0]}: Math` : 'Section 2: Math';
 const contextLabel = `Math · ${testLabel} · ${modWord} ${modId}`; // the Report form's context and the title's tooltip
 window.SATReportContext = () => ({ module: contextLabel });
@@ -441,7 +448,9 @@ window.addEventListener('load', () => {
     document.getElementById('load-lbl').textContent = 'Error: math_modules.js is missing.';
     return;
   }
-  QS = (HARD_MODE && window.HardBank) ? HardBank.mathSet(parseInt(modId, 10), P.get('skill') || '') : MATH_MODULES[modKey];
+  QS = (HARD_MODE && window.HardBank) ? HardBank.mathSet(parseInt(modId, 10), P.get('skill') || '')
+    : DRILL_MODE ? (window.MathDrills ? MathDrills.set(drillTopic, parseInt(modId, 10)) : [])
+    : MATH_MODULES[modKey];
   if (!QS || !QS.length) {
     document.getElementById('load-lbl').textContent = `No questions for: ${modKey}`;
     return;
@@ -461,7 +470,7 @@ window.addEventListener('load', () => {
   checked    = new Array(QS.length).fill(false);
   eliminated = QS.map(() => new Set());
   // Hard sets vary in size: keep the real pace of 35 minutes per 22 questions.
-  if (HARD_MODE) timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22));
+  if (HARD_MODE || DRILL_MODE) timerSecs = Math.max(60, Math.round(QS.length * 35 * 60 / 22));
   const titleEl = document.getElementById('ex-title');
   titleEl.textContent = sectionTitle; titleEl.title = contextLabel;
   document.getElementById('ex-navpop-title').textContent = `${sectionTitle} Questions`;
@@ -470,7 +479,24 @@ window.addEventListener('load', () => {
   // Phones: the response directions start folded so the question is on screen first.
   if (window.matchMedia('(max-width: 760px)').matches) document.getElementById('fr-dir-details').open = false;
   document.getElementById('loading').classList.add('gone');
-  buildNav(); renderQ(0); drawTimer(); startTimer();
+  buildNav(); renderQ(0); drawTimer();
+  // "Before you start": choose Stop timer / Check answer / Pace Coach; the clock starts with Start.
+  Coach.onBudgetEnd = i => {
+    if (submitted || i !== cur) return;
+    if (!flagged[i]) toggleFlag(i);
+    nextQ();
+  };
+  Coach.setup({
+    kind: DRILL_MODE ? 'mathdrill' : 'math', title: sectionTitle,
+    detail: `${testLabel} · ${modWord} ${modId} · ${QS.length} questions · ${Math.round(timerSecs / 60)} min`,
+    count: QS.length, totalSecs: timerSecs, canPause: true, canCheck: true, current: () => cur,
+    onStart: s => {
+      document.getElementById('tpause').hidden = !s.pause;
+      renderQ(cur);
+      startTimer();
+      setInterval(() => Coach.tick(cur, !submitted && !timerPaused), 1000);
+    }
+  });
 });
 
 // Questions shown as text (math_render.js): redraw the current one when KaTeX arrives, or when one falls back to its image.
@@ -494,7 +520,7 @@ function startTimer() {
   }, 250);
 }
 function togglePause() {
-  if (submitted) return;
+  if (submitted || !Coach.settings.pause) return; // Stop timer is chosen on the "Before you start" screen
   if (!timerPaused) timerSecs = Math.max(0, Math.ceil((timerDeadline - Date.now())/1000));
   else timerDeadline = Date.now() + timerSecs*1000; // resume: push the deadline back by the paused time
   timerPaused = !timerPaused;
@@ -739,7 +765,8 @@ function renderQ(i) {
     : `<div class="q-img-err">No image for question ${escH(q.id)}.</div>`;
 
   let checkHtml = '';
-  if (!rev) checkHtml = `<div class="check-row"><button class="btn-check" id="chk-btn" type="button" onclick="checkQ(${i})" ${hasAnswer(i)?'':'disabled'}>Check answer</button></div>`;
+  if (!rev && !Coach.settings.check) checkHtml = ''; // Check answer is off for this module
+  else if (!rev) checkHtml = `<div class="check-row"><button class="btn-check" id="chk-btn" type="button" onclick="checkQ(${i})" ${hasAnswer(i)?'':'disabled'}>Check answer</button></div>`;
   else checkHtml = `<div class="check-row">${resultHtml}${!submitted ? '<span class="chk-lock">Answer locked</span>' : ''}</div>`;
 
   document.getElementById('q-pane').innerHTML = `
@@ -938,13 +965,18 @@ async function submitTest() {
   drawTimer(); renderQ(cur); upNav();
   const pb = document.getElementById('tpause'); if (pb) pb.disabled = true;
 
+  document.getElementById('coach-analysis').innerHTML = Coach.analysisHTML(
+    QS.map((q, i) => ({ num: i + 1, skill: q.skill, domain: q.domain, status: reviewData[i].status })),
+    { math: true, weak: !DRILL_MODE, goTo: 'goTo', close: "closeO('score-o');" });
+
   Promise.resolve().then(() => saveScoreHistory({
     type: 'math', typeLabel: 'Math',
     title: `${testLabel} · ${modWord} ${modId}`,
     correct, total, pct,
     stats: { correct, incorrect, unanswered },
     breakdownLabel: 'Domain', breakdown: domainData,
-    review: reviewData
+    review: reviewData,
+    coach: Coach.record()
   })).catch(e => console.warn('[math.html] score save failed', e));
 }
 

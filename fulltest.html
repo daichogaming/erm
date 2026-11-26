@@ -238,7 +238,7 @@
       .overlay-btn-row { flex-wrap: wrap; }
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=8" />
+  <link rel="stylesheet" href="theme.css?v=9" />
   <link rel="stylesheet" href="exam.css?v=2" />
   <script src="math_render.js"></script>
 </head>
@@ -628,6 +628,9 @@
 <script src="math_modules.js"></script>
 <script src="math_text.js"></script>
 <script src="math_explain.js"></script>
+<script src="rworder.js"></script>
+<script src="rwfixes.js?v=5"></script>
+<script>if (typeof QUESTION_BANK !== "undefined") for (const k in QUESTION_BANK) QUESTION_BANK[k].forEach(RWFix.apply);</script>
 <script src="exam.js?v=1"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -750,59 +753,46 @@ function pickByMix(pool, need, quota, excludeIds) {
 const DIFF_RANK = { Easy: 0, Medium: 1, Hard: 2 };
 const byDifficulty = (a, b) => (DIFF_RANK[a.difficulty] ?? 1) - (DIFF_RANK[b.difficulty] ?? 1);
 
-// ── Build random English module (27 questions, domain-balanced) ──
+// ── Build random English module (27 questions, by question type) ──
+// Counts follow the team's allocation table (positions 1–27):
+//   1–5 Words in Context · 6–15 Text Structure and Purpose, Cross-Text Connections, Central Ideas and Details,
+//   Command of Evidence (text, then table/graph), Inferences · 16–24 Boundaries, Form/Structure/Sense ·
+//   25–27 Transitions, Rhetorical Synthesis. rworder.js puts them in that order.
 function buildEnglishModule(rng, excludeIds, mix) {
-  // Pool: all questions from all test modules in QUESTION_BANK
-  const DOMAIN_ORDER = ['Craft and Structure', 'Information and Ideas', 'Standard English', 'Expression of Ideas'];
-  // Target distribution for 27 questions (approximates real SAT R&W module)
-  const TARGET = {
-    'Craft and Structure': 7,
-    'Information and Ideas': 6,
-    'Standard English': 8,
-    'Expression of Ideas': 6
-  };
-
-  // Build domain pools from entire question bank
+  const TARGET = [ // [type rank in rworder.js, count]
+    [0, 5],                                   // Words in Context
+    [1, 2], [2, 1], [3, 2], [4, 2], [5, 1], [6, 2], // TSP, CTC, CID, CoE text, CoE table/graph, Inferences
+    [7, 5], [8, 4],                           // Boundaries, Form/Structure/Sense
+    [9, 1], [10, 2]                           // Transitions, Rhetorical Synthesis
+  ];
+  // Pools by question type, from the whole question bank
   const pools = {};
-  DOMAIN_ORDER.forEach(d => pools[d] = []);
+  TARGET.forEach(([r]) => pools[r] = []);
   for (const modKey in QUESTION_BANK) {
     for (const q of QUESTION_BANK[modKey]) {
-      const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
-      if (match && !excludeIds.has(q.id) && !q.unusable) pools[match].push(q); // skip questions whose graph was lost
+      const r = RWOrder.rank(q);
+      if (pools[r] && !excludeIds.has(q.id) && !q.unusable) pools[r].push(q); // skip questions whose graph was lost
     }
   }
-  DOMAIN_ORDER.forEach(d => pools[d] = shuffleArray(pools[d], rng));
+  const seen = new Set(); // a question can sit in more than one module of the bank
+  Object.keys(pools).forEach(r => pools[r] = shuffleArray(pools[r].filter(q => !seen.has(q.id) && seen.add(q.id)), rng));
 
   const selected = [];
   const quota = makeQuota(mix, 27);
-  DOMAIN_ORDER.forEach(d => {
-    pickByMix(pools[d], TARGET[d], quota, excludeIds).forEach(q => selected.push(q));
-  });
+  TARGET.forEach(([r, n]) => pickByMix(pools[r], n, quota, excludeIds).forEach(q => selected.push(q)));
 
-  // Fill any shortfall from remaining pool
+  // Fill any shortfall from the remaining pools
   while (selected.length < 27) {
     let added = false;
-    for (const d of DOMAIN_ORDER) {
-      const avail = pools[d];
-      for (const q of avail) {
-        if (!excludeIds.has(q.id)) {
-          selected.push(q); excludeIds.add(q.id); added = true; break;
-        }
-      }
+    for (const [r] of TARGET) {
+      const q = pools[r].find(q => !excludeIds.has(q.id));
+      if (q) { selected.push(q); excludeIds.add(q.id); added = true; }
       if (selected.length >= 27) break;
     }
     if (!added) break;
   }
-
-  // Order: Craft & Structure -> Information & Ideas -> Standard English -> Expression of Ideas
-  const grouped = {};
-  DOMAIN_ORDER.forEach(d => grouped[d] = []);
-  selected.forEach(q => {
-    const match = DOMAIN_ORDER.find(d => q.domain && q.domain.startsWith(d));
-    if (match) grouped[match].push(q);
-  });
-  // Adaptive modules run easy → hard within each domain, like the real test.
-  return DOMAIN_ORDER.flatMap(d => mix ? grouped[d].slice().sort(byDifficulty) : grouped[d]);
+  // In the table's order; adaptive modules run easy → hard within each type.
+  return RWOrder.sort(selected, { byDifficulty: mix });
 }
 
 // ── Build random Math module (22 questions: 17 MC + 5 FR, domain-balanced) ──

@@ -589,3 +589,8 @@ body:where(.exam){
 /* Long test titles stay on one line in the top bar instead of wrapping out of it. */
 :where(body.exam) .top-bar-module, :where(body.exam) .tb-module{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
 :where(body.exam) .top-bar-left{ min-width:0; }
+
+/* Section hook line (index.html section pages) */
+:where(body:not(.exam)) .subj-hook { margin:6px 0 8px; font:600 20px/1.35 var(--font-serif, "Source Serif 4", Georgia, serif); color:var(--cat-rw); }
+:where(body:not(.exam)) .subj-hook[data-cat="math"] { color:var(--cat-math); }
+:where(body:not(.exam)) .subj-hook[data-cat="hard"] { color:var(--warm); }
