@@ -216,6 +216,7 @@ if (new URLSearchParams(location.search).get('test') === 'hard') document.write(
 <script src="recyclebank.js"></script>
 <script src="rworder.js"></script>
 <script src="rwfixes.js?v=5"></script>
+<script>if (new URLSearchParams(location.search).get('export') === 'graphs') document.write('<script src="graphs-export.js?v=1"><\/script>');</script>
 <script>(function(){ var p = new URLSearchParams(location.search); RWFix.load((p.get('test') || 'test01') + '_' + (p.get('module') || '1A')); })();</script>
 <script src="exam.js?v=1"></script>
 <script src="coach.js?v=1"></script>
@@ -271,6 +272,7 @@ window.SATReportContext = () => ({ module: contextLabel });
 
 // ── Load questions from the API (no answers included) ───────────
 async function initTest() {
+  if (window.GraphExport) { GraphExport.run(); return; } // one-off: test.html?export=graphs (graphs-export.js)
   let rawQuestions;
   if (HARD_MODE) {
     rawQuestions = (window.HardBank && typeof QUESTION_BANK !== 'undefined')
